@@ -1,12 +1,9 @@
-package com.radeusgd.archivum
+package com.radeusgd.archivum.gui
 
-import com.radeusgd.archivum.scenes.MainMenu
+import com.radeusgd.archivum.gui.scenes.{MainMenu, MockEditor}
 
 import scalafx.application.JFXApp
-import scalafx.geometry.Insets
 import scalafx.scene.Scene
-import scalafx.scene.control.{Alert, Button, Label}
-import scalafx.scene.layout.VBox
 
 object ApplicationMain extends JFXApp {
 
@@ -18,6 +15,6 @@ object ApplicationMain extends JFXApp {
       title = "Archivum"
       width = 600
       height = 450
-      scene = MainMenu.instance
+      scene = MockEditor.instance//MainMenu.instance // for debugging it's faster to skip menu
    }
 }

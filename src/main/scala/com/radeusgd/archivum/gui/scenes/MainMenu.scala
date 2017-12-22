@@ -1,6 +1,6 @@
-package com.radeusgd.archivum.scenes
+package com.radeusgd.archivum.gui.scenes
 
-import com.radeusgd.archivum.ApplicationMain
+import com.radeusgd.archivum.gui.ApplicationMain
 
 import scalafx.Includes._
 import scalafx.application.JFXApp
@@ -18,6 +18,11 @@ class MainMenu extends Scene {
          new Button("Browse") {
             onAction = handle {
                ApplicationMain.switchScene(EditRecords.instance)
+            }
+         },
+         new Button("Mock editor") {
+            onAction = handle {
+               ApplicationMain.switchScene(MockEditor.instance)
             }
          }
       )
