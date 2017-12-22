@@ -1,11 +1,15 @@
 package com.radeusgd.archivum.datamodel
 
-import com.radeusgd.archivum.datamodel.types.{FieldType, SimpleString, EnumType}
+import com.radeusgd.archivum.datamodel.types.{EnumType, FieldType, SimpleString}
 import spray.json._
+import sun.reflect.generics.reflectiveObjects.NotImplementedException
 
 object ModelJsonProtocol extends DefaultJsonProtocol {
    implicit object ModelDefinitionJsonFormat extends RootJsonFormat[ModelDefinition] {
-      override def write(obj: ModelDefinition): JsValue = ???
+      override def write(obj: ModelDefinition): JsValue = {
+         throw new NotImplementedError("Currently serializing model definition back to JSON is not supported.")
+      }
+
       override def read(json: JsValue): ModelDefinition = {
          json.asJsObject.getFields("name", "types", "fields") match {
             case Seq(JsString(name), JsObject(types), JsObject(fields)) =>
@@ -26,24 +30,9 @@ object ModelJsonProtocol extends DefaultJsonProtocol {
    private def readField(customTypes: Map[String, FieldType])(json: JsValue): FieldType = {
       json match {
          case JsString("string") => SimpleString
-         case JsString("date") => ???
+         case JsString("date") => SimpleString // TODO! FIME
          case JsString(typename) => customTypes(typename)
          case _ => throw DeserializationException("Expected typename")
       }
    }
-  /*implicit object ColorJsonFormat extends RootJsonFormat[Color] {
-    def write(c: Color) = JsObject(
-      "name" -> JsString(c.name),
-      "red" -> JsNumber(c.red),
-      "green" -> JsNumber(c.green),
-      "blue" -> JsNumber(c.blue)
-    )
-    def read(value: JsValue) = {
-      value.asJsObject.getFields("name", "red", "green", "blue") match {
-        case Seq(JsString(name), JsNumber(red), JsNumber(green), JsNumber(blue)) =>
-          new Color(name, red.toInt, green.toInt, blue.toInt)
-        case _ => throw new DeserializationException("Color expected")
-      }
-    }
-  }*/
 }

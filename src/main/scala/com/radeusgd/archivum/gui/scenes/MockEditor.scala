@@ -10,7 +10,7 @@ import scalafx.scene.control.{Button, Label}
 import scalafx.scene.layout.VBox
 
 class MockEditor extends Scene {
-   val repo = Repository.open("testdb/model.json") // TODO repositories should be managed centrally
+   private val repo: Repository = Repository.open("testdb/model.json") // TODO repositories should be managed centrally
    content = new VBox {
       padding = Insets(5.0)
       children = Seq(
