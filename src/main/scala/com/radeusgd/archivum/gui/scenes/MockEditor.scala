@@ -19,7 +19,7 @@ class MockEditor extends Scene {
                ApplicationMain.switchScene(MainMenu.instance)
             }
          },
-         new EditableModelView(repo.definition)
+         new EditableModelView(repo.newInstance())
       )
    }
 }

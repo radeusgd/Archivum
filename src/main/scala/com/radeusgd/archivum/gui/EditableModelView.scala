@@ -1,12 +1,17 @@
 package com.radeusgd.archivum.gui
 
-import com.radeusgd.archivum.datamodel.ModelDefinition
+import com.radeusgd.archivum.datamodel.{ModelDefinition, ModelInstance}
 
 import scalafx.scene.control.Label
-import scalafx.scene.layout.Pane
+import scalafx.scene.layout.{VBox, Pane}
 
-class EditableModelView(val modelDefinition: ModelDefinition) extends Pane {
-   children = Seq(
-      Label("Model for " + modelDefinition.name)
-   )
+class EditableModelView(private val instance: ModelInstance) extends Pane {
+
+   children = new VBox {
+      children = Seq(Label("Editable Model View")) ++ makeControls()
+   }
+
+   private def makeControls(): Seq[Pane] = {
+      Nil
+   }
 }

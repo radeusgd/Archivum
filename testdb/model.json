@@ -1,3 +1,13 @@
 {
-  "name": "Testowy"
+  "name": "Testowy",
+  "types": {
+    "płeć": ["M","K"]
+  },
+  "fields": {
+    "Miasto": "string",
+    "Imię": "string",
+    "Nazwisko": "string",
+    "Data urodzenia": "date",
+    "Płeć": "płeć"
+  }
 }
