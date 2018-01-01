@@ -1,5 +1,7 @@
 package com.radeusgd.archivum.datamodel.types
 
+import javafx.scene.layout.Pane
+
 trait Field {
    /*
    Sets the value if possible.
@@ -7,6 +9,7 @@ trait Field {
     */
    def set(value: String): Boolean
    def get: String
+   def getName: String
 
   override def toString: String = get
 }

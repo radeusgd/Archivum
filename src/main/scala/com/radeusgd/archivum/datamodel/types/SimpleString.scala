@@ -1,6 +1,6 @@
 package com.radeusgd.archivum.datamodel.types
 
-class StringField(private var v: String) extends Field {
+class StringField(private val name: String, private var v: String) extends Field {
 
    override def set(value: String): Boolean = {
       v = value
@@ -8,8 +8,16 @@ class StringField(private var v: String) extends Field {
    }
 
    override def get: String = v
+
+   override def getName: String = name
 }
 
 object SimpleString extends FieldType {
-   override def createEmptyField(): Field = new StringField("")
+   override def createEmptyField(name: String): Field = new StringField(name, "")
+}
+
+class LongStringField(name: String, v: String) extends StringField(name, v)
+
+object LongString extends FieldType {
+   override def createEmptyField(name: String): Field = new LongStringField(name, "")
 }

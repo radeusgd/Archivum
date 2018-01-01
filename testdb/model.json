@@ -8,6 +8,7 @@
     "Imię": "string",
     "Nazwisko": "string",
     "Data urodzenia": "date",
-    "Płeć": "płeć"
+    "Płeć": "płeć",
+    "Źródło": "bigtext"
   }
 }

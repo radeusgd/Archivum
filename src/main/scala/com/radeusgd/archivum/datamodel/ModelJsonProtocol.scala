@@ -1,6 +1,6 @@
 package com.radeusgd.archivum.datamodel
 
-import com.radeusgd.archivum.datamodel.types.{EnumType, FieldType, SimpleString}
+import com.radeusgd.archivum.datamodel.types.{EnumType, FieldType, LongString, SimpleString}
 import spray.json._
 import sun.reflect.generics.reflectiveObjects.NotImplementedException
 
@@ -30,6 +30,7 @@ object ModelJsonProtocol extends DefaultJsonProtocol {
    private def readField(customTypes: Map[String, FieldType])(json: JsValue): FieldType = {
       json match {
          case JsString("string") => SimpleString
+         case JsString("bigtext") => LongString
          case JsString("date") => SimpleString // TODO! FIME
          case JsString(typename) => customTypes(typename)
          case _ => throw DeserializationException("Expected typename")

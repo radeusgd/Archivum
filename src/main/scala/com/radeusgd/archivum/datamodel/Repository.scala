@@ -4,7 +4,8 @@ import com.radeusgd.archivum.datamodel.types.FieldType
 
 class Repository(val definition: ModelDefinition) {
    def newInstance(): ModelInstance = {
-      new ModelInstance(definition.fields mapValues (fieldType => fieldType.createEmptyField()))
+      val typesIntoInstances = (name: String, fieldType: FieldType) => (name, fieldType.createEmptyField(name))
+      new ModelInstance(definition.fields map typesIntoInstances.tupled)
    }
 }
 

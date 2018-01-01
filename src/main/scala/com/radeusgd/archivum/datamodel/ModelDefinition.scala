@@ -4,7 +4,8 @@ import com.radeusgd.archivum.datamodel.types.FieldType
 
 class ModelDefinition(
                         val name: String,
-                        val fields: Map[String, FieldType]
+                        val fields: Map[String, FieldType]/*,
+                        val fieldsOrder: Seq[String]*/    //TODO layout!
                      ) {
 
 }
