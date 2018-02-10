@@ -1,7 +1,7 @@
 package com.radeusgd.archivum.gui
 
 import com.radeusgd.archivum.datamodel.{ModelDefinition, ModelInstance}
-import com.radeusgd.archivum.gui.controls.{ControlFactory, SimpleText}
+import com.radeusgd.archivum.gui.controls.SimpleText
 
 import scalafx.scene.control.Label
 import scalafx.scene.layout.{Pane, VBox}
@@ -14,6 +14,6 @@ class EditableModelView(private val instance: ModelInstance) extends Pane {
    }
 
    private def makeControls(): Seq[Pane] = {
-      (instance.fields.values map ControlFactory.createControl).toSeq
+      Nil // TODO FIXME (instance.fields.values map ControlFactory.createControl).toSeq
    }
 }
