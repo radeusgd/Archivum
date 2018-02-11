@@ -1,27 +1,16 @@
 package com.radeusgd.archivum.datamodel.types
-import javafx.scene.layout.Pane
-
-class EnumField(val enumType: EnumType, private val name: String, private var v: String) extends Field {
-
-   override def set(value: String): Boolean = {
-      if (enumType.isValid(value)) {
-         v = value
-         true
-      } else false
-   }
-
-   override def get: String = v
-
-   override def getName: String = name
-}
+import com.radeusgd.archivum.datamodel._
 
 class EnumType(val values: IndexedSeq[String]) extends FieldType {
-   override def createEmptyField(name: String): Field = new EnumField(this, name, values(0))
+   //override def createEmptyField(name: String): Field = new EnumField(this, name, values(0))
 
-   def isValid(value: String): Boolean = {
-      for (p <- values) {
-         if (value == p) return true
+
+   def validate(v: DMValue): List[ValidationError] =
+      v match {
+         case DMString(str) =>
+            if (values.contains(str)) Nil
+            else ConstraintError(Nil, str + " is not a valid value for this field") :: Nil
+         case _ => TypeError(Nil, v.getClass.getSimpleName,"DMString") :: Nil
       }
-      false
-   }
+
 }

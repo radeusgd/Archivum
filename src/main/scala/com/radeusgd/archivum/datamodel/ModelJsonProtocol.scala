@@ -2,19 +2,18 @@ package com.radeusgd.archivum.datamodel
 
 import com.radeusgd.archivum.datamodel.types.{EnumType, FieldType}
 import spray.json._
-import sun.reflect.generics.reflectiveObjects.NotImplementedException
 
 object ModelJsonProtocol extends DefaultJsonProtocol {
-   implicit object ModelDefinitionJsonFormat extends RootJsonFormat[ModelDefinition] {
-      override def write(obj: ModelDefinition): JsValue = {
+   implicit object ModelDefinitionJsonFormat extends RootJsonFormat[Model] {
+      override def write(obj: Model): JsValue = {
          throw new NotImplementedError("Currently serializing model definition back to JSON is not supported.")
       }
 
-      override def read(json: JsValue): ModelDefinition = {
+      override def read(json: JsValue): Model = {
          json.asJsObject.getFields("name", "types", "fields") match {
             case Seq(JsString(name), JsObject(types), JsObject(fields)) =>
                val customTypes: Map[String, FieldType] = types map (readEnumDef _).tupled
-               new ModelDefinition(name, fields mapValues readField(customTypes))
+               new Model(name, fields mapValues readField(customTypes))
             case _ => throw DeserializationException("Wrong model root structure")
          }
       }

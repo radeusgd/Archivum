@@ -3,7 +3,6 @@ package com.radeusgd.archivum.gui.scenes
 import com.radeusgd.archivum.gui.ApplicationMain
 
 import scalafx.Includes._
-import scalafx.application.JFXApp
 import scalafx.geometry.Insets
 import scalafx.scene.Scene
 import scalafx.scene.control.{Button, Label}
@@ -18,11 +17,6 @@ class MainMenu extends Scene {
          new Button("Browse") {
             onAction = handle {
                ApplicationMain.switchScene(EditRecords.instance)
-            }
-         },
-         new Button("Mock editor") {
-            onAction = handle {
-               ApplicationMain.switchScene(MockEditor.instance)
             }
          }
       )

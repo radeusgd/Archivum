@@ -1,6 +1,6 @@
 package com.radeusgd.archivum.gui.controls
 
-import com.radeusgd.archivum.datamodel.types.{Field, FieldType}
+/*import com.radeusgd.archivum.datamodel.types.{Field, FieldType}
 
 import scalafx.geometry.Pos
 import scalafx.scene.control.{Label, TextField, TextInputControl}
@@ -18,3 +18,4 @@ class SimpleText(val name: String, val field: Field) extends HBox {
       textField
    )
 }
+*/

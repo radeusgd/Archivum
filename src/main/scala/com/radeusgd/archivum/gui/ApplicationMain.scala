@@ -1,6 +1,6 @@
 package com.radeusgd.archivum.gui
 
-import com.radeusgd.archivum.gui.scenes.{MainMenu, MockEditor}
+import com.radeusgd.archivum.gui.scenes.EditRecords
 
 import scalafx.application.JFXApp
 import scalafx.scene.Scene
@@ -15,6 +15,6 @@ object ApplicationMain extends JFXApp {
       title = "Archivum"
       width = 600
       height = 450
-      scene = MockEditor.instance//MainMenu.instance // for debugging it's faster to skip menu
+      scene = EditRecords.instance//MainMenu.instance // for debugging it's faster to skip menu
    }
 }

@@ -1,5 +1,5 @@
 package com.radeusgd.archivum.gui.controls
-
+/*
 import scalafx.scene.control.{ComboBox, Label, TextField}
 import scalafx.scene.layout.HBox
 import com.radeusgd.archivum.datamodel.types.EnumField
@@ -21,3 +21,4 @@ class EnumChoice(val name: String, val enum: EnumField) extends HBox {
       choiceField
    )
 }
+*/

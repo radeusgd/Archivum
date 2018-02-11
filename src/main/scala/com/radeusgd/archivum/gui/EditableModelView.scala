@@ -1,11 +1,7 @@
 package com.radeusgd.archivum.gui
-
-import com.radeusgd.archivum.datamodel.{ModelDefinition, ModelInstance}
-import com.radeusgd.archivum.gui.controls.SimpleText
-
-import scalafx.scene.control.Label
-import scalafx.scene.layout.{Pane, VBox}
-
+//import com.radeusgd.archivum.gui.controls.SimpleText
+/*
+// TODO not ready for that yet
 class EditableModelView(private val instance: ModelInstance) extends Pane {
 
    children = new VBox {
@@ -17,3 +13,4 @@ class EditableModelView(private val instance: ModelInstance) extends Pane {
       Nil // TODO FIXME (instance.fields.values map ControlFactory.createControl).toSeq
    }
 }
+*/
