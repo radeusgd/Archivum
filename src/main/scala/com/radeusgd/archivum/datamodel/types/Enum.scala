@@ -1,7 +1,7 @@
 package com.radeusgd.archivum.datamodel.types
 import com.radeusgd.archivum.datamodel._
 
-class EnumType(val values: IndexedSeq[String]) extends FieldType {
+class EnumField(val values: IndexedSeq[String]) extends FieldType {
    //override def createEmptyField(name: String): Field = new EnumField(this, name, values(0))
 
 
