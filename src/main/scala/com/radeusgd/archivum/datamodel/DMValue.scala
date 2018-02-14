@@ -20,19 +20,43 @@ object DMValue {
 
 trait DMAggregate extends ((String) => DMValue)
 
+trait DMOrdered extends Ordered[DMOrdered]
+class IncompatibleTypeComparison extends IllegalArgumentException
+
 object DMNull extends DMValue
 
-case class DMInteger(value: Int) extends DMValue {
+case class DMInteger(value: Int) extends DMValue with DMOrdered {
    override def asInt: DMInteger = this
+   override def toString: String = value.toString
+
+   override def compare(that: DMOrdered): Int =
+      that match {
+         case DMInteger(thatvalue) => value compare thatvalue
+         case _ => throw new IncompatibleTypeComparison
+      }
 }
 
-case class DMString(value: String) extends DMValue {
+case class DMString(value: String) extends DMValue with DMOrdered {
    override def asString: DMString = this
+   override def toString: String = value
+
+   override def compare(that: DMOrdered): Int =
+      that match {
+         case DMString(thatvalue) => value compare thatvalue
+         case _ => throw new IncompatibleTypeComparison
+      }
 }
 
 // TODO  FIXME  historic dates support!
-case class DMDate(value: DMValue.Date) extends DMValue {
+case class DMDate(value: DMValue.Date) extends DMValue with DMOrdered {
    override def asDate: DMDate = this
+   override def toString: String = value.toString // TODO
+
+   override def compare(that: DMOrdered): Int =
+      that match {
+         case DMDate(thatvalue) => value compareTo thatvalue
+         case _ => throw new IncompatibleTypeComparison
+      }
 }
 
 case class DMArray(values: Vector[DMValue]) extends DMValue with DMAggregate {
@@ -57,7 +81,7 @@ case class DMStruct(values: Map[String, DMValue],
       values.getOrElse(s, computables(s)(this)) // if s is present in values computables(s) is not actually evaluated
 }
 
-case class DMYearDate(value: Either[Int, DMValue.Date]) extends DMValue with DMAggregate {
+case class DMYearDate(value: Either[Int, DMValue.Date]) extends DMValue with DMAggregate with DMOrdered {
    def year: Int = value.fold(identity, _.getYear)
    def fullDate: Option[DMValue.Date] = value.toOption
 
@@ -65,6 +89,15 @@ case class DMYearDate(value: Either[Int, DMValue.Date]) extends DMValue with DMA
       s match {
          case "year" => DMInteger(year)
          case "date" => value.fold(_ => DMNull, DMDate(_))
+      }
+
+   override def toString: String = value.fold(_.toString, _.toString)
+
+
+   override def compare(that: DMOrdered): Int =
+      that match {
+         case thatd: DMYearDate => year compare thatd.year
+         case _ => throw new IncompatibleTypeComparison
       }
 }
 
