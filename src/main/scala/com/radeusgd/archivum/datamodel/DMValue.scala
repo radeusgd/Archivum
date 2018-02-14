@@ -93,7 +93,6 @@ case class DMYearDate(value: Either[Int, DMValue.Date]) extends DMValue with DMA
 
    override def toString: String = value.fold(_.toString, _.toString)
 
-
    override def compare(that: DMOrdered): Int =
       that match {
          case thatd: DMYearDate => year compare thatd.year
