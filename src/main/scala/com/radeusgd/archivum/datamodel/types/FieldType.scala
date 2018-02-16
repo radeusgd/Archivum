@@ -17,6 +17,7 @@ object StringField extends FieldType {
 object IntegerField extends FieldType {
    def validate(v: DMValue): List[ValidationError] =
       v match {
+         case DMNull => Nil
          case DMInteger(_) => Nil
          case _ => TypeError(Nil, v.getClass.getSimpleName, "DMInteger") :: Nil
       }
@@ -25,20 +26,30 @@ object IntegerField extends FieldType {
 object DateField extends FieldType {
    def validate(v: DMValue): List[ValidationError] =
       v match {
-         //case DMInteger(_) => Nil
-         case _ => TypeError(Nil, v.getClass.getSimpleName, "DMDate TODO") :: Nil
+         case DMNull => Nil
+         case DMDate(_) => Nil
+         case _ => TypeError(Nil, v.getClass.getSimpleName, "DMDate") :: Nil
+      }
+}
+
+object YearDateField extends FieldType {
+   def validate(v: DMValue): List[ValidationError] =
+      v match {
+         case DMNull => Nil
+         case DMYearDate(_) => Nil
+         case _ => TypeError(Nil, v.getClass.getSimpleName, "DMYearDate") :: Nil
       }
 }
 
 case class StructField(fieldTypes: Map[String, FieldType]) extends FieldType {
    def validate(v: DMValue): List[ValidationError] =
       v match {
-         case DMStruct(values) => {
+         case DMStruct(values, _) => {
             val unknown = values.keySet -- fieldTypes.keySet
             val unknownErrors: List[ValidationError] = unknown.toList map { key => ConstraintError(Nil, key + " is not expected in this struct") }
 
-            val childErrors: List[List[ValidationError]] =
-               fieldTypes.toList map { case (name, ft) =>
+            val childErrors: List[ValidationError] =
+               fieldTypes.toList flatMap { case (name, ft) =>
                   values.get(name) match {
                      case Some(vv) => ft.validate(vv) map {
                         _.extendPath(name)
@@ -47,7 +58,7 @@ case class StructField(fieldTypes: Map[String, FieldType]) extends FieldType {
                   }
                }
 
-            unknownErrors ++ childErrors.flatten.toList
+            unknownErrors ++ childErrors.toList
          }
          case _ => TypeError(Nil, v.getClass.getSimpleName, "DMStruct") :: Nil
       }
@@ -58,15 +69,17 @@ case class ArrayField(elementsType: FieldType) extends FieldType {
       v match {
          case DMArray(values) => {
             val indexedValues: Seq[(DMValue, Int)] = values.zipWithIndex
-            val childErrors: Seq[List[ValidationError]] =
-               indexedValues map { case (vv, ind) =>
+            val childErrors: Seq[ValidationError] =
+               indexedValues flatMap { case (vv, ind) =>
                   elementsType.validate(vv) map {
-                     _.extendPath("[" + ind + "]")
+                     _.extendPath(ind.toString)
                   }
                }
 
-            childErrors.flatten.toList
+            childErrors.toList
          }
          case _ => TypeError(Nil, v.getClass.getSimpleName, "DMArray") :: Nil
       }
 }
+
+// TODO Image Field (uses DMString for content address and manual content handling)

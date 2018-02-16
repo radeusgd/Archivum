@@ -2,6 +2,7 @@ package com.radeusgd.archivum.datamodel
 
 import java.time.LocalDate
 
+import com.radeusgd.archivum.languages.QueryLanguage
 import com.radeusgd.archivum.utils.AsInt
 
 sealed class DMValue {
@@ -65,7 +66,7 @@ case class DMArray(values: Vector[DMValue]) extends DMValue with DMAggregate {
 
    override def apply(s: String): DMValue =
       s match {
-         case "length" => DMInteger(values.length)
+         case QueryLanguage.ArrayLength => DMInteger(values.length)
          case AsInt(ind) /*if ind >= 0 && ind < values.length*/ => values(ind) // TODO not sure what to throw here
          case _ => throw new NoSuchFieldException
       }
@@ -87,8 +88,8 @@ case class DMYearDate(value: Either[Int, DMValue.Date]) extends DMValue with DMA
 
    override def apply(s: String): DMValue =
       s match {
-         case "year" => DMInteger(year)
-         case "date" => value.fold(_ => DMNull, DMDate(_))
+         case QueryLanguage.YDYear => DMInteger(year)
+         case QueryLanguage.YDFullDate => value.fold(_ => DMNull, DMDate(_))
       }
 
    override def toString: String = value.fold(_.toString, _.toString)

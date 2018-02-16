@@ -1,0 +1,13 @@
+<vbox>
+   <label>Testing</label>
+    <hbox>
+        <vbox>
+            <TextField/>
+            <TextField/>
+        </vbox>
+        <vbox>
+            <TextField/>
+            <TextField/>
+        </vbox>
+    </hbox>
+</vbox>
