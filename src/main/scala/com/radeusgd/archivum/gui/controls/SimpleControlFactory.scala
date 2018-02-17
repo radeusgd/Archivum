@@ -12,8 +12,8 @@ abstract class SimpleControlFactory(make: (String, List[String], EditableView) =
       else {
          val label: Option[String] = xmlnode.attribute(ViewLanguage.Label).map(_.text)
          val node = for {
-            pathSeq <- xmlnode.attribute(ViewLanguage.BindingPath)
-            path <- pathSeq.headOption.map(n => DMUtils.parsePath(n.text))
+            pathAttr <- xmlnode.attribute(ViewLanguage.BindingPath)
+            path <- pathAttr.headOption.map(n => DMUtils.parsePath(n.text))
             if path.nonEmpty
          } yield make(label.getOrElse(path.last), path, ev)
          node.toRight(ViewParseError("Missing path attribute")).map(n => ParsedView(n, Seq(n)))

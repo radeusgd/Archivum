@@ -24,7 +24,7 @@ class EditRecords extends Scene {
         |    "rodzic": {
         |      "Imię": "string",
         |      "Nazwisko": "string",
-        |      "Zawód": "strind"
+        |      "Zawód": "string"
         |    }
         |  },
         |  "fields": {
