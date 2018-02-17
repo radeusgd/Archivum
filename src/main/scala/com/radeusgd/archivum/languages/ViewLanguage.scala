@@ -6,6 +6,7 @@ object ViewLanguage {
 
    val Label = "label"
    val TextField = "textfield"
+   val ChoiceField = "choicefield"
    val IntegerField = "integerfield"
    val DateField = "datefield"
    val BigTextField = "textarea"

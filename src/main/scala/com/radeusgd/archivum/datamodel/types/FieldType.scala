@@ -73,6 +73,13 @@ case class StructField(fieldTypes: Map[String, FieldType]) extends FieldType {
          case _ => TypeError(Nil, v.getClass.getSimpleName, "DMStruct") :: Nil
       }
 
+   def getType(path: List[String]): FieldType = // TODO option/either
+      path match {
+         case Nil => this
+         case last :: Nil => fieldTypes(last)
+         case next :: rest => fieldTypes(next).asInstanceOf[StructField].getType(rest) // TODO FIXME add array support and error checking
+      }
+
    override def makeEmpty: DMStruct = DMStruct(fieldTypes mapValues (_.makeEmpty), Map.empty)
 }
 

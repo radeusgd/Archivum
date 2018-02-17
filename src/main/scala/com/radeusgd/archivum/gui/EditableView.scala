@@ -1,7 +1,7 @@
 package com.radeusgd.archivum.gui
 
 import com.radeusgd.archivum.datamodel._
-import com.radeusgd.archivum.gui.controls.{BoundControl, SimpleTextFactory}
+import com.radeusgd.archivum.gui.controls.{BoundControl, ChoiceControlFactory, SimpleTextFactory}
 
 import scala.collection.mutable
 import scala.xml.XML
@@ -79,7 +79,7 @@ trait ViewFactory {
 }
 
 // TODO maybe make it checked?
-case class ViewParseError(message: String) extends RuntimeException(message)
+case class ViewParseError(message: String, cause: Throwable = null) extends RuntimeException(message)
 
 object EditableView {
    def makeFromDefinition(model: Model, text: String): EditableView =
@@ -89,7 +89,8 @@ object EditableView {
       HBoxFactory,
       VBoxFactory,
       LabelFactory,
-      SimpleTextFactory
+      SimpleTextFactory,
+      ChoiceControlFactory
    )
 
    private val parsers: Map[String, ViewFactory] =

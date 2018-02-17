@@ -3,6 +3,7 @@ package com.radeusgd.archivum.gui
 import com.radeusgd.archivum.languages.ViewLanguage
 
 import scala.xml.Node
+import scalafx.geometry.Pos
 import scalafx.scene
 import scalafx.scene.control.Label
 import scalafx.scene.layout.{HBox, VBox}
@@ -29,11 +30,11 @@ abstract class AggregateFactory(make: (Seq[scene.Node]) => scene.Node) extends V
       )
 }
 
-object HBoxFactory extends AggregateFactory(new HBox(_: _*)) {
+object HBoxFactory extends AggregateFactory(new HBox(_: _*) { spacing = 5 }) {
    override val nodeType: String = ViewLanguage.Hbox
 }
 
-object VBoxFactory extends AggregateFactory(new VBox(_: _*)) {
+object VBoxFactory extends AggregateFactory(new VBox(_: _*) { spacing = 3 }) {
    override val nodeType: String = ViewLanguage.Vbox
 }
 
@@ -41,8 +42,11 @@ object LabelFactory extends ViewFactory {
    override def fromXML(xmlnode: Node, ev: EditableView): Either[ViewParseError, ParsedView] = {
          val size: Int = xmlnode.attribute(ViewLanguage.FontSize).map(_.text.toInt).getOrElse(20) // TODO default font size
          val text: String = xmlnode.text
-         val label = new Label(text)
-         label.font = scalafx.scene.text.Font(label.font.name, size)
+         val label = new Label(text) {
+            minWidth = 100
+            alignment = Pos.CenterRight
+            font = scalafx.scene.text.Font(font.name, size)
+         }
          Right(ParsedView(label, Nil))
       }
 

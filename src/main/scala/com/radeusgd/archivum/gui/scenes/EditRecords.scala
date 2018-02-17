@@ -50,7 +50,7 @@ class EditRecords extends Scene {
         |            <TextField path="Imię"/>
         |            <TextField path="Nazwisko"/>
         |            <TextField path="Miasto"/>
-        |            <TextField path="Płeć"/> <!-- TODO choice field -->
+        |            <choicefield path="Płeć"/>
         |        </vbox>
         |        <vbox>
         |            <Label>Ojciec</Label>
