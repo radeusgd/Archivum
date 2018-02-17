@@ -12,4 +12,8 @@ object ViewLanguage {
 
    val BindingPath = "path"
    val TextName = "name"
+
+   val FontSize = "size"
+   val Width = "width"
+   val Rows = "rows"
 }

@@ -1,6 +1,6 @@
 package com.radeusgd.archivum.gui.scenes
 
-import com.radeusgd.archivum.gui.ApplicationMain
+import com.radeusgd.archivum.gui.{ApplicationMain, EditableView}
 
 import scalafx.Includes._
 import scalafx.application.JFXApp
@@ -10,6 +10,25 @@ import scalafx.scene.control.{Button, Label}
 import scalafx.scene.layout.VBox
 
 class EditRecords extends Scene {
+
+   // TODO loading the file
+   val editableView: EditableView = EditableView.makeFromDefinition(
+      """
+        |<vbox>
+        |   <label>Testing</label>
+        |    <hbox>
+        |        <vbox>
+        |            <TextField label="A" path="a"/>
+        |            <TextField label="B" path="a"/>
+        |        </vbox>
+        |        <vbox>
+        |            <TextField  label="C" path="a"/>
+        |            <TextField  label="D" path="a"/>
+        |        </vbox>
+        |    </hbox>
+        |</vbox>
+      """.stripMargin)
+
    content = new VBox {
       padding = Insets(5.0)
       children = Seq(
@@ -19,7 +38,7 @@ class EditRecords extends Scene {
             }
          },
          Label("TODO"),
-         Label("dwa"),
+         editableView
       )
    }
 }
