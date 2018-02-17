@@ -1,4 +1,5 @@
 package com.radeusgd.archivum.datamodel.types
+
 import com.radeusgd.archivum.datamodel._
 
 class EnumField(val values: IndexedSeq[String]) extends FieldType {
@@ -10,7 +11,8 @@ class EnumField(val values: IndexedSeq[String]) extends FieldType {
          case DMString(str) =>
             if (values.contains(str)) Nil
             else ConstraintError(Nil, str + " is not a valid value for this field") :: Nil
-         case _ => TypeError(Nil, v.getClass.getSimpleName,"DMString") :: Nil
+         case _ => TypeError(Nil, v.getClass.getSimpleName, "DMString") :: Nil
       }
 
+   override def makeEmpty: DMValue = DMString(values.head)
 }

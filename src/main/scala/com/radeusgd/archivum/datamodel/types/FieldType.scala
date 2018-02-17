@@ -4,6 +4,8 @@ import com.radeusgd.archivum.datamodel._
 
 trait FieldType {
    def validate(v: DMValue): List[ValidationError]
+
+   def makeEmpty: DMValue
 }
 
 object StringField extends FieldType {
@@ -12,6 +14,8 @@ object StringField extends FieldType {
          case DMString(_) => Nil
          case _ => TypeError(Nil, v.getClass.getSimpleName, "DMString") :: Nil
       }
+
+   override def makeEmpty: DMValue = DMString("")
 }
 
 object IntegerField extends FieldType {
@@ -21,6 +25,8 @@ object IntegerField extends FieldType {
          case DMInteger(_) => Nil
          case _ => TypeError(Nil, v.getClass.getSimpleName, "DMInteger") :: Nil
       }
+
+   override def makeEmpty: DMValue = DMNull
 }
 
 object DateField extends FieldType {
@@ -30,6 +36,8 @@ object DateField extends FieldType {
          case DMDate(_) => Nil
          case _ => TypeError(Nil, v.getClass.getSimpleName, "DMDate") :: Nil
       }
+
+   override def makeEmpty: DMValue = DMNull
 }
 
 object YearDateField extends FieldType {
@@ -39,12 +47,15 @@ object YearDateField extends FieldType {
          case DMYearDate(_) => Nil
          case _ => TypeError(Nil, v.getClass.getSimpleName, "DMYearDate") :: Nil
       }
+
+   override def makeEmpty: DMValue = DMNull
 }
 
+// TODO computable fields
 case class StructField(fieldTypes: Map[String, FieldType]) extends FieldType {
    def validate(v: DMValue): List[ValidationError] =
       v match {
-         case DMStruct(values, _) => {
+         case DMStruct(values, _) =>
             val unknown = values.keySet -- fieldTypes.keySet
             val unknownErrors: List[ValidationError] = unknown.toList map { key => ConstraintError(Nil, key + " is not expected in this struct") }
 
@@ -59,9 +70,10 @@ case class StructField(fieldTypes: Map[String, FieldType]) extends FieldType {
                }
 
             unknownErrors ++ childErrors.toList
-         }
          case _ => TypeError(Nil, v.getClass.getSimpleName, "DMStruct") :: Nil
       }
+
+   override def makeEmpty: DMStruct = DMStruct(fieldTypes mapValues (_.makeEmpty), Map.empty)
 }
 
 case class ArrayField(elementsType: FieldType) extends FieldType {
@@ -80,6 +92,8 @@ case class ArrayField(elementsType: FieldType) extends FieldType {
          }
          case _ => TypeError(Nil, v.getClass.getSimpleName, "DMArray") :: Nil
       }
+
+   override def makeEmpty: DMArray = DMArray(Vector.empty)
 }
 
 // TODO Image Field (uses DMString for content address and manual content handling)

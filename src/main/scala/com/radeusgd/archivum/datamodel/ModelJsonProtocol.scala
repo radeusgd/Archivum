@@ -40,6 +40,7 @@ object ModelJsonProtocol extends DefaultJsonProtocol {
       json match {
          case JsString(arrayPrefixed(suf)) => ArrayField(readFieldType(customTypes)(JsString(suf)))
          case JsString("string") => StringField
+         case JsString("bigtext") => StringField
          case JsString("date") => DateField
          case JsString(typename) => customTypes(typename)
          case _ => throw DeserializationException("Expected a typename")
