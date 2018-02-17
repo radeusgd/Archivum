@@ -10,14 +10,13 @@ abstract class SimpleControlFactory(make: (String, List[String], EditableView) =
    override def fromXML(xmlnode: xml.Node, ev: EditableView): Either[ViewParseError, ParsedView] = {
       if (xmlnode.child != Nil) Left(ViewParseError("This node shouldn't have any children"))
       else {
+         val label: Option[String] = xmlnode.attribute(ViewLanguage.Label).map(_.text)
          val node = for {
-            labelSeq <- xmlnode.attribute(ViewLanguage.Label)
             pathSeq <- xmlnode.attribute(ViewLanguage.BindingPath)
-            label <- labelSeq.headOption
-            path <- pathSeq.headOption
-            if label.isAtom && path.isAtom
-         } yield make(label.text, DMUtils.parsePath(path.text), ev)
-         node.toRight(ViewParseError("Missing label or path attribute")).map(n => ParsedView(n, Seq(n)))
+            path <- pathSeq.headOption.map(n => DMUtils.parsePath(n.text))
+            if path.nonEmpty
+         } yield make(label.getOrElse(path.last), path, ev)
+         node.toRight(ViewParseError("Missing path attribute")).map(n => ParsedView(n, Seq(n)))
       }
    }
 }

@@ -22,9 +22,9 @@ class EditRecords extends Scene {
         |  "types": {
         |    "płeć": ["M","K"],
         |    "rodzic": {
-        |      "imię": "string",
-        |      "nazwisko": "string",
-        |      "zawód": "strind"
+        |      "Imię": "string",
+        |      "Nazwisko": "string",
+        |      "Zawód": "strind"
         |    }
         |  },
         |  "fields": {
@@ -33,6 +33,8 @@ class EditRecords extends Scene {
         |    "Nazwisko": "string",
         |    "Data urodzenia": "date",
         |    "Płeć": "płeć",
+        |    "Ojciec": "rodzic",
+        |    "Matka": "rodzic",
         |    "Źródło": "bigtext"
         |  }
         |}
@@ -42,16 +44,21 @@ class EditRecords extends Scene {
    val editableView: EditableView = EditableView.makeFromDefinition(model,
       """
         |<vbox>
-        |   <label>Testing</label>
+        |   <label>Osoba</label>
         |    <hbox>
         |        <vbox>
-        |            <TextField label="A" path="a"/>
-        |            <TextField label="B" path="a"/>
+        |            <TextField path="Imię"/>
+        |            <TextField path="Nazwisko"/>
+        |            <TextField path="Miasto"/>
+        |            <TextField path="Płeć"/> <!-- TODO choice field -->
         |        </vbox>
         |        <vbox>
-        |            <TextField  label="C" path="a"/>
-        |            <TextField  label="D" path="a"/>
+        |            <Label>Ojciec</Label>
+        |            <TextField path="Ojciec.Imię"/>
+        |            <TextField path="Ojciec.Nazwisko"/>
+        |            <TextField path="Ojciec.Zawód"/>
         |        </vbox>
+        |
         |    </hbox>
         |</vbox>
       """.stripMargin)
