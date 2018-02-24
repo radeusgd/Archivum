@@ -62,6 +62,8 @@ case class DMDate(value: DMValue.Date) extends DMValue with DMOrdered {
 
 case class DMArray(values: Vector[DMValue]) extends DMValue with DMAggregate {
 
+   def length: Int = values.length
+
    def updated(idx: Int, v: DMValue): DMArray = DMArray(values.updated(idx, v))
 
    override def apply(s: String): DMValue =

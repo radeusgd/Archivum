@@ -1,9 +1,7 @@
 package com.radeusgd.archivum.gui.scenes
 
 import com.radeusgd.archivum.datamodel.Model
-import com.radeusgd.archivum.datamodel.ModelJsonProtocol._
 import com.radeusgd.archivum.gui.{ApplicationMain, EditableView}
-import spray.json.JsonParser
 
 import scalafx.Includes._
 import scalafx.application.JFXApp
@@ -15,7 +13,7 @@ import scalafx.scene.layout.VBox
 class EditRecords extends Scene {
 
    // TODO these are for testing, later this will be encapsulated into separate functions etc.
-   val modelJson = JsonParser(
+   val modelText: String =
       """
         |{
         |  "name": "Testowy",
@@ -38,8 +36,8 @@ class EditRecords extends Scene {
         |    "Źródło": "bigtext"
         |  }
         |}
-      """.stripMargin)
-   val model: Model = modelJson.convertTo[Model]
+      """.stripMargin
+   val model: Model = Model.fromDefinition(modelText).get
    // TODO loading the file
    val editableView: EditableView = EditableView.makeFromDefinition(model,
       """

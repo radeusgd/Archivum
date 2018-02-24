@@ -1,11 +1,17 @@
 package com.radeusgd.archivum.datamodel.types
 
 import com.radeusgd.archivum.datamodel._
+import com.radeusgd.archivum.persistence.DBTypes
+import com.radeusgd.archivum.persistence.strategies.{Fetch, Insert, Setup}
 
 trait FieldType {
    def validate(v: DMValue): List[ValidationError]
 
    def makeEmpty: DMValue
+
+   def tableSetup(path: Seq[String], table: Setup): Unit
+   def tableFetch(path: Seq[String], table: Fetch): DMValue
+   def tableInsert(path: Seq[String], table: Insert, value: DMValue)
 }
 
 object StringField extends FieldType {
@@ -16,6 +22,22 @@ object StringField extends FieldType {
       }
 
    override def makeEmpty: DMValue = DMString("")
+
+   override def tableSetup(path: Seq[String], table: Setup): Unit = {
+      table.addField(path, DBTypes.String)
+   }
+
+   override def tableFetch(path: Seq[String], table: Fetch): DMValue = {
+      table.getField(path, DBTypes.String)
+   }
+
+   override def tableInsert(path: Seq[String], table: Insert, value: DMValue): Unit = {
+      value match {
+         case DMString(str) => table.setValue(path, str)
+         case DMNull => table.setValue(path, null)
+         case _ => assert(false)
+      }
+   }
 }
 
 object IntegerField extends FieldType {
@@ -27,6 +49,22 @@ object IntegerField extends FieldType {
       }
 
    override def makeEmpty: DMValue = DMNull
+
+   override def tableSetup(path: Seq[String], table: Setup): Unit = {
+      table.addField(path, DBTypes.Integer)
+   }
+
+   override def tableFetch(path: Seq[String], table: Fetch): DMValue = {
+      table.getField(path, DBTypes.Integer)
+   }
+
+   override def tableInsert(path: Seq[String], table: Insert, value: DMValue): Unit = {
+      value match {
+         case DMInteger(i) => table.setValue(path, i)
+         case DMNull => table.setValue(path, null)
+         case _ => assert(false)
+      }
+   }
 }
 
 object DateField extends FieldType {
@@ -38,6 +76,18 @@ object DateField extends FieldType {
       }
 
    override def makeEmpty: DMValue = DMNull
+
+   override def tableSetup(path: Seq[String], table: Setup): Unit = {
+      ???
+   }
+
+   override def tableFetch(path: Seq[String], table: Fetch): DMValue = {
+      ???
+   }
+
+   override def tableInsert(path: Seq[String], table: Insert, value: DMValue): Unit = {
+      ???
+   }
 }
 
 object YearDateField extends FieldType {
@@ -49,6 +99,12 @@ object YearDateField extends FieldType {
       }
 
    override def makeEmpty: DMValue = DMNull
+
+   override def tableSetup(path: Seq[String], table: Setup): Unit = ???
+
+   override def tableFetch(path: Seq[String], table: Fetch): DMValue = ???
+
+   override def tableInsert(path: Seq[String], table: Insert, value: DMValue): Unit = ???
 }
 
 // TODO computable fields
@@ -81,6 +137,24 @@ case class StructField(fieldTypes: Map[String, FieldType]) extends FieldType {
       }
 
    override def makeEmpty: DMStruct = DMStruct(fieldTypes mapValues (_.makeEmpty), Map.empty)
+
+   override def tableSetup(path: Seq[String], table: Setup): Unit = {
+      for ((name, ft) <- fieldTypes) {
+         ft.tableSetup(path ++ List(name), table)
+      }
+   }
+
+   override def tableFetch(path: Seq[String], table: Fetch): DMValue = {
+      val fields = fieldTypes map { case (name, ft) => (name, ft.tableFetch(path ++ List(name), table)) }
+      DMStruct(fields) // TODO computable fields
+   }
+
+   override def tableInsert(path: Seq[String], table: Insert, value: DMValue): Unit = {
+      val obj: DMStruct = value.asInstanceOf[DMStruct]
+      for ((name, ft) <- fieldTypes) {
+         ft.tableInsert(path ++ List(name), table, obj(name))
+      }
+   }
 }
 
 case class ArrayField(elementsType: FieldType) extends FieldType {
@@ -101,6 +175,24 @@ case class ArrayField(elementsType: FieldType) extends FieldType {
       }
 
    override def makeEmpty: DMArray = DMArray(Vector.empty)
+
+   override def tableSetup(path: Seq[String], table: Setup): Unit = {
+      val sub = table.addSubTable(path)
+      elementsType.tableSetup(Nil, sub)
+   }
+
+   override def tableFetch(path: Seq[String], table: Fetch): DMValue = {
+      val subs = table.getSubTable(path)
+      val values = subs map { (sub) => elementsType.tableFetch(Nil, sub) }
+      DMArray(values.toVector)
+   }
+
+   override def tableInsert(path: Seq[String], table: Insert, value: DMValue): Unit = {
+      val arr: DMArray = value.asInstanceOf[DMArray]
+      val subs = table.setSubTable(path, arr.length)
+      val vAndSub: Seq[(Insert, DMValue)] = subs.zip(arr.values)
+      vAndSub.foreach({ case (sub, svalue) => elementsType.tableInsert(Nil, sub, svalue)})
+   }
 }
 
 // TODO Image Field (uses DMString for content address and manual content handling)

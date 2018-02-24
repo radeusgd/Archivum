@@ -21,5 +21,3 @@ libraryDependencies ++= Seq(
 
 // TODO assembly setup
 // mainClass in assembly := Some("com.radeusgd.archivum.gui.ApplicationMain")
-
-offline := true

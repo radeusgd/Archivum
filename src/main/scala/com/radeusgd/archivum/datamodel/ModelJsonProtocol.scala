@@ -5,8 +5,13 @@ import spray.json._
 
 object ModelJsonProtocol extends DefaultJsonProtocol {
    implicit object ModelDefinitionJsonFormat extends RootJsonFormat[Model] {
-      override def write(obj: Model): JsValue = {
-         throw new NotImplementedError("Currently serializing model definition back to JSON is not supported.")
+      override def write(m: Model): JsValue = {
+         //val types: Map[String, FieldType]
+         JsObject(
+            "name" -> JsString(m.name),
+            "types" -> ???,
+            "fields" -> ???
+         )
       }
 
       override def read(json: JsValue): Model = {
