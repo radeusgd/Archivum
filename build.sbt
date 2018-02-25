@@ -19,5 +19,7 @@ libraryDependencies ++= Seq(
    "ch.qos.logback"  %  "logback-classic"   % "1.2.3"
 )
 
+libraryDependencies += "org.typelevel" %% "cats-core" % "1.0.1"
+
 // TODO assembly setup
 // mainClass in assembly := Some("com.radeusgd.archivum.gui.ApplicationMain")

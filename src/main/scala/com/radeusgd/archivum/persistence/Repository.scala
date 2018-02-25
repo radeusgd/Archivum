@@ -3,7 +3,7 @@ package com.radeusgd.archivum.persistence
 import com.radeusgd.archivum.datamodel.{DMStruct, Model}
 
 trait Repository {
-   type Rid = Long
+   type Rid = Int
 
    def model: Model
 

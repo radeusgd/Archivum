@@ -3,6 +3,7 @@ package com.radeusgd.archivum.persistence
 import scalikejdbc._
 import com.radeusgd.archivum.datamodel.Model
 import com.radeusgd.archivum.datamodel.ModelJsonProtocol._
+import com.radeusgd.archivum.persistence.strategies.SetupImpl
 import spray.json._
 
 trait Database {
@@ -26,8 +27,12 @@ class DatabaseImpl(val db: DB) extends Database {
    override def createRepository(modelDefinition: String): Unit = {
       val model = Model.fromDefinition(modelDefinition).get // TODO this may not be the best error handling in the world
       ensureModelTable()
+      val setup: SetupImpl = new SetupImpl(model.name)
+      model.roottype.tableSetup(Nil, setup)
+      val modelCreation = setup.createSchema()
       db.autoCommit { implicit session =>
          sql"INSERT INTO models (name, definition) VALUES(${model.name}, $modelDefinition);".update.apply()
+         modelCreation.foreach(_.update.apply())
       }
    }
 

@@ -5,4 +5,5 @@ object DBTypes {
    object Integer extends DBType
    object String extends DBType
    object Date extends DBType
+   val Rid: DBType = Integer
 }

@@ -2,6 +2,7 @@ package com.radeusgd.archivum.gui.scenes
 
 import com.radeusgd.archivum.datamodel.Model
 import com.radeusgd.archivum.gui.{ApplicationMain, EditableView}
+import com.radeusgd.archivum.persistence.Database
 
 import scalafx.Includes._
 import scalafx.application.JFXApp
@@ -29,14 +30,14 @@ class EditRecords extends Scene {
         |    "Miasto": "string",
         |    "Imię": "string",
         |    "Nazwisko": "string",
-        |    "Data urodzenia": "date",
+        |    "Data urodzenia": "string",
         |    "Płeć": "płeć",
         |    "Ojciec": "rodzic",
         |    "Matka": "rodzic",
         |    "Źródło": "bigtext"
         |  }
         |}
-      """.stripMargin
+      """.stripMargin // TODO date is not yet implemented
    val model: Model = Model.fromDefinition(modelText).get
    // TODO loading the file
    val editableView: EditableView = EditableView.makeFromDefinition(model,
@@ -69,7 +70,12 @@ class EditRecords extends Scene {
                ApplicationMain.switchScene(MainMenu.instance)
             }
          },
-         Label("TODO"),
+         new Button("Test") {
+            onAction = handle {
+               val db = Database.open()
+               db.createRepository(modelText)
+            }
+         },
          editableView
       )
    }
