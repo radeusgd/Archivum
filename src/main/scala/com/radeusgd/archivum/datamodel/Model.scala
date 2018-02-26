@@ -5,11 +5,8 @@ import com.radeusgd.archivum.datamodel.ModelJsonProtocol._
 import spray.json.JsonParser
 
 import scala.util.Try
-import scala.util.control.NonFatal
 
-class Model(val name: String, val roottype: StructField) {
-
-}
+case class Model(name: String, roottype: StructField)
 
 object Model {
    def fromDefinition(definition: String): Try[Model] = {

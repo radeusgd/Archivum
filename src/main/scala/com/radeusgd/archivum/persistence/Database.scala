@@ -18,6 +18,8 @@ import DBUtils._
    so if later rewriting for multiple backends that will need to be refactored into some kind of TypeSerializer[FieldType]
  */
 class DatabaseImpl(val db: DB) extends Database {
+   ensureModelTable()
+
    override def openRepository(modelName: String): Option[Repository] = {
       for {
          model <- getRepositoryModel(modelName)
@@ -27,7 +29,6 @@ class DatabaseImpl(val db: DB) extends Database {
    // TODO probably better use model instance: TODO model.toJson (implement Writer)
    override def createRepository(modelDefinition: String): Unit = {
       val model = Model.fromDefinition(modelDefinition).get // TODO this may not be the best error handling in the world
-      ensureModelTable()
       val setup: SetupImpl = new SetupImpl(sanitizeName(model.name))
       model.roottype.tableSetup(Nil, setup)
       val modelCreation = setup.createSchema()
@@ -55,8 +56,7 @@ class DatabaseImpl(val db: DB) extends Database {
 
 object Database {
    def open(): Database = {
-      // TODO this is not quite how it should be done
-      ConnectionPool.singleton("jdbc:h2:mem:db1","","") // dbc:h2:file:./data/db
+      ConnectionPool.singleton("jdbc:h2:file:./database","","")
       val db = DB(ConnectionPool.borrow())
       db.autoClose(false)
       new DatabaseImpl(db)
