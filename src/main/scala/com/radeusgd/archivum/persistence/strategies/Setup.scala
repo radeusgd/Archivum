@@ -1,6 +1,6 @@
 package com.radeusgd.archivum.persistence.strategies
 
-import com.radeusgd.archivum.persistence.DBTypes.{DBType, Date, Integer}
+import com.radeusgd.archivum.persistence.DBTypes.DBType
 import com.radeusgd.archivum.persistence.{DBTypes, DBUtils}
 
 import scala.collection.mutable
@@ -24,7 +24,7 @@ class SetupImpl(val tableName: String, val subOf: Option[String] = None) extends
    }
 
    override def addSubTable(path: Seq[String]): Setup = {
-      val sub = new SetupImpl(tableName + "__" + pathToDb(path), Some(tableName))
+      val sub = new SetupImpl(subtableName(tableName, path), Some(tableName))
       tables.put(pathToDb(path), sub)
       sub
    }
@@ -39,13 +39,10 @@ class SetupImpl(val tableName: String, val subOf: Option[String] = None) extends
    }
 
    def createSchema(): List[SQL[Nothing, NoExtractor]] = {
-      val rid = rawSql("_rid INT PRIMARY KEY")
-      val prid = subOf.map(parent => rawSql("_prid INT REFERENCES " + parent + " ON DELETE CASCADE"))
+      val rid = rawSql("_rid IDENTITY PRIMARY KEY")
+      val prid = subOf.map(parent => rawSql("_prid IDENTITY REFERENCES " + parent + " ON DELETE CASCADE"))
       val columns: SQLSyntax = join(List(rid) ++ prid.toList ++ fields.map({ case (name, typ) => defineColumn(name, typ) }), sqls",")
       val schem = sql"CREATE TABLE $sqlTableName ($columns);"
       List(schem) ++ tables.values.toList.flatMap(_.createSchema())
    }
-
-   def delete(rid: Int): List[SQL[Nothing, NoExtractor]] =
-      List(sql"DELETE FROM $sqlTableName WHERE _rid = $rid;") // cascade delete will cleanse the arrays' subtable entries
 }

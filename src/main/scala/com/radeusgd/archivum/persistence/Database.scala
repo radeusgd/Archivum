@@ -11,6 +11,7 @@ trait Database {
    def createRepository(modelDefinition: String) // TODO
 }
 
+import DBUtils._
 /* TODO if there are multiple backends this will diverge into various implementations
    However this won't be very easy because in the beginning
    I assume FieldType will handle their serialization each on their own,
@@ -20,14 +21,14 @@ class DatabaseImpl(val db: DB) extends Database {
    override def openRepository(modelName: String): Option[Repository] = {
       for {
          model <- getRepositoryModel(modelName)
-      } yield ???
+      } yield new RepositoryImpl(model, sanitizeName(modelName), db)
    }
 
    // TODO probably better use model instance: TODO model.toJson (implement Writer)
    override def createRepository(modelDefinition: String): Unit = {
       val model = Model.fromDefinition(modelDefinition).get // TODO this may not be the best error handling in the world
       ensureModelTable()
-      val setup: SetupImpl = new SetupImpl(model.name)
+      val setup: SetupImpl = new SetupImpl(sanitizeName(model.name))
       model.roottype.tableSetup(Nil, setup)
       val modelCreation = setup.createSchema()
       db.autoCommit { implicit session =>

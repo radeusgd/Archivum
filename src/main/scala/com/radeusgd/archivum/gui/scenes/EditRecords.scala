@@ -62,6 +62,12 @@ class EditRecords extends Scene {
         |</vbox>
       """.stripMargin)
 
+   private val localLogLabel = new Label("")
+
+   private def logLocal(msg: String): Unit = {
+      localLogLabel.text = localLogLabel.text.value + msg + "\n"
+   }
+
    content = new VBox {
       padding = Insets(5.0)
       children = Seq(
@@ -73,9 +79,23 @@ class EditRecords extends Scene {
          new Button("Test") {
             onAction = handle {
                val db = Database.open()
+               val mdl = Model.fromDefinition(modelText).get
                db.createRepository(modelText)
+               val repo = db.openRepository("Testowy").get
+               def test(): Unit = {
+                  val r = repo.createRecord(mdl.roottype.makeEmpty)
+                  logLocal(s"Created $r")
+               }
+
+               test()
+               test()
+               val rid = repo.createRecord(mdl.roottype.makeEmpty)
+               repo.updateRecord(rid, mdl.roottype.makeEmpty)
+               test()
+               test()
             }
          },
+         localLogLabel,
          editableView
       )
    }
