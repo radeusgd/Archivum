@@ -1,8 +1,8 @@
 package com.radeusgd.archivum.persistence.strategies
 
-import com.radeusgd.archivum.datamodel.{DMInteger, DMString, DMStruct, DMValue}
+import com.radeusgd.archivum.datamodel._
 import com.radeusgd.archivum.persistence.DBTypes
-import com.radeusgd.archivum.persistence.DBTypes.{DBType, Date, Integer}
+import com.radeusgd.archivum.persistence.DBTypes.DBType
 import scalikejdbc.{DBSession, WrappedResultSet}
 
 trait Fetch {
@@ -20,7 +20,7 @@ class FetchImpl(private val rs: WrappedResultSet, private val tableName: String)
    override def getField(path: Seq[String], typ: DBType): DMValue = {
       val name = pathToDb(path)
       typ match {
-         case DBTypes.Integer => DMInteger(rs.int(name))
+         case DBTypes.Integer => rs.intOpt(name).map(DMInteger).getOrElse(DMNull)
          case DBTypes.String => DMString(rs.string(name))
          case DBTypes.Date => ???
       }

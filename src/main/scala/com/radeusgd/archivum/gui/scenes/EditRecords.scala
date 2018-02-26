@@ -28,6 +28,7 @@ class EditRecords extends Scene {
         |  },
         |  "fields": {
         |    "Miasto": "string",
+        |    "Numer domu": "integer",
         |    "Imię": "string",
         |    "Nazwisko": "string",
         |    "Data urodzenia": "string",
