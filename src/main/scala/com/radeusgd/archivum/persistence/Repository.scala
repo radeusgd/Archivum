@@ -1,7 +1,7 @@
 package com.radeusgd.archivum.persistence
 
 import com.radeusgd.archivum.datamodel.{DMStruct, Model}
-import com.radeusgd.archivum.persistence.strategies.InsertImpl
+import com.radeusgd.archivum.persistence.strategies.{FetchImpl, InsertImpl}
 import scalikejdbc._
 
 trait Repository {
@@ -28,6 +28,8 @@ class RepositoryImpl(
 
    private def rootType = model.roottype
 
+   private val table: SQLSyntax = DBUtils.rawSql(tableName)
+
    override def createRecord(value: DMStruct): Rid = {
       assert(rootType.validate(value).isEmpty)
       val ins = new InsertImpl(tableName)
@@ -35,7 +37,15 @@ class RepositoryImpl(
       db.autoCommit({ implicit session => ins.insert(None) })
    }
 
-   override def fetchRecord(rid: Rid): Option[DMStruct] = ???
+   private def rsToDM(rs: WrappedResultSet)(implicit session: DBSession): DMStruct = {
+      val f = new FetchImpl(rs, tableName)
+      rootType.tableFetch(Nil, f)
+   }
+
+   override def fetchRecord(rid: Rid): Option[DMStruct] =
+      db.readOnly({ implicit session =>
+         sql"SELECT * FROM $table WHERE _rid = $rid".map(rs => rsToDM(rs)(session)).single.apply()
+      })
 
    override def updateRecord(rid: Rid, newValue: DMStruct): Unit = {
       assert(rootType.validate(newValue).isEmpty)
@@ -48,11 +58,15 @@ class RepositoryImpl(
 
    override def deleteRecord(rid: Rid): Unit = {
       db.autoCommit({ implicit session =>
-         sql"DELETE FROM ${DBUtils.rawSql(tableName)} WHERE _rid = $rid;".update.apply()
+         sql"DELETE FROM $table WHERE _rid = $rid;".update.apply()
       })
    }
 
-   override def fetchAllRecords(): Seq[(Rid, DMStruct)] = ???
+   override def fetchAllRecords(): Seq[(Rid, DMStruct)] = {
+      db.readOnly({ implicit session =>
+         sql"SELECT * FROM $table".map(rs => (rs.long("_rid"), rsToDM(rs)(session))).list.apply()
+      })
+   }
 
    override def searchRecords(criteria: SearchCriteria): Seq[(Rid, DMStruct)] = ???
 

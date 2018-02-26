@@ -93,6 +93,9 @@ class EditRecords extends Scene {
                repo.updateRecord(rid, mdl.roottype.makeEmpty)
                test()
                test()
+
+               val res = repo.fetchAllRecords()
+               logLocal(res.toString())
             }
          },
          localLogLabel,

@@ -61,7 +61,7 @@ case class DMDate(value: DMValue.Date) extends DMValue with DMOrdered {
 }
 
 case class DMArray(values: Vector[DMValue]) extends DMValue with DMAggregate {
-
+   override def toString: String = values.toString() // TODO computables
    def length: Int = values.length
 
    def updated(idx: Int, v: DMValue): DMArray = DMArray(values.updated(idx, v))
@@ -77,6 +77,7 @@ case class DMArray(values: Vector[DMValue]) extends DMValue with DMAggregate {
 case class DMStruct(values: Map[String, DMValue],
                     computables: Map[String, (DMStruct) => DMValue] = Map.empty)
    extends DMValue with DMAggregate {
+   override def toString: String = values.toString() // TODO better toString, also include computables
 
    def updated(key: String, v: DMValue) = DMStruct(values.updated(key, v), computables)
 

@@ -39,8 +39,8 @@ class SetupImpl(val tableName: String, val subOf: Option[String] = None) extends
    }
 
    def createSchema(): List[SQL[Nothing, NoExtractor]] = {
-      val rid = rawSql("_rid IDENTITY PRIMARY KEY")
-      val prid = subOf.map(parent => rawSql("_prid IDENTITY REFERENCES " + parent + " ON DELETE CASCADE"))
+      val rid = rawSql("_rid BIGINT AUTO_INCREMENT PRIMARY KEY")
+      val prid = subOf.map(parent => rawSql("_prid BIGINT AUTO_INCREMENT REFERENCES " + parent + " ON DELETE CASCADE"))
       val columns: SQLSyntax = join(List(rid) ++ prid.toList ++ fields.map({ case (name, typ) => defineColumn(name, typ) }), sqls",")
       val schem = sql"CREATE TABLE $sqlTableName ($columns);"
       List(schem) ++ tables.values.toList.flatMap(_.createSchema())

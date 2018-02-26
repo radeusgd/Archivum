@@ -144,7 +144,7 @@ case class StructField(fieldTypes: Map[String, FieldType]) extends FieldType {
       }
    }
 
-   override def tableFetch(path: Seq[String], table: Fetch): DMValue = {
+   override def tableFetch(path: Seq[String], table: Fetch): DMStruct = {
       val fields = fieldTypes map { case (name, ft) => (name, ft.tableFetch(path ++ List(name), table)) }
       DMStruct(fields) // TODO computable fields
    }
