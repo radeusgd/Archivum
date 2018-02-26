@@ -2,6 +2,7 @@ package com.radeusgd.archivum.gui
 
 import com.radeusgd.archivum.datamodel._
 import com.radeusgd.archivum.gui.controls.{BoundControl, ChoiceControlFactory, SimpleTextFactory}
+import com.radeusgd.archivum.persistence.Repository
 
 import scala.collection.mutable
 import scala.xml.XML
@@ -10,7 +11,10 @@ import scalafx.scene.control.Label
 import scalafx.scene.layout.{Pane, VBox}
 import scalafx.scene.paint.Paint
 
-class EditableView(val model: Model, xmlroot: xml.Node) extends Pane {
+class EditableView(val repo: Repository, xmlroot: xml.Node) extends Pane {
+
+   def model: Model = repo.model
+
    private def initChildren(xmlnode: xml.Node): (scalafx.scene.Node, Seq[BoundControl]) = {
       val res = EditableView.parseViewTree(xmlnode, this).toTry.get
       (res.node, res.boundControls)
@@ -25,6 +29,7 @@ class EditableView(val model: Model, xmlroot: xml.Node) extends Pane {
       errorsLabel
    )
 
+   var currentRid: Long = -1
    var modelInstance: DMStruct = model.roottype.makeEmpty
 
    def updateErrorState(errors: Seq[ValidationError]): Unit = {
@@ -47,26 +52,31 @@ class EditableView(val model: Model, xmlroot: xml.Node) extends Pane {
       val errors = model.roottype.validate(newInstance)
       updateErrorState(errors)
       val severe = errors.exists(_.isInstanceOf[TypeError])
-      if (severe) return {}
-      /*
-       warning, we don't call setModelInstance -> refreshBinding,
-        we assume that the field changed only its own value
-        and other fields need not be updated
-       */
-      modelInstance = newInstance
+      if (!severe) {
+         /*
+           warning, we don't call setModelInstance -> refreshBinding,
+           we assume that the field changed only its own value
+           and other fields need not be updated
+         */
+         modelInstance = newInstance
 
-      if (errors.isEmpty) {
-         // TODO submit to Repo
-      } else {
-         println(errors)
-         //TODO display errors
+         if (errors.isEmpty) {
+            // TODO debounce (if there are multiple changes during 3s or so make only one submission)
+            repo.updateRecord(currentRid, modelInstance)
+         } else {
+            println(errors)
+            //TODO display errors
+         }
       }
    }
 
-   def setModelInstance(v: DMStruct): Unit = {
-      assert(model.roottype.validate(v).isEmpty)
-      modelInstance = v
-      boundControls.foreach(_.refreshBinding(v))
+   def setModelInstance(rid: Long): Unit = {
+      repo.fetchRecord(rid).foreach(v => {
+         assert(model.roottype.validate(v).isEmpty)
+         currentRid = rid
+         modelInstance = v
+         boundControls.foreach(_.refreshBinding(v))
+      })
    }
 }
 
@@ -82,8 +92,8 @@ trait ViewFactory {
 case class ViewParseError(message: String, cause: Throwable = null) extends RuntimeException(message)
 
 object EditableView {
-   def makeFromDefinition(model: Model, text: String): EditableView =
-      new EditableView(model, XML.loadString(text))
+   def makeFromDefinition(repo: Repository, text: String): EditableView =
+      new EditableView(repo, XML.loadString(text))
 
    private val parsersList: Seq[ViewFactory] = Seq(
       HBoxFactory,

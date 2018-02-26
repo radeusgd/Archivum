@@ -5,7 +5,6 @@ import com.radeusgd.archivum.gui.{ApplicationMain, EditableView}
 import com.radeusgd.archivum.persistence.Database
 
 import scalafx.Includes._
-import scalafx.application.JFXApp
 import scalafx.geometry.Insets
 import scalafx.scene.Scene
 import scalafx.scene.control.{Button, Label}
@@ -41,27 +40,6 @@ class EditRecords extends Scene {
       """.stripMargin // TODO date is not yet implemented
    val model: Model = Model.fromDefinition(modelText).get
    // TODO loading the file
-   val editableView: EditableView = EditableView.makeFromDefinition(model,
-      """
-        |<vbox>
-        |   <label>Osoba</label>
-        |    <hbox>
-        |        <vbox>
-        |            <TextField path="Imię"/>
-        |            <TextField path="Nazwisko"/>
-        |            <TextField path="Miasto"/>
-        |            <choicefield path="Płeć"/>
-        |        </vbox>
-        |        <vbox>
-        |            <Label>Ojciec</Label>
-        |            <TextField path="Ojciec.Imię"/>
-        |            <TextField path="Ojciec.Nazwisko"/>
-        |            <TextField path="Ojciec.Zawód"/>
-        |        </vbox>
-        |
-        |    </hbox>
-        |</vbox>
-      """.stripMargin)
 
    private val localLogLabel = new Label("")
 
@@ -70,6 +48,8 @@ class EditRecords extends Scene {
    }
 
    val db = Database.open()
+
+   val box = new VBox()
 
    content = new VBox {
       padding = Insets(5.0)
@@ -84,9 +64,43 @@ class EditRecords extends Scene {
                db.createRepository(modelText)
             }
          },
+         new Button("Open repository") {
+            onAction = handle {
+               val repo = db.openRepository(model.name).get
+               val editableView: EditableView = EditableView.makeFromDefinition(repo,
+                  """
+                    |<vbox>
+                    |   <label>Osoba</label>
+                    |    <hbox>
+                    |        <vbox>
+                    |            <TextField path="Imię"/>
+                    |            <TextField path="Nazwisko"/>
+                    |            <TextField path="Miasto"/>
+                    |            <choicefield path="Płeć"/>
+                    |        </vbox>
+                    |        <vbox>
+                    |            <Label>Ojciec</Label>
+                    |            <TextField path="Ojciec.Imię"/>
+                    |            <TextField path="Ojciec.Nazwisko"/>
+                    |            <TextField path="Ojciec.Zawód"/>
+                    |        </vbox>
+                    |
+                    |    </hbox>
+                    |</vbox>
+                  """.stripMargin)
+               box.children = editableView
+               val rids = repo.fetchAllIds()
+               // TODO will need to handle going over all items in DB, arrows, i / n label etc.
+               val current =
+                  if (rids.isEmpty) repo.createRecord(model.roottype.makeEmpty)
+                  else rids.head
+               editableView.setModelInstance(current)
+            }
+         },
          new Button("Test") {
             onAction = handle {
                val repo = db.openRepository("Testowy").get
+
                def test(): Unit = {
                   val r = repo.createRecord(model.roottype.makeEmpty)
                   logLocal(s"Created $r")
@@ -104,7 +118,7 @@ class EditRecords extends Scene {
             }
          },
          localLogLabel,
-         editableView
+         box
       )
    }
 }

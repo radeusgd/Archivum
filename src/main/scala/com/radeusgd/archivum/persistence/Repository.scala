@@ -16,6 +16,7 @@ trait Repository {
 
    // TODO using this in processing will be slow, in the future we should extend Repository to handle Streams of records or something similar
    def fetchAllRecords(): Seq[(Rid, DMStruct)]
+   def fetchAllIds(): Seq[Rid]
 
    def searchRecords(criteria: SearchCriteria): Seq[(Rid, DMStruct)]
 }
@@ -65,6 +66,12 @@ class RepositoryImpl(
    override def fetchAllRecords(): Seq[(Rid, DMStruct)] = {
       db.readOnly({ implicit session =>
          sql"SELECT * FROM $table".map(rs => (rs.long("_rid"), rsToDM(rs)(session))).list.apply()
+      })
+   }
+
+   override def fetchAllIds(): Seq[Rid] = {
+      db.readOnly({ implicit session =>
+         sql"SELECT _rid FROM $table".map(rs => rs.long("_rid")).list.apply()
       })
    }
 
