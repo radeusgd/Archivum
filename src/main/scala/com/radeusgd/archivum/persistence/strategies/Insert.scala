@@ -3,13 +3,12 @@ package com.radeusgd.archivum.persistence.strategies
 import scalikejdbc._
 
 import scala.collection.mutable
+import com.radeusgd.archivum.persistence.DBUtils._
 
 trait Insert {
    def setValue(path: Seq[String], value: Any): Unit // TODO
    def setSubTable(path: Seq[String], amount: Int): Seq[Insert]
 }
-
-import com.radeusgd.archivum.persistence.DBUtils._
 
 class InsertImpl(val tableName: String) extends Insert {
    var children: List[InsertImpl] = Nil
@@ -25,8 +24,8 @@ class InsertImpl(val tableName: String) extends Insert {
    }
 
    private def makeInsert(pairs: List[(String, Any)]): SQL[Nothing, NoExtractor] = {
-      val names = join(pairs.map({ case (name, _) => rawSql(name)}), sqls",")
-      val vals = join(pairs.map({ case (_, v) => sqls"$v"}), sqls",")
+      val names = join(pairs.map({ case (name, _) => rawSql(name) }), sqls",")
+      val vals = join(pairs.map({ case (_, v) => sqls"$v" }), sqls",")
 
       sql"INSERT INTO ${rawSql(tableName)} ($names) VALUES($vals);"
    }

@@ -10,7 +10,9 @@ trait FieldType {
    def makeEmpty: DMValue
 
    def tableSetup(path: Seq[String], table: Setup): Unit
+
    def tableFetch(path: Seq[String], table: Fetch): DMValue
+
    def tableInsert(path: Seq[String], table: Insert, value: DMValue)
 }
 
@@ -191,7 +193,7 @@ case class ArrayField(elementsType: FieldType) extends FieldType {
       val arr: DMArray = value.asInstanceOf[DMArray]
       val subs = table.setSubTable(path, arr.length)
       val vAndSub: Seq[(Insert, DMValue)] = subs.zip(arr.values)
-      vAndSub.foreach({ case (sub, svalue) => elementsType.tableInsert(Nil, sub, svalue)})
+      vAndSub.foreach({ case (sub, svalue) => elementsType.tableInsert(Nil, sub, svalue) })
    }
 }
 

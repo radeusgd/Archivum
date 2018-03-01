@@ -25,7 +25,7 @@ abstract class SimpleControlFactory(make: (String, List[String], EditableView) =
    }
 
    //TODO use Cats or scalaz
-   private def leftMap[A,B,C](e: Either[A,B], f: A => C): Either[C,B] = {
+   private def leftMap[A, B, C](e: Either[A, B], f: A => C): Either[C, B] = {
       e.swap.map(f).swap
    }
 }

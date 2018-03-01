@@ -13,7 +13,7 @@ abstract class AggregateFactory(make: (Seq[scene.Node]) => scene.Node) extends V
       if (xmlnode.attributes.nonEmpty) Left(ViewParseError("Unrecognized attributes"))
       else {
          val childrenResults = xmlnode.child filter (_.label != "#PCDATA") map (EditableView.parseViewTree(_, ev))
-         val children: Either[ViewParseError, Seq[ParsedView]] = either_sequence(childrenResults)
+         val children: Either[ViewParseError, Seq[ParsedView]] = eitherSequence(childrenResults)
          children map buildAggregate
       }
 
@@ -24,31 +24,35 @@ abstract class AggregateFactory(make: (Seq[scene.Node]) => scene.Node) extends V
    }
 
    // TODO use scalaz or Cats
-   private def either_sequence[A, B](seq: Seq[Either[A, B]]): Either[A, Seq[B]] =
+   private def eitherSequence[A, B](seq: Seq[Either[A, B]]): Either[A, Seq[B]] =
       seq.collectFirst({ case Left(l) => Left(l) }).getOrElse(
          Right(seq.collect({ case Right(r) => r }))
       )
 }
 
-object HBoxFactory extends AggregateFactory(new HBox(_: _*) { spacing = 5 }) {
+object HBoxFactory extends AggregateFactory(new HBox(_: _*) {
+   spacing = 5
+}) {
    override val nodeType: String = ViewLanguage.Hbox
 }
 
-object VBoxFactory extends AggregateFactory(new VBox(_: _*) { spacing = 3 }) {
+object VBoxFactory extends AggregateFactory(new VBox(_: _*) {
+   spacing = 3
+}) {
    override val nodeType: String = ViewLanguage.Vbox
 }
 
 object LabelFactory extends ViewFactory {
    override def fromXML(xmlnode: Node, ev: EditableView): Either[ViewParseError, ParsedView] = {
-         val size: Int = xmlnode.attribute(ViewLanguage.FontSize).map(_.text.toInt).getOrElse(20) // TODO default font size
-         val text: String = xmlnode.text
-         val label = new Label(text) {
-            minWidth = 100
-            alignment = Pos.CenterRight
-            font = scalafx.scene.text.Font(font.name, size)
-         }
-         Right(ParsedView(label, Nil))
+      val size: Int = xmlnode.attribute(ViewLanguage.FontSize).map(_.text.toInt).getOrElse(20) // TODO default font size
+      val text: String = xmlnode.text
+      val label = new Label(text) {
+         minWidth = 100
+         alignment = Pos.CenterRight
+         font = scalafx.scene.text.Font(font.name, size)
       }
+      Right(ParsedView(label, Nil))
+   }
 
    override val nodeType: String = ViewLanguage.Label
 }

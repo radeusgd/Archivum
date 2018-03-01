@@ -4,7 +4,6 @@ import com.radeusgd.archivum.datamodel._
 import com.radeusgd.archivum.gui.controls.{BoundControl, ChoiceControlFactory, SimpleTextFactory}
 import com.radeusgd.archivum.persistence.Repository
 
-import scala.collection.mutable
 import scala.xml.XML
 import scalafx.scene
 import scalafx.scene.control.Label
@@ -39,7 +38,7 @@ class EditableView(val repo: Repository, xmlroot: xml.Node) extends Pane {
       } else {
          val texts = errors map {
             case ConstraintError(path, message) => path.mkString(".") + ": " + message
-            case t : TypeError => t.path.mkString(".") + ": " + t.toString
+            case t: TypeError => t.path.mkString(".") + ": " + t.toString
          }
          errorsLabel.text = texts.mkString("\n")
          errorsLabel.textFill.set(Paint.valueOf("red"))

@@ -4,15 +4,15 @@ import com.radeusgd.archivum.datamodel._
 import com.radeusgd.archivum.persistence.DBTypes
 import com.radeusgd.archivum.persistence.DBTypes.DBType
 import scalikejdbc.{DBSession, WrappedResultSet}
+import com.radeusgd.archivum.persistence.DBUtils._
+import scalikejdbc._
+
 
 trait Fetch {
    def getField(path: Seq[String], typ: DBType): DMValue
 
    def getSubTable(path: Seq[String]): Seq[Fetch]
 }
-
-import scalikejdbc._
-import com.radeusgd.archivum.persistence.DBUtils._
 
 class FetchImpl(private val rs: WrappedResultSet, private val tableName: String)
                (private implicit val session: DBSession) extends Fetch {

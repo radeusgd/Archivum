@@ -15,6 +15,6 @@ object ApplicationMain extends JFXApp {
       title = "Archivum"
       width = 600
       height = 450
-      scene = EditRecords.instance//MainMenu.instance // for debugging it's faster to skip menu
+      scene = EditRecords.instance //MainMenu.instance // for debugging it's faster to skip menu
    }
 }

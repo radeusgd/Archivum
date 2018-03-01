@@ -4,15 +4,15 @@ import com.radeusgd.archivum.persistence.DBTypes.DBType
 import com.radeusgd.archivum.persistence.{DBTypes, DBUtils}
 
 import scala.collection.mutable
+import com.radeusgd.archivum.persistence.DBUtils._
+import scalikejdbc._
+
 
 trait Setup {
    def addField(path: Seq[String], typ: DBType): Unit
 
    def addSubTable(path: Seq[String]): Setup
 }
-
-import scalikejdbc._
-import DBUtils._
 
 class SetupImpl(val tableName: String, val subOf: Option[String] = None) extends Setup {
    private val fields: mutable.Map[String, DBType] = mutable.Map.empty

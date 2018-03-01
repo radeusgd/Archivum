@@ -1,11 +1,10 @@
 package com.radeusgd.archivum.gui.controls
 
 import com.radeusgd.archivum.datamodel._
-import com.radeusgd.archivum.gui.{EditableView, ViewFactory}
+import com.radeusgd.archivum.gui.EditableView
 import com.radeusgd.archivum.languages.ViewLanguage
 
 import scalafx.geometry.Pos
-import scalafx.scene
 import scalafx.scene.control.{Label, TextField, TextInputControl}
 import scalafx.scene.layout.HBox
 

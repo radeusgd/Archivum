@@ -1,7 +1,7 @@
 package com.radeusgd.archivum.persistence
 
-import scalikejdbc.interpolation.SQLSyntax
 import scalikejdbc._
+import scalikejdbc.interpolation.SQLSyntax
 
 object DBUtils {
    type Rid = Long
@@ -9,11 +9,11 @@ object DBUtils {
    def sanitizeName(name: String): String =
       name.replace(' ', '_')
 
+   private val dbSep: String = "__"
+
    def pathToDb(path: Seq[String]): String = {
-      if (path == Nil)
-         "__"
-      else
-         path.map(sanitizeName).mkString("__")
+      if (path == Nil) dbSep
+      else path.map(sanitizeName).mkString(dbSep)
    }
 
    //def dbToPath(dbPath: String): Seq[String] = dbPath.split("__")
@@ -24,5 +24,5 @@ object DBUtils {
 
    def rawSql(str: String): SQLSyntax = SQLSyntax.createUnsafely(str)
 
-   def subtableName(parent: String, path: Seq[String]): String = parent + "__" + pathToDb(path)
+   def subtableName(parent: String, path: Seq[String]): String = parent + dbSep + pathToDb(path)
 }

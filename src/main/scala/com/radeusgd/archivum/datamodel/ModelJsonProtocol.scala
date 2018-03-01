@@ -4,6 +4,7 @@ import com.radeusgd.archivum.datamodel.types._
 import spray.json._
 
 object ModelJsonProtocol extends DefaultJsonProtocol {
+
    implicit object ModelDefinitionJsonFormat extends RootJsonFormat[Model] {
       override def write(m: Model): JsValue = {
          //val types: Map[String, FieldType]
@@ -29,11 +30,11 @@ object ModelJsonProtocol extends DefaultJsonProtocol {
 
    private def readCustomTypeDef(name: String, json: JsValue): (String, FieldType) = {
       json match {
-         case JsArray(_)  => name -> new EnumField(json.convertTo[IndexedSeq[String]])
-            /*
-             TODO for now custom types cannot use other custom types
-             (ie. custom struct cannot use enum), but it can easily be fixed
-             */
+         case JsArray(_) => name -> new EnumField(json.convertTo[IndexedSeq[String]])
+         /*
+          TODO for now custom types cannot use other custom types
+          (ie. custom struct cannot use enum), but it can easily be fixed
+          */
          case JsObject(fields) => name -> readStructDef(Map.empty[String, FieldType])(fields)
          case _ => throw DeserializationException("Expected an enum or struct definition")
       }

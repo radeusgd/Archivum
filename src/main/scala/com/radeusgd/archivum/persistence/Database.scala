@@ -1,17 +1,16 @@
 package com.radeusgd.archivum.persistence
 
-import scalikejdbc._
 import com.radeusgd.archivum.datamodel.Model
-import com.radeusgd.archivum.datamodel.ModelJsonProtocol._
 import com.radeusgd.archivum.persistence.strategies.SetupImpl
-import spray.json._
+import scalikejdbc._
+import com.radeusgd.archivum.persistence.DBUtils._
 
 trait Database {
    def openRepository(modelName: String): Option[Repository]
+
    def createRepository(modelDefinition: String) // TODO
 }
 
-import DBUtils._
 /* TODO if there are multiple backends this will diverge into various implementations
    However this won't be very easy because in the beginning
    I assume FieldType will handle their serialization each on their own,
@@ -56,7 +55,7 @@ class DatabaseImpl(val db: DB) extends Database {
 
 object Database {
    def open(): Database = {
-      ConnectionPool.singleton("jdbc:h2:file:./database","","")
+      ConnectionPool.singleton("jdbc:h2:file:./database", "", "")
       val db = DB(ConnectionPool.borrow())
       db.autoClose(false)
       new DatabaseImpl(db)
