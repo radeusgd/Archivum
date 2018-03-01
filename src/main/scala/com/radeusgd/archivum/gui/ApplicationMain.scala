@@ -11,10 +11,13 @@ object ApplicationMain extends JFXApp {
       stage.scene = scene
    }
 
+   private val defaultWidth = 600
+   private val defaultHeight = 450
+
    stage = new JFXApp.PrimaryStage {
       title = "Archivum"
-      width = 600
-      height = 450
+      width = defaultWidth
+      height = defaultHeight
       scene = EditRecords.instance //MainMenu.instance // for debugging it's faster to skip menu
    }
 }

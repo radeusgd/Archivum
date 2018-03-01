@@ -19,10 +19,10 @@ class ChoiceControl(val label: String, path: List[String], protected val editabl
       value = allowedValues.head
    }
 
-   spacing = 5
+   spacing = LayoutDefaults.defaultSpacing
    children = Seq(
       new Label(label) {
-         minWidth = 100
+         minWidth = LayoutDefaults.defaultFieldNameWidth
          alignment = Pos.CenterRight
       },
       choiceField

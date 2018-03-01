@@ -10,10 +10,10 @@ import scalafx.scene.layout.HBox
 
 class SimpleText(val label: String, path: List[String], protected val editableView: EditableView) extends HBox with BoundControl {
    protected val textField: TextInputControl = new TextField()
-   spacing = 5
+   spacing = LayoutDefaults.defaultSpacing
    children = Seq(
       new Label(label) {
-         minWidth = 100
+         minWidth = LayoutDefaults.defaultFieldNameWidth
          alignment = Pos.CenterRight
       },
       textField

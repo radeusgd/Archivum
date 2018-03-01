@@ -2,10 +2,10 @@ package com.radeusgd.archivum.gui
 
 import com.radeusgd.archivum.datamodel._
 import com.radeusgd.archivum.gui.controls.{BoundControl, ChoiceControlFactory, SimpleTextFactory}
+import com.radeusgd.archivum.gui.layout._
 import com.radeusgd.archivum.persistence.Repository
 
 import scala.xml.XML
-import scalafx.scene
 import scalafx.scene.control.Label
 import scalafx.scene.layout.{Pane, VBox}
 import scalafx.scene.paint.Paint
@@ -79,22 +79,11 @@ class EditableView(val repo: Repository, xmlroot: xml.Node) extends Pane {
    }
 }
 
-case class ParsedView(node: scene.Node, boundControls: Seq[BoundControl])
-
-trait ViewFactory {
-   def fromXML(xmlnode: xml.Node, ev: EditableView): Either[ViewParseError, ParsedView]
-
-   val nodeType: String
-}
-
-// TODO maybe make it checked?
-case class ViewParseError(message: String, cause: Throwable = null) extends RuntimeException(message)
-
 object EditableView {
    def makeFromDefinition(repo: Repository, text: String): EditableView =
       new EditableView(repo, XML.loadString(text))
 
-   private val parsersList: Seq[ViewFactory] = Seq(
+   private val parsersList: Seq[LayoutFactory] = Seq(
       HBoxFactory,
       VBoxFactory,
       LabelFactory,
@@ -102,12 +91,12 @@ object EditableView {
       ChoiceControlFactory
    )
 
-   private val parsers: Map[String, ViewFactory] =
-      Map(parsersList map { p: ViewFactory => (p.nodeType, p) }: _*)
+   private val parsers: Map[String, LayoutFactory] =
+      Map(parsersList map { p: LayoutFactory => (p.nodeType, p) }: _*)
 
-   def parseViewTree(xmlnode: xml.Node, ev: EditableView): Either[ViewParseError, ParsedView] = {
+   def parseViewTree(xmlnode: xml.Node, ev: EditableView): Either[LayoutParseError, ParsedLayout] = {
       parsers.get(xmlnode.label.toLowerCase).
-         toRight(ViewParseError("Unsupported node type '" + xmlnode.label + "'")).
+         toRight(LayoutParseError("Unsupported node type '" + xmlnode.label + "'")).
          flatMap(_.fromXML(xmlnode, ev))
    }
 }

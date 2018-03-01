@@ -102,7 +102,7 @@ case class DMYearDate(value: Either[Int, DMValue.Date]) extends DMValue with DMA
    override def apply(s: String): DMValue =
       s match {
          case QueryLanguage.YDYear => DMInteger(year)
-         case QueryLanguage.YDFullDate => value.fold(_ => DMNull, DMDate(_))
+         case QueryLanguage.YDFullDate => value.fold(_ => DMNull, DMDate)
       }
 
    override def toString: String = value.fold(_.toString, _.toString)

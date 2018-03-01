@@ -1,9 +1,9 @@
 package com.radeusgd.archivum.persistence
 
 import com.radeusgd.archivum.datamodel.Model
-import com.radeusgd.archivum.persistence.strategies.SetupImpl
-import scalikejdbc._
 import com.radeusgd.archivum.persistence.DBUtils._
+import com.radeusgd.archivum.persistence.impl.h2scalikejdbc.{RepositoryImpl, SetupImpl}
+import scalikejdbc._
 
 trait Database {
    def openRepository(modelName: String): Option[Repository]

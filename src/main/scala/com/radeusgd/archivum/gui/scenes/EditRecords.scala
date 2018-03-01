@@ -2,7 +2,7 @@ package com.radeusgd.archivum.gui.scenes
 
 import com.radeusgd.archivum.datamodel.Model
 import com.radeusgd.archivum.gui.{ApplicationMain, EditableView}
-import com.radeusgd.archivum.persistence.Database
+import com.radeusgd.archivum.persistence.{Database, Repository}
 
 import scalafx.Includes._
 import scalafx.geometry.Insets
@@ -10,7 +10,7 @@ import scalafx.scene.Scene
 import scalafx.scene.control.{Button, Label}
 import scalafx.scene.layout.VBox
 
-class EditRecords extends Scene {
+class EditRecords(val repository: Repository) extends Scene {
 
    // TODO these are for testing, later this will be encapsulated into separate functions etc.
    val modelText: String =
@@ -124,5 +124,5 @@ class EditRecords extends Scene {
 }
 
 object EditRecords {
-   lazy val instance = new EditRecords()
+   lazy val instance = new EditRecords(null) // TODO next commit will sort this out
 }
