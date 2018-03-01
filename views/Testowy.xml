@@ -1,0 +1,18 @@
+<vbox>
+    <label>Osoba</label>
+    <hbox>
+        <vbox>
+            <Label>Ojciec</Label>
+            <TextField path="Ojciec.Imię"/>
+            <TextField path="Ojciec.Nazwisko"/>
+            <TextField path="Ojciec.Zawód"/>
+        </vbox>
+        <vbox>
+            <TextField path="Imię"/>
+            <TextField path="Nazwisko"/>
+            <TextField path="Miasto"/>
+            <choicefield path="Płeć"/>
+        </vbox>
+
+    </hbox>
+</vbox>

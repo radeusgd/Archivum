@@ -1,0 +1,22 @@
+{
+  "name": "Testowy",
+  "types": {
+    "płeć": ["M","K"],
+    "rodzic": {
+      "Imię": "string",
+      "Nazwisko": "string",
+      "Zawód": "string"
+    }
+  },
+  "fields": {
+    "Miasto": "string",
+    "Numer domu": "integer",
+    "Imię": "string",
+    "Nazwisko": "string",
+    "Data urodzenia": "string",
+    "Płeć": "płeć",
+    "Ojciec": "rodzic",
+    "Matka": "rodzic",
+    "Źródło": "bigtext"
+  }
+}
