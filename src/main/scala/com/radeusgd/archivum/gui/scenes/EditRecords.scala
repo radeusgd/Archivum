@@ -89,7 +89,7 @@ class EditRecords extends Scene {
                     |</vbox>
                   """.stripMargin)
                box.children = editableView
-               val rids = repo.fetchAllIds()
+               val rids = repo.ridSet.fetchAllIds()
                // TODO will need to handle going over all items in DB, arrows, i / n label etc.
                val current =
                   if (rids.isEmpty) repo.createRecord(model.roottype.makeEmpty)
