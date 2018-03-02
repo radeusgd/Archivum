@@ -16,7 +16,7 @@ case class ArrayField(elementsType: FieldType) extends FieldType {
                }
 
             childErrors.toList
-         case _ => TypeError(Nil, v.getClass.getSimpleName, "DMArray") :: Nil
+         case _ => TypeError(Nil, v.toString, "DMArray") :: Nil
       }
 
    override def makeEmpty: DMArray = DMArray(Vector.empty)

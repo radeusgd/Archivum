@@ -8,7 +8,7 @@ object DateField extends FieldType {
       v match {
          case DMNull => Nil
          case DMDate(_) => Nil
-         case _ => TypeError(Nil, v.getClass.getSimpleName, "DMDate") :: Nil
+         case _ => TypeError(Nil, v.toString, "DMDate") :: Nil
       }
 
    override def makeEmpty: DMValue = DMNull

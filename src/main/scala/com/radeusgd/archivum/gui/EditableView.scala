@@ -1,11 +1,16 @@
 package com.radeusgd.archivum.gui
 
+import javafx.beans.value.ObservableBooleanValue
+import javafx.collections.{FXCollections, ObservableList}
+
 import com.radeusgd.archivum.datamodel._
-import com.radeusgd.archivum.gui.controls.{BoundControl, ChoiceControlFactory, SimpleTextFactory}
+import com.radeusgd.archivum.gui.controls.{BoundControl, ChoiceControlFactory, SimpleIntegerFactory, SimpleTextFactory}
 import com.radeusgd.archivum.gui.layout._
 import com.radeusgd.archivum.persistence.Repository
 
 import scala.xml.XML
+import scalafx.beans.Observable
+import scalafx.collections.ObservableBuffer
 import scalafx.scene.control.Label
 import scalafx.scene.layout.{Pane, VBox}
 import scalafx.scene.paint.Paint
@@ -21,36 +26,19 @@ class EditableView(val repo: Repository, xmlroot: xml.Node) extends Pane {
 
    private val (root, boundControls) = initChildren(xmlroot)
 
-   private val errorsLabel = new Label()
+   val errors: ObservableBuffer[ValidationError] = new ObservableBuffer[ValidationError]
 
-   children = new VBox(
-      root,
-      errorsLabel
-   )
+   children = root
 
    var currentRid: Long = -1
    var modelInstance: DMStruct = model.roottype.makeEmpty
 
-   def updateErrorState(errors: Seq[ValidationError]): Unit = {
-      if (errors.isEmpty) {
-         errorsLabel.text = "OK"
-         errorsLabel.textFill.set(Paint.valueOf("green"))
-      } else {
-         val texts = errors map {
-            case ConstraintError(path, message) => path.mkString(".") + ": " + message
-            case t: TypeError => t.path.mkString(".") + ": " + t.toString
-         }
-         errorsLabel.text = texts.mkString("\n")
-         errorsLabel.textFill.set(Paint.valueOf("red"))
-      }
-   }
-
    def update(upd: (DMStruct) => DMStruct): Unit = {
       //println("Updating")
       val newInstance = upd(modelInstance)
-      val errors = model.roottype.validate(newInstance)
-      updateErrorState(errors)
-      val severe = errors.exists(_.isInstanceOf[TypeError])
+      val newErrors = model.roottype.validate(newInstance)
+      errors.setAll(newErrors:_*)
+      val severe = newErrors.exists(_.isInstanceOf[TypeError])
       if (!severe) {
          /*
            warning, we don't call setModelInstance -> refreshBinding,
@@ -59,11 +47,11 @@ class EditableView(val repo: Repository, xmlroot: xml.Node) extends Pane {
          */
          modelInstance = newInstance
 
-         if (errors.isEmpty) {
+         if (newErrors.isEmpty) {
             // TODO debounce (if there are multiple changes during 3s or so make only one submission)
             repo.updateRecord(currentRid, modelInstance)
          } else {
-            println(errors)
+            println(newErrors)
             //TODO display errors
          }
       }
@@ -88,6 +76,7 @@ object EditableView {
       VBoxFactory,
       LabelFactory,
       SimpleTextFactory,
+      SimpleIntegerFactory,
       ChoiceControlFactory
    )
 

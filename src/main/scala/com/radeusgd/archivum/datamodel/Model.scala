@@ -6,7 +6,9 @@ import spray.json.JsonParser
 
 import scala.util.Try
 
-case class Model(name: String, roottype: StructField)
+case class Model(name: String, roottype: StructField) {
+   def makeEmpty: DMStruct = roottype.makeEmpty
+}
 
 object Model {
    def fromDefinition(definition: String): Try[Model] = {

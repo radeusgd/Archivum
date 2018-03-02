@@ -9,7 +9,7 @@ object IntegerField extends FieldType {
       v match {
          case DMNull => Nil
          case DMInteger(_) => Nil
-         case _ => TypeError(Nil, v.getClass.getSimpleName, "DMInteger") :: Nil
+         case _ => TypeError(Nil, v.toString, "DMInteger") :: Nil
       }
 
    override def makeEmpty: DMValue = DMNull

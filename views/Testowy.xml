@@ -12,6 +12,7 @@
             <TextField path="Nazwisko"/>
             <TextField path="Miasto"/>
             <choicefield path="Płeć"/>
+            <IntegerField path="Numer domu"/>
         </vbox>
 
     </hbox>

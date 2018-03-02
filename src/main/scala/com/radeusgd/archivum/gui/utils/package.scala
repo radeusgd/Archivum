@@ -4,7 +4,7 @@ import scalafx.Includes.handle
 import scalafx.application.Platform
 import scalafx.scene.Scene
 import scalafx.scene.control.Alert.AlertType
-import scalafx.scene.control.{Alert, Button}
+import scalafx.scene.control.{Alert, Button, ButtonType}
 
 package object utils {
 
@@ -25,6 +25,13 @@ package object utils {
          }
       }
 
+   def mkButton(name: String, action: () => Unit): Button =
+      new Button(name) {
+         onAction = handle {
+            action()
+         }
+      }
+
    def showError(header: String, content: String = "", alertType: AlertType = AlertType.Warning): Unit = {
       new Alert(alertType) {
          title = "Error"
@@ -36,4 +43,15 @@ package object utils {
    def notImplemented(): Unit =
       showError("Feature unavailable", "This feature hasn't been implemented yet.")
 
+   def ask(question: String, comment: String = ""): Boolean = {
+      val alert = new Alert(AlertType.Confirmation) {
+         headerText = question
+         contentText = comment
+      }
+      val result = alert.showAndWait()
+      result match {
+         case Some(ButtonType.OK) => true
+         case _                   => false
+      }
+   }
 }

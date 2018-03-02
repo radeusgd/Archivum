@@ -8,7 +8,7 @@ object StringField extends FieldType {
    def validate(v: DMValue): List[ValidationError] =
       v match {
          case DMString(_) => Nil
-         case _ => TypeError(Nil, v.getClass.getSimpleName, "DMString") :: Nil
+         case _ => TypeError(Nil, v.toString, "DMString") :: Nil
       }
 
    override def makeEmpty: DMValue = DMString("")

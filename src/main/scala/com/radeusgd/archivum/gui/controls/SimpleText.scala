@@ -22,8 +22,16 @@ class SimpleText(val label: String, path: List[String], protected val editableVi
    protected val fieldGetter: DMAggregate => DMValue = DMUtils.makeGetter(path)
    protected val fieldSetter: (DMStruct, DMValue) => DMStruct = DMUtils.makeSetter(path)
 
+   protected def fromValue(v: DMValue): String = v match {
+      case DMString(str) => str
+      case DMNull => ""
+      case _ => throw new RuntimeException("Incompatible type")
+   }
+
+   protected def toValue(s: String): DMValue = DMString(s)
+
    textField.text.onChange((_, _, newValue) => {
-      editableView.update(fieldSetter(_, DMString(newValue)))
+      editableView.update(fieldSetter(_, toValue(newValue)))
    })
 
    override def refreshBinding(newValue: DMStruct): Unit = {
@@ -32,7 +40,7 @@ class SimpleText(val label: String, path: List[String], protected val editableVi
        (if the element had something else than String or Null,
        but typechecking should make sure this won't happen
         */
-      textField.text = fieldGetter(newValue).asString.getOrElse("")
+      textField.text = fromValue(fieldGetter(newValue))
    }
 }
 

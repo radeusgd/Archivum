@@ -25,4 +25,12 @@ trait RidSetHelper {
    (Warning: result may be huge.)
     */
    def fetchAllIds(): Seq[Rid]
+
+   def getFirstRid(): Option[Rid]
+
+   def getLastRid(): Option[Rid]
+
+   def getNextRid(rid: Rid): Option[Rid]
+
+   def getPreviousRid(rid: Rid): Option[Rid]
 }

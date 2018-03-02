@@ -16,6 +16,8 @@ object ApplicationMain extends JFXApp {
    }
 
    def reportException(throwable: Throwable): Unit = {
+      throwable.printStackTrace()
+
       val stackTrace = {
          val sw = new StringWriter
          throwable.printStackTrace(new PrintWriter(sw))

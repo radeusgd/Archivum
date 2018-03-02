@@ -22,7 +22,7 @@ case class StructField(fieldTypes: Map[String, FieldType]) extends FieldType {
                }
 
             unknownErrors ++ childErrors
-         case _ => TypeError(Nil, v.getClass.getSimpleName, "DMStruct") :: Nil
+         case _ => TypeError(Nil, v.toString, "DMStruct") :: Nil
       }
 
    def getType(path: List[String]): FieldType = // TODO option/either
