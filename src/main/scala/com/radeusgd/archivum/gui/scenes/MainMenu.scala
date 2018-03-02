@@ -1,6 +1,6 @@
 package com.radeusgd.archivum.gui.scenes
 
-import com.radeusgd.archivum.gui.ApplicationMain
+import com.radeusgd.archivum.gui.{ApplicationMain, utils}
 import com.radeusgd.archivum.persistence.Database
 import com.radeusgd.archivum.utils.IO
 
@@ -57,11 +57,7 @@ class MainMenu extends Scene {
                onAction = handle {
                   db.openRepository(repositoryChoice.value.value) match {
                      case Some(repo) => ApplicationMain.switchScene(new RepositoryMenu(repo))
-                     case None => new Alert(AlertType.Error) {
-                        title = "Error"
-                        headerText = "Cannot open repository."
-                        contentText = ""
-                     }.showAndWait()
+                     case None => utils.showError("Cannot open repository")
                   }
                }
             }

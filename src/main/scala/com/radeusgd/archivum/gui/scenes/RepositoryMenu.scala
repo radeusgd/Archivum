@@ -2,12 +2,12 @@ package com.radeusgd.archivum.gui.scenes
 
 import com.radeusgd.archivum.gui.ApplicationMain
 import com.radeusgd.archivum.persistence.Repository
+import com.radeusgd.archivum.gui.utils
 
 import scalafx.Includes._
 import scalafx.geometry.Insets
 import scalafx.scene.Scene
-import scalafx.scene.control.Alert.AlertType
-import scalafx.scene.control.{Alert, Button, Label}
+import scalafx.scene.control.{Button, Label}
 import scalafx.scene.layout.VBox
 
 class RepositoryMenu(val repository: Repository) extends Scene {
@@ -17,36 +17,20 @@ class RepositoryMenu(val repository: Repository) extends Scene {
       new Label(repository.model.name) {
          font = scalafx.scene.text.Font(font.name, 25)
       },
-      new Button("Edit records") {
-         onAction = handle {
-            ApplicationMain.switchScene(editRecords)
-         }
-      },
+      utils.makeGoToButtonRefreshable("Edit records", editRecords),
       new Button("Search") {
          onAction = handle {
-            new Alert(AlertType.Warning) {
-               title = "Error"
-               headerText = "Feature unavailable."
-               contentText = "This hasn't been implemented yet."
-            }.showAndWait()
+            utils.notImplemented()
          }
       },
       new Button("Queries") {
          onAction = handle {
-            new Alert(AlertType.Warning) {
-               title = "Error"
-               headerText = "Feature unavailable."
-               contentText = "This hasn't been implemented yet."
-            }.showAndWait()
+            utils.notImplemented()
          }
       },
       new Button("Export") {
          onAction = handle {
-            new Alert(AlertType.Warning) {
-               title = "Error"
-               headerText = "Feature unavailable."
-               contentText = "This hasn't been implemented yet."
-            }.showAndWait()
+            utils.notImplemented()
          }
       }
    ) {
