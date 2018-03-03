@@ -5,11 +5,13 @@ import com.radeusgd.archivum.gui.EditableView
 import com.radeusgd.archivum.languages.ViewLanguage
 
 import scalafx.geometry.Pos
-import scalafx.scene.control.{Label, TextField, TextInputControl}
+import scalafx.scene.control.{Label, TextField, TextInputControl, Tooltip}
 import scalafx.scene.layout.HBox
 
 class SimpleText(val label: String, path: List[String], protected val editableView: EditableView) extends HBox with BoundControl {
-   protected val textField: TextInputControl = new TextField()
+   protected val textField: TextInputControl = new TextField() {
+      prefWidth = 200 // TODO setting width
+   }
    spacing = LayoutDefaults.defaultSpacing
    children = Seq(
       new Label(label) {
@@ -41,6 +43,25 @@ class SimpleText(val label: String, path: List[String], protected val editableVi
        but typechecking should make sure this won't happen
         */
       textField.text = fromValue(fieldGetter(newValue))
+   }
+
+   private val errorTooltip = Tooltip("")
+
+   // TODO this could be some mix-in or sth
+   override def refreshErrors(errors: Seq[ValidationError]): Unit = {
+      val myErrors = errors.filter(_.getPath == path)
+      if (myErrors.isEmpty) {
+         textField.setStyle("")
+         Tooltip.uninstall(textField, errorTooltip)
+         errorTooltip.hide()
+      } else {
+         textField.setStyle("-fx-border-color: red; -fx-border-width: 1.5px;")
+         Tooltip.install(textField, errorTooltip)
+         val texts = myErrors.map(_.getMessage)
+         errorTooltip.text = texts.mkString("\n")
+         val pos = textField.localToScreen(textField.prefWidth.value, 0)
+         errorTooltip.show(textField, pos.getX, pos.getY)
+      }
    }
 }
 

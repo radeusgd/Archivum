@@ -30,6 +30,8 @@ class IncompatibleTypeComparison extends IllegalArgumentException
 
 object DMNull extends DMValue
 
+case class DMError(message: String) extends DMValue
+
 case class DMInteger(value: Int) extends DMValue with DMOrdered {
    override def asInt: Option[Int] = Some(value)
 

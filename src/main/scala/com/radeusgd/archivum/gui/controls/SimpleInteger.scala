@@ -1,6 +1,6 @@
 package com.radeusgd.archivum.gui.controls
 
-import com.radeusgd.archivum.datamodel.{DMInteger, DMNull, DMString, DMValue}
+import com.radeusgd.archivum.datamodel._
 import com.radeusgd.archivum.gui.EditableView
 import com.radeusgd.archivum.languages.ViewLanguage
 
@@ -13,7 +13,7 @@ class SimpleInteger(label: String, path: List[String], editableView: EditableVie
    }
    override def toValue(v: String): DMValue =
       if (v == "") DMNull
-      else util.Try(v.toInt).fold(_ => DMString("Wrong number format"), DMInteger)
+      else util.Try(v.toInt).fold(_ => DMError("Wrong number format"), DMInteger)
 }
 
 object SimpleIntegerFactory extends SimpleControlFactory(new SimpleInteger(_, _, _)) {

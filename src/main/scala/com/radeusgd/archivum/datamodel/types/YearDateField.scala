@@ -6,6 +6,7 @@ import com.radeusgd.archivum.persistence.strategies.{Fetch, Insert, Setup}
 object YearDateField extends FieldType {
    def validate(v: DMValue): List[ValidationError] =
       v match {
+         case DMError(msg) => ConstraintError(Nil, msg) :: Nil
          case DMNull => Nil
          case DMYearDate(_) => Nil
          case _ => TypeError(Nil, v.toString, "DMYearDate") :: Nil

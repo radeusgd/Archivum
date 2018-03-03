@@ -47,6 +47,8 @@ class EditableView(val repo: Repository, xmlroot: xml.Node) extends Pane {
          */
          modelInstance = newInstance
 
+         boundControls.foreach(_.refreshErrors(newErrors))
+
          if (newErrors.isEmpty) {
             // TODO debounce (if there are multiple changes during 3s or so make only one submission)
             repo.updateRecord(currentRid, modelInstance)

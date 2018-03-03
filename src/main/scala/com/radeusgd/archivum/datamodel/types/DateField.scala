@@ -6,6 +6,7 @@ import com.radeusgd.archivum.persistence.strategies.{Fetch, Insert, Setup}
 object DateField extends FieldType {
    def validate(v: DMValue): List[ValidationError] =
       v match {
+         case DMError(msg) => ConstraintError(Nil, msg) :: Nil
          case DMNull => Nil
          case DMDate(_) => Nil
          case _ => TypeError(Nil, v.toString, "DMDate") :: Nil
