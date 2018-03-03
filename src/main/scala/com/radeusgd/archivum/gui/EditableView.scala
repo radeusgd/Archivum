@@ -27,6 +27,7 @@ class EditableView(val repo: Repository, xmlroot: xml.Node) extends Pane {
    private val (root, boundControls) = initChildren(xmlroot)
 
    val errors: ObservableBuffer[ValidationError] = new ObservableBuffer[ValidationError]
+   val unhandledErrors: ObservableBuffer[ValidationError] = new ObservableBuffer[ValidationError]
 
    children = root
 
@@ -47,7 +48,8 @@ class EditableView(val repo: Repository, xmlroot: xml.Node) extends Pane {
          */
          modelInstance = newInstance
 
-         boundControls.foreach(_.refreshErrors(newErrors))
+         val unhandled = boundControls.foldLeft(newErrors)((e,c) => c.refreshErrors(e))
+         unhandledErrors.setAll(unhandled : _*)
 
          if (newErrors.isEmpty) {
             // TODO debounce (if there are multiple changes during 3s or so make only one submission)

@@ -48,8 +48,8 @@ class SimpleText(val label: String, path: List[String], protected val editableVi
    private val errorTooltip = Tooltip("")
 
    // TODO this could be some mix-in or sth
-   override def refreshErrors(errors: Seq[ValidationError]): Unit = {
-      val myErrors = errors.filter(_.getPath == path)
+   override def refreshErrors(errors: List[ValidationError]): List[ValidationError] = {
+      val (myErrors, otherErrors) = errors.partition(_.getPath == path)
       if (myErrors.isEmpty) {
          textField.setStyle("")
          Tooltip.uninstall(textField, errorTooltip)
@@ -62,6 +62,8 @@ class SimpleText(val label: String, path: List[String], protected val editableVi
          val pos = textField.localToScreen(textField.prefWidth.value, 0)
          errorTooltip.show(textField, pos.getX, pos.getY)
       }
+
+      otherErrors
    }
 }
 

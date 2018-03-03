@@ -91,8 +91,8 @@ class EditRecords(val repository: Repository, val parentScene: Scene) extends Sc
          errorsLabel.text = "OK"
          errorsLabel.textFill.set(Paint.valueOf("green"))
       } else {
-         val texts = errors.map(e => e.getPath.mkString(".") + ": " + e.getMessage)
-         errorsLabel.text = texts.mkString("\n")
+         val texts = editableView.unhandledErrors.map(e => e.getPath.mkString(".") + ": " + e.getMessage)
+         errorsLabel.text = if (texts.isEmpty) "There are errors" else texts.mkString("\n")
          errorsLabel.textFill.set(Paint.valueOf("red"))
       }
    }
