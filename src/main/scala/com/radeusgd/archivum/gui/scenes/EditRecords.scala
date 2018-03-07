@@ -17,7 +17,7 @@ class EditRecords(val repository: Repository, val parentScene: Scene) extends Sc
 
    private def model: Model = repository.model
 
-   private val layoutXml = IO.readFile("views/" + model.name + ".xml")
+   private val layoutXml = IO.readFileString("views/" + model.name + ".xml")
 
    private val editableView: EditableView = EditableView.makeFromDefinition(repository, layoutXml)
 

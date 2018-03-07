@@ -4,7 +4,7 @@ import com.radeusgd.archivum.datamodel._
 import com.radeusgd.archivum.persistence.DBTypes
 import com.radeusgd.archivum.persistence.strategies.{Fetch, Insert, Setup}
 import com.radeusgd.archivum.utils.AsInt
-import spray.json.{DeserializationException, JsNumber, JsString, JsValue}
+import spray.json.{DeserializationException, JsNull, JsNumber, JsString, JsValue}
 
 object IntegerField extends FieldType {
    def validate(v: DMValue): List[ValidationError] =
@@ -35,10 +35,15 @@ object IntegerField extends FieldType {
    }
 
 
-   override def toHumanJson(v: DMValue): JsValue = v.asInt.map(JsNumber(_)).get
+   override def toHumanJson(v: DMValue): JsValue = v match {
+      case DMInteger(x) => JsNumber(x)
+      case DMNull => JsNull
+      case _ => throw new RuntimeException("Invalid integer DM")
+   }
 
    override def fromHumanJson(j: JsValue): Either[Throwable, DMValue] = j match {
       case JsNumber(x) => Right(DMInteger(x.toInt))
+      case JsNull => Right(DMNull)
       case JsString(AsInt(x)) => Right(DMInteger(x)) // allow for conversion from string
       case _ => Left(DeserializationException("Expected an integer"))
    }

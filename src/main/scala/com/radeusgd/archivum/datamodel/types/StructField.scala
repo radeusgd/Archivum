@@ -63,7 +63,7 @@ case class StructField(fieldTypes: Map[String, FieldType]) extends FieldType {
          .toRight(DeserializationException("Field " + name + " unknown"))
          .flatMap(_.fromHumanJson(value))
 
-   override def fromHumanJson(j: JsValue): Either[Throwable, DMValue] = j match {
+   override def fromHumanJson(j: JsValue): Either[Throwable, DMStruct] = j match {
       case JsObject(fields) =>
          val values: Map[String, Either[Throwable, DMValue]] = fields.transform(fieldFromHumanJson)
          // this is slightly hacky:

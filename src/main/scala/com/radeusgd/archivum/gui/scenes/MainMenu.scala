@@ -27,11 +27,11 @@ class MainMenu extends Scene {
 
    def importEmptyModel(fname: String): Unit = {
       try {
-         val modelDefinition = IO.readFile(fname)
+         val modelDefinition = IO.readFileString(fname)
          db.createRepository(modelDefinition)
          refreshRepos()
       } catch {
-         case NonFatal(e) => ApplicationMain.reportException(e)
+         case NonFatal(e) => utils.reportException("Error importing model", e)
       }
    }
 
