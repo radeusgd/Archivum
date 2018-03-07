@@ -2,6 +2,7 @@ package com.radeusgd.archivum.datamodel.types
 
 import com.radeusgd.archivum.datamodel._
 import com.radeusgd.archivum.persistence.strategies.{Fetch, Insert, Setup}
+import spray.json.JsValue
 
 object YearDateField extends FieldType {
    def validate(v: DMValue): List[ValidationError] =
@@ -19,4 +20,8 @@ object YearDateField extends FieldType {
    override def tableFetch(path: Seq[String], table: Fetch): DMValue = ???
 
    override def tableInsert(path: Seq[String], table: Insert, value: DMValue): Unit = ???
+
+   override def toHumanJson(v: DMValue): JsValue = ???
+
+   override def fromHumanJson(j: JsValue): Either[Throwable, DMValue] = ???
 }

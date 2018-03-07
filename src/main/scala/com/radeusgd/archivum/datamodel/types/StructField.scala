@@ -2,6 +2,7 @@ package com.radeusgd.archivum.datamodel.types
 
 import com.radeusgd.archivum.datamodel._
 import com.radeusgd.archivum.persistence.strategies.{Fetch, Insert, Setup}
+import spray.json.{DeserializationException, JsObject, JsValue}
 
 // TODO computable fields
 case class StructField(fieldTypes: Map[String, FieldType]) extends FieldType {
@@ -50,5 +51,24 @@ case class StructField(fieldTypes: Map[String, FieldType]) extends FieldType {
       for ((name, ft) <- fieldTypes) {
          ft.tableInsert(path ++ List(name), table, obj(name))
       }
+   }
+
+   override def toHumanJson(v: DMValue): JsValue = {
+      val obj = v.asInstanceOf[DMStruct]
+      JsObject(obj.values.map { case (name, value) => (name, fieldTypes(name).toHumanJson(value)) } )
+   }
+
+   private def fieldFromHumanJson(name: String, value: JsValue): Either[Throwable, DMValue] =
+      fieldTypes.get(name)
+         .toRight(DeserializationException("Field " + name + " unknown"))
+         .flatMap(_.fromHumanJson(value))
+
+   override def fromHumanJson(j: JsValue): Either[Throwable, DMValue] = j match {
+      case JsObject(fields) =>
+         val values: Map[String, Either[Throwable, DMValue]] = fields.transform(fieldFromHumanJson)
+         // this is slightly hacky:
+         util.Try(values.mapValues(_.fold(throw _, identity))).toEither
+            .map(DMStruct(_))
+      case _ => Left(DeserializationException("Expected an object"))
    }
 }

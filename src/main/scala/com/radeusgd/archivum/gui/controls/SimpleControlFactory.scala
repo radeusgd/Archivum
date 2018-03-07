@@ -6,6 +6,7 @@ import com.radeusgd.archivum.gui.layout.{LayoutFactory, LayoutParseError, Parsed
 import com.radeusgd.archivum.languages.ViewLanguage
 
 import scalafx.scene
+import cats.implicits._
 
 abstract class SimpleControlFactory(make: (String, List[String], EditableView) => scene.Node with BoundControl) extends LayoutFactory {
    override def fromXML(xmlnode: xml.Node, ev: EditableView): Either[LayoutParseError, ParsedLayout] = {
@@ -19,13 +20,8 @@ abstract class SimpleControlFactory(make: (String, List[String], EditableView) =
                if path.nonEmpty
             } yield () => make(label.getOrElse(path.last), path, ev)
          val mkNodeEither = makeNode.toRight(LayoutParseError("Missing path attribute")) // convert Option to Either
-         val constructed = mkNodeEither.flatMap(maker => leftMap(util.Try(maker()).toEither, (t: Throwable) => LayoutParseError("Error in constructor", Some(t)))) // evaluate Maker and catch and pack any exception to Either
+         val constructed = mkNodeEither.flatMap(maker => util.Try(maker()).toEither.leftMap((t: Throwable) => LayoutParseError("Error in constructor", Some(t)))) // evaluate Maker and catch and pack any exception to Either
          constructed.map(n => ParsedLayout(n, Seq(n))) // convert Node to proper result
       }
-   }
-
-   //TODO use Cats or scalaz
-   private def leftMap[A, B, C](e: Either[A, B], f: A => C): Either[C, B] = {
-      e.swap.map(f).swap
    }
 }

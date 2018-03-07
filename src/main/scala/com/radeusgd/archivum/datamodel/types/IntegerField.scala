@@ -3,6 +3,8 @@ package com.radeusgd.archivum.datamodel.types
 import com.radeusgd.archivum.datamodel._
 import com.radeusgd.archivum.persistence.DBTypes
 import com.radeusgd.archivum.persistence.strategies.{Fetch, Insert, Setup}
+import com.radeusgd.archivum.utils.AsInt
+import spray.json.{DeserializationException, JsNumber, JsString, JsValue}
 
 object IntegerField extends FieldType {
    def validate(v: DMValue): List[ValidationError] =
@@ -30,5 +32,14 @@ object IntegerField extends FieldType {
          case DMNull => table.setValue(path, null)
          case _ => assert(false)
       }
+   }
+
+
+   override def toHumanJson(v: DMValue): JsValue = v.asInt.map(JsNumber(_)).get
+
+   override def fromHumanJson(j: JsValue): Either[Throwable, DMValue] = j match {
+      case JsNumber(x) => Right(DMInteger(x.toInt))
+      case JsString(AsInt(x)) => Right(DMInteger(x)) // allow for conversion from string
+      case _ => Left(DeserializationException("Expected an integer"))
    }
 }

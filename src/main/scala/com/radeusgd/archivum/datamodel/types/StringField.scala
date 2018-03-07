@@ -3,6 +3,7 @@ package com.radeusgd.archivum.datamodel.types
 import com.radeusgd.archivum.datamodel._
 import com.radeusgd.archivum.persistence.DBTypes
 import com.radeusgd.archivum.persistence.strategies.{Fetch, Insert, Setup}
+import spray.json.{DeserializationException, JsNumber, JsString, JsValue}
 
 object StringField extends FieldType {
    def validate(v: DMValue): List[ValidationError] =
@@ -28,5 +29,13 @@ object StringField extends FieldType {
          case DMNull => table.setValue(path, null)
          case _ => assert(false)
       }
+   }
+
+   override def toHumanJson(v: DMValue): JsValue = v.asString.map(JsString(_)).get
+
+   override def fromHumanJson(j: JsValue): Either[Throwable, DMValue] = j match {
+      case JsString(s) => Right(DMString(s))
+      case JsNumber(x) => Right(DMString(x.toString)) // allow for conversions
+      case _ => Left(DeserializationException("Expected a string"))
    }
 }
