@@ -5,7 +5,7 @@ import java.time.LocalDate
 import com.radeusgd.archivum.languages.QueryLanguage
 import com.radeusgd.archivum.utils.AsInt
 
-sealed class DMValue {
+sealed abstract class DMValue {
    // TODO not sure if they'll be useful
    def asInt: Option[Int] = None
 
@@ -83,8 +83,9 @@ case class DMArray(values: Vector[DMValue]) extends DMValue with DMAggregate {
       }
 }
 
+// this computables format is deprecated
 case class DMStruct(values: Map[String, DMValue],
-                    computables: Map[String, (DMStruct) => DMValue] = Map.empty)
+                    @deprecated computables: Map[String, (DMStruct) => DMValue] = Map.empty)
    extends DMValue with DMAggregate {
    override def toString: String = values.toString() // TODO better toString, also include computables
 
