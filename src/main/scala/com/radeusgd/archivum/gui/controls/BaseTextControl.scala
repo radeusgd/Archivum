@@ -2,7 +2,7 @@ package com.radeusgd.archivum.gui.controls
 
 import com.radeusgd.archivum.datamodel._
 import com.radeusgd.archivum.gui.EditableView
-import com.radeusgd.archivum.gui.controls.dmview.StringDMBridge
+import com.radeusgd.archivum.gui.controls.dmbridges.StringDMBridge
 
 import scalafx.geometry.Pos
 import scalafx.scene.control.{Label, TextField, TextInputControl, Tooltip}

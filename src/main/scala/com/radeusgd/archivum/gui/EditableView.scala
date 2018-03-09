@@ -1,19 +1,13 @@
 package com.radeusgd.archivum.gui
 
-import javafx.beans.value.ObservableBooleanValue
-import javafx.collections.{FXCollections, ObservableList}
-
 import com.radeusgd.archivum.datamodel._
-import com.radeusgd.archivum.gui.controls.{BoundControl, ChoiceControlFactory, SimpleIntegerFactory, SimpleTextFactory}
+import com.radeusgd.archivum.gui.controls._
 import com.radeusgd.archivum.gui.layout._
 import com.radeusgd.archivum.persistence.Repository
 
 import scala.xml.XML
-import scalafx.beans.Observable
 import scalafx.collections.ObservableBuffer
-import scalafx.scene.control.Label
-import scalafx.scene.layout.{Pane, VBox}
-import scalafx.scene.paint.Paint
+import scalafx.scene.layout.Pane
 
 class EditableView(val repo: Repository, xmlroot: xml.Node) extends Pane {
 
@@ -38,7 +32,6 @@ class EditableView(val repo: Repository, xmlroot: xml.Node) extends Pane {
       //println("Updating")
       val newInstance = upd(modelInstance)
       val newErrors = model.roottype.validate(newInstance)
-      errors.setAll(newErrors:_*)
       val severe = newErrors.exists(_.isInstanceOf[TypeError])
       if (!severe) {
          /*
@@ -48,9 +41,6 @@ class EditableView(val repo: Repository, xmlroot: xml.Node) extends Pane {
          */
          modelInstance = newInstance
 
-         val unhandled = boundControls.foldLeft(newErrors)((e,c) => c.refreshErrors(e))
-         unhandledErrors.setAll(unhandled : _*)
-
          if (newErrors.isEmpty) {
             // TODO debounce (if there are multiple changes during 3s or so make only one submission)
             repo.updateRecord(currentRid, modelInstance)
@@ -59,6 +49,10 @@ class EditableView(val repo: Repository, xmlroot: xml.Node) extends Pane {
             //TODO display errors
          }
       }
+
+      val unhandled = boundControls.foldLeft(newErrors)((e, c) => c.refreshErrors(e))
+      unhandledErrors.setAll(unhandled: _*)
+      errors.setAll(newErrors: _*)
    }
 
    def setModelInstance(rid: Long): Unit = {
@@ -79,9 +73,10 @@ object EditableView {
       HBoxFactory,
       VBoxFactory,
       LabelFactory,
-      SimpleTextFactory,
-      SimpleIntegerFactory,
-      ChoiceControlFactory
+      TextControlFactory,
+      IntegerControlFactory,
+      ChoiceControlFactory,
+      DateControlFactory
    )
 
    private val parsers: Map[String, LayoutFactory] =

@@ -5,7 +5,8 @@
             <TextField path="Names"/>
             <TextField path="Surname"/>
             <TextField path="City"/>
-            <choicefield path="Gender"/>
+            <ChoiceField path="Gender"/>
+            <DateField path="Birthday" />
             <IntegerField path="Siblings"/>
             <TextField path="Source"/>
         </vbox>

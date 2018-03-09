@@ -12,5 +12,7 @@ object DateHelper {
       case _ => throw new IllegalArgumentException(s + " is not a correct date")
    }
 
+   def fromStringOpt(s: String): Option[DMValue.Date] = util.Try(fromString(s)).toOption
+
    def toString(d: DMValue.Date): String = d.toString
 }

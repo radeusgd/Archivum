@@ -64,10 +64,10 @@ object DateField extends FieldType {
    def dateToRepr(d: DMValue): String = d match {
       case DMNull => ""
       case DMDate(date) =>
-         val y = date.getYear.toString
+         val y = date.getYear
          val m = date.getMonth.getValue
-         val d = date.getDayOfMonth.toString
-         s"$y%04d$m%02d$d%02d"
+         val d = date.getDayOfMonth
+         f"$y%04d$m%02d$d%02d"
       case _ => throw new IllegalArgumentException
    }
 }

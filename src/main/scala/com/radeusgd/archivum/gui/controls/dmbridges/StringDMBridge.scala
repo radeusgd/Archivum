@@ -1,4 +1,4 @@
-package com.radeusgd.archivum.gui.controls.dmview
+package com.radeusgd.archivum.gui.controls.dmbridges
 
 import com.radeusgd.archivum.datamodel.DMValue
 
