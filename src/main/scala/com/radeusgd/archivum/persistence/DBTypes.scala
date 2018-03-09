@@ -8,7 +8,7 @@ object DBTypes {
 
    object String extends DBType
 
-   object Date extends DBType
+   case class ShortString(length: Int) extends DBType
 
    val Rid: DBType = Integer
 }

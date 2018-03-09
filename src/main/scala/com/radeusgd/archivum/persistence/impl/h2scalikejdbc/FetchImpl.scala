@@ -10,14 +10,9 @@ import scalikejdbc._
 class FetchImpl(private val rs: WrappedResultSet, private val tableName: String)
                (private implicit val session: DBSession) extends Fetch {
 
-   override def getField(path: Seq[String], typ: DBType): DMValue = {
-      val name = pathToDb(path)
-      typ match {
-         case DBTypes.Integer => rs.intOpt(name).map(DMInteger).getOrElse(DMNull)
-         case DBTypes.String => DMString(rs.string(name))
-         case DBTypes.Date => ???
-      }
-   }
+   override def getString(path: Seq[String]): String = rs.string(pathToDb(path))
+
+   override def getInt(path: Seq[String]): Option[Int] = rs.intOpt(pathToDb(path))
 
    override def getSubTable(path: Seq[String]): Seq[Fetch] = {
       val subname = subtableName(tableName, path)

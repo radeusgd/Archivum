@@ -24,7 +24,7 @@ class EnumField(val values: IndexedSeq[String]) extends FieldType {
    }
 
    override def tableFetch(path: Seq[String], table: Fetch): DMValue = {
-      val res = table.getField(path, DBTypes.String)
+      val res = DMString(table.getString(path))
       assert(validate(res).isEmpty)
       res
    }

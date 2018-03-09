@@ -18,9 +18,7 @@ object StringField extends FieldType {
       table.addField(path, DBTypes.String)
    }
 
-   override def tableFetch(path: Seq[String], table: Fetch): DMValue = {
-      table.getField(path, DBTypes.String)
-   }
+   override def tableFetch(path: Seq[String], table: Fetch): DMValue = DMString(table.getString(path))
 
    override def tableInsert(path: Seq[String], table: Insert, value: DMValue): Unit = {
       //noinspection ScalaStyle

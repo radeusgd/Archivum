@@ -4,7 +4,8 @@ import com.radeusgd.archivum.datamodel._
 import com.radeusgd.archivum.persistence.DBTypes.DBType
 
 trait Fetch {
-   def getField(path: Seq[String], typ: DBType): DMValue
+   def getString(path: Seq[String]): String
+   def getInt(path: Seq[String]): Option[Int] // ints are nullable
 
    def getSubTable(path: Seq[String]): Seq[Fetch]
 }

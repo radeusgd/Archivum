@@ -27,7 +27,7 @@ class SetupImpl(val tableName: String, val subOf: Option[String] = None) extends
       val typename: String = dbtype match {
          case DBTypes.Integer => "INT"
          case DBTypes.String => "VARCHAR(9000)"
-         case DBTypes.Date => "VARCHAR(10)" // TODO decide on dates, but probably string storage will be better to make sure we support historic dates correctly
+         case DBTypes.ShortString(len) => s"VARCHAR($len)"
       }
       rawSql(s"$name $typename")
    }

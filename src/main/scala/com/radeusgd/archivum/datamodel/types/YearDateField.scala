@@ -15,6 +15,8 @@ object YearDateField extends FieldType {
 
    override def makeEmpty: DMValue = DMNull
 
+   // TODO
+
    override def tableSetup(path: Seq[String], table: Setup): Unit = ???
 
    override def tableFetch(path: Seq[String], table: Fetch): DMValue = ???

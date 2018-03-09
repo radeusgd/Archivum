@@ -56,11 +56,10 @@ case class DMString(value: String) extends DMValue with DMOrdered {
       }
 }
 
-// TODO  FIXME  historic dates support!
 case class DMDate(value: DMValue.Date) extends DMValue with DMOrdered {
    override def asDate: Option[DMValue.Date] = Some(value)
 
-   override def toString: String = value.toString // TODO
+   override def toString: String = value.toString
 
    override def compare(that: DMOrdered): Int =
       that match {

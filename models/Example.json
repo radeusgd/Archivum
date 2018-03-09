@@ -12,7 +12,7 @@
     "City": "string",
     "Names": "string",
     "Surname": "string",
-    "Birthday": "string",
+    "Birthday": "date",
     "Gender": "gender",
     "Father": "parent",
     "Mother": "parent",

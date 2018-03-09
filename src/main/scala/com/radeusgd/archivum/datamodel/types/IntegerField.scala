@@ -21,16 +21,15 @@ object IntegerField extends FieldType {
       table.addField(path, DBTypes.Integer)
    }
 
-   override def tableFetch(path: Seq[String], table: Fetch): DMValue = {
-      table.getField(path, DBTypes.Integer)
-   }
+   override def tableFetch(path: Seq[String], table: Fetch): DMValue =
+      table.getInt(path).map(DMInteger).getOrElse(DMNull)
 
    override def tableInsert(path: Seq[String], table: Insert, value: DMValue): Unit = {
       //noinspection ScalaStyle
       value match {
          case DMInteger(i) => table.setValue(path, i)
          case DMNull => table.setValue(path, null)
-         case _ => assert(false)
+         case _ => throw new IllegalArgumentException
       }
    }
 
@@ -38,7 +37,7 @@ object IntegerField extends FieldType {
    override def toHumanJson(v: DMValue): JsValue = v match {
       case DMInteger(x) => JsNumber(x)
       case DMNull => JsNull
-      case _ => throw new RuntimeException("Invalid integer DM")
+      case _ => throw new IllegalArgumentException
    }
 
    override def fromHumanJson(j: JsValue): Either[Throwable, DMValue] = j match {
