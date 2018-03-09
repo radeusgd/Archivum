@@ -13,7 +13,7 @@ class RepositoryImpl(private val _model: Model,
    private val table: SQLSyntax = DBUtils.rawSql(tableName)
 
    override def createRecord(value: DMStruct): Rid = {
-      assert(rootType.validate(value).isEmpty)
+      if (rootType.validate(value).nonEmpty) throw new IllegalArgumentException("Value does not conform to the model")
       val ins = new InsertImpl(tableName)
       rootType.tableInsert(Nil, ins, value)
       db.autoCommit({ implicit session => ins.insert(None) })
@@ -24,14 +24,17 @@ class RepositoryImpl(private val _model: Model,
       rootType.tableFetch(Nil, f)
    }
 
-   override def fetchRecord(rid: Rid): Option[DMStruct] =
-      db.readOnly({ implicit session =>
+   override def fetchRecord(rid: Rid): Option[DMStruct] = {
+      val record = db.readOnly({ implicit session =>
          sql"SELECT * FROM $table WHERE _rid = $rid"
             .map(rs => rsToDM(rs)(session)).single.apply()
       })
+      assert(record.forall(rootType.validate(_).isEmpty))
+      record
+   }
 
    override def updateRecord(rid: Rid, newValue: DMStruct): Unit = {
-      assert(rootType.validate(newValue).isEmpty)
+      if (rootType.validate(newValue).nonEmpty) throw new IllegalArgumentException("Value does not conform to the model")
       deleteRecord(rid)
       val ins = new InsertImpl(tableName)
       rootType.tableInsert(Nil, ins, newValue)
@@ -46,10 +49,12 @@ class RepositoryImpl(private val _model: Model,
    }
 
    override def fetchAllRecords(): Seq[(Rid, DMStruct)] = {
-      db.readOnly({ implicit session =>
+      val records = db.readOnly({ implicit session =>
          sql"SELECT * FROM $table"
             .map(rs => (rs.long("_rid"), rsToDM(rs)(session))).list.apply()
       })
+      assert(records.forall(r => rootType.validate(r._2).isEmpty))
+      records
    }
 
    private lazy val ridSetHelper = new RidSetHelperImpl(db, table)
