@@ -13,7 +13,9 @@ object DateField extends FieldType {
       v match {
          case DMError(msg) => ConstraintError(Nil, msg) :: Nil
          case DMNull => Nil
-         case DMDate(date) => if (date.getYear < 1583 || date.getYear > 4000) ConstraintError(Nil, "This date is not in the supported range") :: Nil else Nil
+         case DMDate(date) =>
+            if (isDateSupported(date)) Nil
+            else ConstraintError(Nil, "This date is not in the supported range") :: Nil
          case _ => TypeError(Nil, v.toString, "DMDate") :: Nil
       }
 
@@ -70,4 +72,6 @@ object DateField extends FieldType {
          f"$y%04d$m%02d$d%02d"
       case _ => throw new IllegalArgumentException
    }
+
+   def isDateSupported(d: LocalDate): Boolean = d.getYear >= 1583 && d.getYear < 4000
 }

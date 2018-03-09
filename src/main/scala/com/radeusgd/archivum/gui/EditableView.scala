@@ -76,7 +76,8 @@ object EditableView {
       TextControlFactory,
       IntegerControlFactory,
       ChoiceControlFactory,
-      DateControlFactory
+      DateControlFactory,
+      ClassicDateControlFactory
    )
 
    private val parsers: Map[String, LayoutFactory] =

@@ -9,6 +9,7 @@ object ViewLanguage {
    val ChoiceField = "choicefield"
    val IntegerField = "integerfield"
    val DateField = "datefield"
+   val ClassicDateField = "classicdatefield"
    val BigTextField = "textarea"
 
    val BindingPath = "path"

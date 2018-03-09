@@ -2,6 +2,7 @@ package com.radeusgd.archivum.datamodel
 
 import java.time.LocalDate
 
+import com.radeusgd.archivum.datamodel.types.DateField
 import com.radeusgd.archivum.languages.QueryLanguage
 import com.radeusgd.archivum.utils.AsInt
 
@@ -68,6 +69,10 @@ case class DMDate(value: DMValue.Date) extends DMValue with DMOrdered {
       }
 }
 
+object DMDate {
+   def safe(v: DMValue.Date): Option[DMDate] = if (DateField.isDateSupported(v)) Some(DMDate(v)) else None
+}
+
 case class DMArray(values: Vector[DMValue]) extends DMValue with DMAggregate {
    override def toString: String = values.toString() // TODO computables
    def length: Int = values.length
@@ -104,7 +109,7 @@ case class DMYearDate(value: Either[Int, DMValue.Date]) extends DMValue with DMA
    override def apply(s: String): DMValue =
       s match {
          case QueryLanguage.YDYear => DMInteger(year)
-         case QueryLanguage.YDFullDate => value.fold(_ => DMNull, DMDate)
+         case QueryLanguage.YDFullDate => value.fold(_ => DMNull, DMDate(_))
       }
 
    override def toString: String = value.fold(_.toString, _.toString)
