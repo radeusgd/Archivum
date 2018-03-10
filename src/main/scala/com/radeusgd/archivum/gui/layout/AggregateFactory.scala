@@ -4,12 +4,13 @@ import com.radeusgd.archivum.gui.EditableView
 
 import scalafx.scene
 import cats.implicits._
+import com.radeusgd.archivum.gui.utils.XMLUtils
 
 abstract class AggregateFactory(make: (Seq[scene.Node]) => scene.Node) extends LayoutFactory {
    override def fromXML(xmlnode: xml.Node, ev: EditableView): Either[LayoutParseError, ParsedLayout] =
       if (xmlnode.attributes.nonEmpty) Left(LayoutParseError("Unrecognized attributes"))
       else {
-         val childrenResults = xmlnode.child filter (_.label != "#PCDATA") map (EditableView.parseViewTree(_, ev))
+         val childrenResults = XMLUtils.properChildren(xmlnode).map(EditableView.parseViewTree(_, ev))
          type ParsingEither[A] = Either[LayoutParseError, A]
          val children: Either[LayoutParseError, Seq[ParsedLayout]] =
             childrenResults.toList.sequence[ParsingEither, ParsedLayout]

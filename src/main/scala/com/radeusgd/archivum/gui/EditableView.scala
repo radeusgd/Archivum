@@ -77,15 +77,15 @@ object EditableView {
       IntegerControlFactory,
       ChoiceControlFactory,
       DateControlFactory,
-      ClassicDateControlFactory
+      ClassicDateControlFactory,
+      TableControlFactory
    )
 
    private val parsers: Map[String, LayoutFactory] =
-      Map(parsersList map { p: LayoutFactory => (p.nodeType, p) }: _*)
+      (parsersList map { p => (p.nodeType, p) }).toMap
 
-   def parseViewTree(xmlnode: xml.Node, ev: EditableView): Either[LayoutParseError, ParsedLayout] = {
+   def parseViewTree(xmlnode: xml.Node, ev: EditableView): Either[LayoutParseError, ParsedLayout] =
       parsers.get(xmlnode.label.toLowerCase).
          toRight(LayoutParseError("Unsupported node type '" + xmlnode.label + "'")).
          flatMap(_.fromXML(xmlnode, ev))
-   }
 }

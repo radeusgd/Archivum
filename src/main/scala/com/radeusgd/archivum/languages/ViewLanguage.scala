@@ -12,6 +12,12 @@ object ViewLanguage {
    val ClassicDateField = "classicdatefield"
    val BigTextField = "textarea"
 
+   val TableRoot = "table"
+   val TextColumn = "textcolumn"
+   val DateColumn = "datecolumn"
+   val ClassicDateColumn = "classicdatecolumn"
+   val ChoiceColumn = "choicecolumn"
+
    val BindingPath = "path"
    val TextName = "name"
 

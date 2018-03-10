@@ -2,7 +2,12 @@
     <label>Birth record</label>
     <hbox>
         <vbox>
-            <TextField path="Names"/>
+            <hbox>
+                <Label>Names</Label>
+                <table path="Names">
+                    <TextColumn />
+                </table>
+            </hbox>
             <TextField path="Surname"/>
             <TextField path="City"/>
             <ChoiceField path="Gender"/>
@@ -21,6 +26,14 @@
             <TextField path="Father.Name"/>
             <TextField path="Father.Surname"/>
             <TextField path="Father.Profession"/>
+        </vbox>
+        <vbox>
+            <Label>Godparents</Label>
+            <table path="Godparents">
+                <TextColumn path="Name"/>
+                <TextColumn path="Surname"/>
+                <TextColumn path="Profession"/>
+            </table>
         </vbox>
     </hbox>
 </vbox>
