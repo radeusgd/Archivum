@@ -6,5 +6,5 @@ import com.radeusgd.archivum.gui.controls.BoundControl
 import scalafx.scene.control.TableColumn
 
 abstract class Column[A] extends TableColumn[DMValue, A] {
-   def refresh(): Unit // TODO
+   //def refresh(): Unit // TODO
 }

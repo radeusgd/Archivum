@@ -10,7 +10,7 @@
   },
   "fields": {
     "City": "string",
-    "Names": "string",
+    "Names": "array:string",
     "Surname": "string",
     "Birthday": "date",
     "Gender": "gender",

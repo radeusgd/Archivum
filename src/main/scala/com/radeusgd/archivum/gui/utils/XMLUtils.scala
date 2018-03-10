@@ -15,6 +15,6 @@ object XMLUtils {
          if path.nonEmpty
       } yield path).toRight(LayoutParseError("Path not specified"))
 
-   def properChildren(xmlnode: Node): FilterMonadic[Node, Seq[Node]] =
-      xmlnode.child.withFilter(_.label != "#PCDATA")
+   def properChildren(xmlnode: Node): Seq[Node] =
+      xmlnode.child.filter(_.label != "#PCDATA")
 }

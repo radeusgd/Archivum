@@ -8,6 +8,8 @@ import com.radeusgd.archivum.gui.utils.XMLUtils
 
 import scala.xml.Node
 import scalafx.beans.property.ReadOnlyStringWrapper
+import scalafx.scene.control.cell.TextFieldTableCell
+import scalafx.scene.control.{TableCell, TableColumn}
 
 // later refactor to StringColumn
 class StringBasedColumn(path: List[String], stringDMBridge: StringDMBridge, tableControl: TableControl) extends Column[String] {
@@ -19,10 +21,21 @@ class StringBasedColumn(path: List[String], stringDMBridge: StringDMBridge, tabl
 
    onEditCommit = ev => {
       val newValue = stringDMBridge.fromString(ev.getNewValue)
-      tableControl.update(setter(_, newValue))
+      tableControl.update(ev.getTablePosition.getRow, setter(_, newValue))
    }
 
-   override def refresh(): Unit = ??? // TODO
+   def cellFactoryF(t: TableColumn[DMValue, String]): TableCell[DMValue, String] =
+      new TextFieldTableCell[DMValue, String]() {
+         // TODO
+      }
+
+   cellFactory = cellFactoryF _
+
+   editable = true
+
+   private val label: String = path.lastOption.getOrElse("") // TODO handle label from XML
+
+   text = label
 }
 
 abstract class StringBasedColumnFactory(bridge: StringDMBridge) extends ColumnFactory {

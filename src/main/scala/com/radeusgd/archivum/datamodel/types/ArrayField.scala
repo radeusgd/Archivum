@@ -11,10 +11,8 @@ case class ArrayField(elementsType: FieldType) extends FieldType {
          case DMArray(values) =>
             val indexedValues: Seq[(DMValue, Int)] = values.zipWithIndex
             val childErrors: Seq[ValidationError] =
-               indexedValues flatMap { case (vv, ind) =>
-                  elementsType.validate(vv) map {
-                     _.extendPath(ind.toString)
-                  }
+               indexedValues.flatMap { case (vv, ind) =>
+                  elementsType.validate(vv).map(_.extendPath(ind.toString))
                }
 
             childErrors.toList
@@ -30,7 +28,7 @@ case class ArrayField(elementsType: FieldType) extends FieldType {
 
    override def tableFetch(path: Seq[String], table: Fetch): DMValue = {
       val subs = table.getSubTable(path)
-      val values = subs map { (sub) => elementsType.tableFetch(Nil, sub) }
+      val values = subs.map(sub => elementsType.tableFetch(Nil, sub))
       DMArray(values.toVector)
    }
 

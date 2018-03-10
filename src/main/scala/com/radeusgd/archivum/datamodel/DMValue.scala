@@ -74,7 +74,7 @@ object DMDate {
 }
 
 case class DMArray(values: Vector[DMValue]) extends DMValue with DMAggregate {
-   override def toString: String = values.toString() // TODO computables
+   override def toString: String = "DMArray(" + values.map(_.toString).mkString(", ") + ")"
    def length: Int = values.length
 
    def updated(idx: Int, v: DMValue): DMArray = DMArray(values.updated(idx, v))
@@ -85,6 +85,12 @@ case class DMArray(values: Vector[DMValue]) extends DMValue with DMAggregate {
          case AsInt(ind) /*if ind >= 0 && ind < values.length*/ => values(ind) // TODO not sure what to throw here
          case _ => throw new NoSuchFieldException
       }
+
+   def apply(idx: Int): DMValue = values(idx)
+
+   def appended(v: DMValue): DMArray = DMArray(values ++ Vector(v))
+
+   def without(idx: Int): DMArray = DMArray(values.take(idx - 1) ++ values.drop(idx + 1))
 }
 
 // this computables format is deprecated
