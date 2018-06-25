@@ -26,11 +26,8 @@ case class ArrayField(elementsType: FieldType) extends FieldType {
       elementsType.tableSetup(Nil, sub)
    }
 
-   override def tableFetch(path: Seq[String], table: Fetch): DMValue = {
-      val subs = table.getSubTable(path)
-      val values = subs.map(sub => elementsType.tableFetch(Nil, sub))
-      DMArray(values.toVector)
-   }
+   override def tableFetch(path: Seq[String], table: Fetch): DMValue =
+      DMArray(table.getSubTable(path, sub => elementsType.tableFetch(Nil, sub)).toVector)
 
    override def tableInsert(path: Seq[String], table: Insert, value: DMValue): Unit = {
       val arr: DMArray = value.asInstanceOf[DMArray]

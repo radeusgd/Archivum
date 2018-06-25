@@ -14,10 +14,10 @@ class FetchImpl(private val rs: WrappedResultSet, private val tableName: String)
 
    override def getInt(path: Seq[String]): Option[Int] = rs.intOpt(pathToDb(path))
 
-   override def getSubTable(path: Seq[String]): Seq[Fetch] = {
+   override def getSubTable[T](path: Seq[String], subMapper: Fetch => T): Seq[T] = {
       val subname = subtableName(tableName, path)
       val subtable = rawSql(subname)
       val prid = rs.long("_rid")
-      sql"SELECT * FROM $subtable WHERE _prid = $prid".map(rs => new FetchImpl(rs, subname)).list.apply()
+      sql"SELECT * FROM $subtable WHERE _prid = $prid".map(rs => subMapper(new FetchImpl(rs, subname))).list.apply()
    }
 }
