@@ -6,10 +6,9 @@ import com.radeusgd.archivum.gui.{ApplicationMain, EditableView, Refreshable, ut
 import com.radeusgd.archivum.persistence.DBUtils.Rid
 import com.radeusgd.archivum.persistence.{Repository, RidSetHelper}
 import com.radeusgd.archivum.utils.IO
-
 import scalafx.geometry.{Insets, Pos}
 import scalafx.scene.Scene
-import scalafx.scene.control.{Button, Label, TextField}
+import scalafx.scene.control.{Button, Label, ScrollPane, TextField}
 import scalafx.scene.layout.{BorderPane, HBox}
 import scalafx.scene.paint.Paint
 
@@ -62,7 +61,9 @@ class EditRecords(val repository: Repository, val parentScene: Scene) extends Sc
       top = new HBox(
          utils.makeGoToButton("< Back", parentScene)
       )
-      center = editableView
+      private val scrollPane = new ScrollPane()
+      scrollPane.content = editableView
+      center = scrollPane
       bottom = new HBox(LayoutDefaults.defaultSpacing,
          utils.mkButton("<--", () => ridSet.getFirstRid().foreach(setModelInstance)),
          utils.mkButton("<-", () => ridSet.getPreviousRid(currentRid).foreach(setModelInstance)),
