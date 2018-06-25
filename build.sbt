@@ -22,4 +22,4 @@ libraryDependencies ++= Seq(
 libraryDependencies += "org.typelevel" %% "cats-core" % "1.0.1"
 
 // TODO assembly setup
-// mainClass in assembly := Some("com.radeusgd.archivum.gui.ApplicationMain")
+mainClass in assembly := Some("com.radeusgd.archivum.gui.ApplicationMain")
