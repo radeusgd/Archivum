@@ -12,7 +12,7 @@ import com.radeusgd.archivum.languages.ViewLanguage
 import scala.xml.Node
 import scalafx.Includes._
 import scalafx.scene.control.{Button, TableView}
-import scalafx.scene.layout.{HBox, VBox}
+import scalafx.scene.layout.{GridPane, HBox, VBox}
 
 class TableControl(/* TODO some params */
                    childrenxml: Seq[Node],
@@ -20,17 +20,25 @@ class TableControl(/* TODO some params */
                    protected val editableView: EditableView)
    extends VBox with BoundControl {
 
-   private def makeMyColumns(): Seq[Column[_]] = {
+   private def makeMyColumns(): Seq[Column] = {
       type EitherLayout[A] = Either[LayoutParseError, A]
-      childrenxml.map(TableControlFactory.makeColumn(this)).toList.sequence[EitherLayout, Column[_]]
+      childrenxml.map(TableControlFactory.makeColumn(this)).toList.sequence[EitherLayout, Column]
          .toTry.get // throw on failure (that's the only way to get out of the constructor)
    }
 
-   val myColumns: Seq[Column[_]] = makeMyColumns()
+   val myColumns: Seq[Column] = makeMyColumns()
+   val rows: Seq[Seq[Column.Cell]] = Seq()
 
    override def refreshBinding(newValue: DMStruct): Unit = {
       val arr = getter(newValue).asInstanceOf[DMArray]
-      table.items.getValue.setAll(arr.values: _*)
+
+      if (arr.length < rows.length) {
+         // TODO remove unneeded rows
+      } else if (arr.length > rows.length) {
+         // TODO create more rows
+      }
+      //table.items.getValue.setAll(arr.values: _*)
+      // TODO update all rows inside
    }
 
    private val getter: DMStruct => DMValue = DMUtils.makeGetter(path)
@@ -49,10 +57,11 @@ class TableControl(/* TODO some params */
       editableView.update(rupd)
    }
 
+   /*
    private val table: TableView[DMValue] = new TableView[DMValue]() {
       columns.setAll(myColumns.map(_.delegate): _*)
       prefWidth = myColumns.length * 150 // TODO configurable width
-   }
+   }*/
 
    // TODO this is quite hacky :(
    @scala.annotation.tailrec
@@ -85,14 +94,8 @@ class TableControl(/* TODO some params */
       }
    }
 
-   private val removeButton: Button = new Button("x") {
-      onAction = handle {
-         editableView.update(removeRow(table.getSelectionModel.getSelectedIndex))
-         refreshBinding(editableView.modelInstance)
-      }
-   }
-
-   children = List(table, new HBox(removeButton, addButton))
+   private val fieldsContainer: GridPane = new GridPane()
+   children = List(fieldsContainer, addButton)
 }
 
 object TableControlFactory extends LayoutFactory {
@@ -108,15 +111,15 @@ object TableControlFactory extends LayoutFactory {
    }
 
    private val columnFactoriesList: Seq[ColumnFactory] = Seq(
-      TextColumnFactory,
+      TextColumnFactory/*,
       DateColumnFactory,
-      ClassicDateColumnFactory
+      ClassicDateColumnFactory*/
    )
 
    private val columnFactories: Map[String, ColumnFactory] =
       (columnFactoriesList map { p => (p.nodeType, p) }).toMap
 
-   def makeColumn(tc: TableControl)(xmlnode: Node): Either[LayoutParseError, Column[_]] = {
+   def makeColumn(tc: TableControl)(xmlnode: Node): Either[LayoutParseError, Column] = {
       columnFactories.get(xmlnode.label.toLowerCase)
          .toRight(LayoutParseError("Unknown column type " + xmlnode.label))
          .flatMap(f => f.fromXML(xmlnode, tc))

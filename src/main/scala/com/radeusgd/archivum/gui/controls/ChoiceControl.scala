@@ -20,7 +20,7 @@ class ChoiceControl(val label: String, path: List[String], protected val editabl
    }
 
    spacing = LayoutDefaults.defaultSpacing
-   children = Seq(
+   children = if (label == "") Seq(choiceField) else Seq(
       new Label(label) {
          minWidth = LayoutDefaults.defaultFieldNameWidth
          alignment = Pos.CenterRight

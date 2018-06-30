@@ -13,7 +13,7 @@ class BaseTextControl(bridge: StringDMBridge, val label: String, path: List[Stri
       prefWidth = 200 // TODO setting width
    }
    spacing = LayoutDefaults.defaultSpacing
-   children = Seq(
+   children = if (label == "") Seq(textField) else Seq(
       new Label(label) {
          minWidth = LayoutDefaults.defaultFieldNameWidth
          alignment = Pos.CenterRight

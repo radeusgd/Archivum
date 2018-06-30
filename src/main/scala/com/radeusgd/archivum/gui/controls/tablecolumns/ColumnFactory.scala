@@ -4,7 +4,7 @@ import com.radeusgd.archivum.gui.controls.TableControl
 import com.radeusgd.archivum.gui.layout.LayoutParseError
 
 trait ColumnFactory {
-   def fromXML(xmlnode: xml.Node, tableControl: TableControl): Either[LayoutParseError, Column[_]]
+   def fromXML(xmlnode: xml.Node, tableControl: TableControl): Either[LayoutParseError, Column]
 
    val nodeType: String
 }
