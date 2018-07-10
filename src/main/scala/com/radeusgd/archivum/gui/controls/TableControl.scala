@@ -22,23 +22,27 @@ class TableControl(/* TODO some params */
 
    private def makeMyColumns(): Seq[Column] = {
       type EitherLayout[A] = Either[LayoutParseError, A]
-      childrenxml.map(TableControlFactory.makeColumn(this)).toList.sequence[EitherLayout, Column]
+      childrenxml.map(TableControlFactory.makeColumn(editableView)).toList.sequence[EitherLayout, Column]
          .toTry.get // throw on failure (that's the only way to get out of the constructor)
    }
 
    val myColumns: Seq[Column] = makeMyColumns()
-   val rows: Seq[Seq[Column.Cell]] = Seq()
+   var rows: Vector[Seq[Column.Cell]] = Vector()
+
+   def makeRow(ith: Int): Seq[Column.Cell] =
+      myColumns.map(_.createControl(path ++ List(ith.toString), editableView))
 
    override def refreshBinding(newValue: DMStruct): Unit = {
       val arr = getter(newValue).asInstanceOf[DMArray]
 
+      // update amount of rows to match array
       if (arr.length < rows.length) {
-         // TODO remove unneeded rows
+         rows = rows.take(arr.length)
       } else if (arr.length > rows.length) {
-         // TODO create more rows
+         rows = rows ++ (rows.length until arr.length).map(makeRow)
       }
-      //table.items.getValue.setAll(arr.values: _*)
-      // TODO update all rows inside
+      // update all rows inside
+      rows.flatten.foreach(_.refreshBinding(newValue))
    }
 
    private val getter: DMStruct => DMValue = DMUtils.makeGetter(path)
@@ -119,10 +123,10 @@ object TableControlFactory extends LayoutFactory {
    private val columnFactories: Map[String, ColumnFactory] =
       (columnFactoriesList map { p => (p.nodeType, p) }).toMap
 
-   def makeColumn(tc: TableControl)(xmlnode: Node): Either[LayoutParseError, Column] = {
+   def makeColumn(ev: EditableView)(xmlnode: Node): Either[LayoutParseError, Column] = {
       columnFactories.get(xmlnode.label.toLowerCase)
          .toRight(LayoutParseError("Unknown column type " + xmlnode.label))
-         .flatMap(f => f.fromXML(xmlnode, tc))
+         .flatMap(f => f.fromXML(xmlnode, ev))
    }
 
    override val nodeType: String = ViewLanguage.TableRoot

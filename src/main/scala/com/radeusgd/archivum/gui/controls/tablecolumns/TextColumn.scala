@@ -14,7 +14,7 @@ class TextColumn(label: String) extends Column {
 }
 
 object TextColumnFactory extends ColumnFactory {
-   override def fromXML(xmlnode: Node, tableControl: TableControl): Either[LayoutParseError, Column] = ???
-
+   override def fromXML(xmlnode: Node, ev: EditableView): Either[LayoutParseError, Column] = ???
    override val nodeType: String = ViewLanguage.TextColumn
+
 }
