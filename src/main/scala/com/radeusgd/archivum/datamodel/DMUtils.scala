@@ -8,19 +8,20 @@ object DMUtils {
          case Nil => identity
          case part :: rest =>
             val nestedGetter: (DMValue) => DMValue = makeGetter(rest)
-            (v: DMValue) =>
+            (v: DMValue) => {
+               //println(part + " of " + v) // TODO remove me (debug)
                nestedGetter(v.asInstanceOf[DMAggregate](part))
+            }
       }
 
-   // for now setters only work for structs, arrays may be added later
-   def makeSetter(path: List[String]): (DMStruct, DMValue) => DMStruct =
+   def makeSetter(path: List[String]): (DMAggregate, DMValue) => DMAggregate =
       path match {
          case Nil => throw new IllegalArgumentException
          case last :: Nil => _.updated(last, _)
          case part :: rest =>
-            val nestedSetter: (DMStruct, DMValue) => DMStruct = makeSetter(rest)
-            (s: DMStruct, v: DMValue) =>
-               s.updated(part, nestedSetter(s(part).asInstanceOf[DMStruct], v))
+            val nestedSetter: (DMAggregate, DMValue) => DMAggregate = makeSetter(rest)
+            (s: DMAggregate, v: DMValue) =>
+               s.updated(part, nestedSetter(s(part).asInstanceOf[DMAggregate], v))
       }
 
    def makeValueSetter(path: List[String]): (DMValue, DMValue) => DMValue =

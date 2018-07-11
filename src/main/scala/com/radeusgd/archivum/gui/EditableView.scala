@@ -28,9 +28,9 @@ class EditableView(val repo: Repository, xmlroot: xml.Node) extends Pane {
    var currentRid: Long = -1
    var modelInstance: DMStruct = model.roottype.makeEmpty
 
-   def update(upd: (DMStruct) => DMStruct): Unit = {
+   def update(upd: (DMStruct) => DMAggregate): Unit = { // TODO come back to DMStruct, for now a hack
       //println("Updating")
-      val newInstance = upd(modelInstance)
+      val newInstance = upd(modelInstance).asInstanceOf[DMStruct] // FIXME I'm so sorry to write shit like this, but I'm in hurry :(
       val newErrors = model.roottype.validate(newInstance)
       val severe = newErrors.exists(_.isInstanceOf[TypeError])
       if (!severe) {

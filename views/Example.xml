@@ -5,7 +5,7 @@
             <hbox>
                 <Label>Names</Label>
                 <table path="Names">
-                    <TextColumn />
+                    <TextColumn label="Name" />
                 </table>
             </hbox>
             <TextField path="Surname"/>

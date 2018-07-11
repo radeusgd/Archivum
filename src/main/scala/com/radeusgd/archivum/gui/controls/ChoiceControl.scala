@@ -29,7 +29,7 @@ class ChoiceControl(val label: String, path: List[String], protected val editabl
    )
 
    protected val fieldGetter: DMValue => DMValue = DMUtils.makeGetter(path)
-   protected val fieldSetter: (DMStruct, DMValue) => DMStruct = DMUtils.makeSetter(path)
+   protected val fieldSetter: (DMAggregate, DMValue) => DMAggregate = DMUtils.makeSetter(path)
 
    choiceField.value.onChange((_, _, newValue) => {
       editableView.update(fieldSetter(_, DMString(newValue)))

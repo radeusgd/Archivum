@@ -22,7 +22,7 @@ class BaseTextControl(bridge: StringDMBridge, val label: String, path: List[Stri
    )
 
    protected val fieldGetter: DMValue => DMValue = DMUtils.makeGetter(path)
-   protected val fieldSetter: (DMStruct, DMValue) => DMStruct = DMUtils.makeSetter(path)
+   protected val fieldSetter: (DMAggregate, DMValue) => DMAggregate = DMUtils.makeSetter(path)
 
    protected def fromValue(v: DMValue): String = bridge.fromDM(v)
 

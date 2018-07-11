@@ -2,17 +2,18 @@ package com.radeusgd.archivum.gui.controls
 
 import cats.implicits._
 import com.radeusgd.archivum.datamodel.types.{ArrayField, FieldType, StructField}
-import com.radeusgd.archivum.datamodel.{DMArray, DMStruct, DMUtils, DMValue}
+import com.radeusgd.archivum.datamodel._
 import com.radeusgd.archivum.gui.EditableView
 import com.radeusgd.archivum.gui.controls.tablecolumns._
 import com.radeusgd.archivum.gui.layout.{LayoutFactory, LayoutParseError, ParsedLayout}
 import com.radeusgd.archivum.gui.utils.XMLUtils
 import com.radeusgd.archivum.languages.ViewLanguage
+import scalafx.Includes._
+import scalafx.scene.control.Button
+import scalafx.scene.layout.{GridPane, VBox}
 
 import scala.xml.Node
-import scalafx.Includes._
-import scalafx.scene.control.{Button, TableView}
-import scalafx.scene.layout.{GridPane, HBox, VBox}
+
 
 class TableControl(/* TODO some params */
                    childrenxml: Seq[Node],
@@ -41,13 +42,29 @@ class TableControl(/* TODO some params */
       } else if (arr.length > rows.length) {
          rows = rows ++ (rows.length until arr.length).map(makeRow)
       }
+
+      // update grid (TODO more lazy)
+      fieldsContainer.children.clear()
+      rows.zipWithIndex.foreach({ case (row, idx) =>
+         val btn: Button = new Button("x") {
+            onAction = handle {
+               // this is not exactly the way I'd like to do it
+               editableView.update(removeRow(idx))
+               refreshBinding(editableView.modelInstance)
+            }
+            focusTraversable = false
+         }
+         val nodes = row.map(_.delegate) ++ Seq(btn.delegate)
+         fieldsContainer.addRow(idx, nodes:_*)
+      })
+
       // update all rows inside
       rows.flatten.foreach(_.refreshBinding(newValue))
    }
 
    private val getter: DMStruct => DMValue = DMUtils.makeGetter(path)
 
-   private val setter: (DMStruct, DMValue) => DMStruct = DMUtils.makeSetter(path)
+   private val setter: (DMAggregate, DMValue) => DMAggregate = DMUtils.makeSetter(path)
 
    def update(idx: Int, upd: (DMValue) => DMValue): Unit = {
       def rupd(root: DMStruct): DMStruct = {
@@ -55,7 +72,7 @@ class TableControl(/* TODO some params */
          val oldElem = oldArray(idx)
          val newElem = upd(oldElem)
          val updatedArray = oldArray.updated(idx, newElem)
-         setter(root, updatedArray)
+         setter(root, updatedArray).asInstanceOf[DMStruct] // FIXME
       }
 
       editableView.update(rupd)
@@ -81,13 +98,14 @@ class TableControl(/* TODO some params */
    private def insertRow(root: DMStruct): DMStruct = {
       val oldArray = getter(root).asInstanceOf[DMArray]
       val newArray = oldArray.appended(getMyFieldType.makeEmpty)
-      setter(root, newArray)
+      setter(root, newArray).asInstanceOf[DMStruct] // FIXME
    }
 
    private def removeRow(idx: Int)(root: DMStruct): DMStruct = {
       val oldArray = getter(root).asInstanceOf[DMArray]
       val newArray = oldArray.without(idx)
-      setter(root, newArray)
+      println("Removing " + idx)
+      setter(root, newArray).asInstanceOf[DMStruct] // FIXME
    }
 
    private val addButton: Button = new Button("+") {
@@ -96,6 +114,7 @@ class TableControl(/* TODO some params */
          editableView.update(insertRow)
          refreshBinding(editableView.modelInstance)
       }
+      focusTraversable = false
    }
 
    private val fieldsContainer: GridPane = new GridPane()
@@ -115,9 +134,10 @@ object TableControlFactory extends LayoutFactory {
    }
 
    private val columnFactoriesList: Seq[ColumnFactory] = Seq(
-      TextColumnFactory/*,
-      DateColumnFactory,
+      TextColumnFactory,
+      /*DateColumnFactory,
       ClassicDateColumnFactory*/
+      ChoiceColumnFactory
    )
 
    private val columnFactories: Map[String, ColumnFactory] =
