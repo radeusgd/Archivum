@@ -9,7 +9,7 @@ import com.radeusgd.archivum.gui.layout.{LayoutFactory, LayoutParseError, Parsed
 import com.radeusgd.archivum.gui.utils.XMLUtils
 import com.radeusgd.archivum.languages.ViewLanguage
 import scalafx.Includes._
-import scalafx.scene.control.Button
+import scalafx.scene.control.{Button, Label}
 import scalafx.scene.layout.{GridPane, VBox}
 
 import scala.xml.Node
@@ -28,6 +28,7 @@ class TableControl(/* TODO some params */
    }
 
    val myColumns: Seq[Column] = makeMyColumns()
+   val headerRow: Seq[Label] = myColumns.map(col => new Label(col.headerName))
    var rows: Vector[Seq[Column.Cell]] = Vector()
 
    def makeRow(ith: Int): Seq[Column.Cell] =
@@ -45,6 +46,7 @@ class TableControl(/* TODO some params */
 
       // update grid (TODO more lazy)
       fieldsContainer.children.clear()
+      fieldsContainer.addRow(0, headerRow.map(_.delegate):_*)
       rows.zipWithIndex.foreach({ case (row, idx) =>
          val btn: Button = new Button("x") {
             onAction = handle {
@@ -55,7 +57,7 @@ class TableControl(/* TODO some params */
             focusTraversable = false
          }
          val nodes = row.map(_.delegate) ++ Seq(btn.delegate)
-         fieldsContainer.addRow(idx, nodes:_*)
+         fieldsContainer.addRow(idx + 1, nodes:_*)
       })
 
       // update all rows inside

@@ -3,7 +3,6 @@
     <hbox>
         <vbox>
             <hbox>
-                <Label>Names</Label>
                 <table path="Names">
                     <TextColumn label="Name" />
                 </table>
@@ -16,27 +15,31 @@
             <TextField path="Source"/>
         </vbox>
         <vbox>
-            <Label>Mother</Label>
-            <TextField path="Mother.Name"/>
-            <TextField path="Mother.Surname"/>
-            <TextField path="Mother.Profession"/>
-            <ChoiceField path="Mother.FooBar" />
-        </vbox>
-        <vbox>
-            <Label>Father</Label>
-            <TextField path="Father.Name"/>
-            <TextField path="Father.Surname"/>
-            <TextField path="Father.Profession"/>
-            <ChoiceField path="Father.FooBar" />
-        </vbox>
-        <vbox>
-            <Label>Godparents</Label>
-            <table path="Godparents">
-                <TextColumn path="Name"/>
-                <TextColumn path="Surname"/>
-                <TextColumn path="Profession"/>
-                <ChoiceColumn path="FooBar" />
-            </table>
+            <hbox>
+                <vbox>
+                    <Label>Mother</Label>
+                    <TextField path="Mother.Name"/>
+                    <TextField path="Mother.Surname"/>
+                    <TextField path="Mother.Profession"/>
+                    <ChoiceField path="Mother.FooBar" />
+                </vbox>
+                <vbox>
+                    <Label>Father</Label>
+                    <TextField path="Father.Name"/>
+                    <TextField path="Father.Surname"/>
+                    <TextField path="Father.Profession"/>
+                    <ChoiceField path="Father.FooBar" />
+                </vbox>
+            </hbox>
+            <vbox>
+                <Label>Godparents</Label>
+                <table path="Godparents">
+                    <TextColumn path="Name"/>
+                    <TextColumn path="Surname"/>
+                    <TextColumn path="Profession"/>
+                    <ChoiceColumn path="FooBar" />
+                </table>
+            </vbox>
         </vbox>
     </hbox>
 </vbox>
