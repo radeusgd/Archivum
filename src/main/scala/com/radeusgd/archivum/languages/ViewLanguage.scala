@@ -17,6 +17,7 @@ object ViewLanguage {
    val DateColumn = "datecolumn"
    val ClassicDateColumn = "classicdatecolumn"
    val ChoiceColumn = "choicecolumn"
+   val IntegerColumn = "integercolumn"
 
    val BindingPath = "path"
    val TextName = "name"

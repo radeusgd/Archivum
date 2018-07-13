@@ -2,10 +2,12 @@
   "name": "Example",
   "types": {
     "gender": ["F","M"],
+    "maybeboolean": [ "no data", "YES", "NO"],
     "parent": {
       "Name": "string",
       "Surname": "string",
-      "Profession": "string"
+      "Profession": "string",
+      "FooBar": "maybeboolean"
     }
   },
   "fields": {

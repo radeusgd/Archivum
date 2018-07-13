@@ -4,8 +4,9 @@ import com.radeusgd.archivum.datamodel.{DMArray, DMValue, TypeError, ValidationE
 import com.radeusgd.archivum.persistence.strategies.{Fetch, Insert, Setup}
 import spray.json.{DeserializationException, JsArray, JsValue}
 import cats.implicits._
+import com.radeusgd.archivum.utils.AsInt
 
-case class ArrayField(elementsType: FieldType) extends FieldType {
+case class ArrayField(elementsType: FieldType) extends FieldType with TypedAggregateField {
    def validate(v: DMValue): List[ValidationError] =
       v match {
          case DMArray(values) =>
@@ -17,6 +18,18 @@ case class ArrayField(elementsType: FieldType) extends FieldType {
 
             childErrors.toList
          case _ => TypeError(Nil, v.toString, "DMArray") :: Nil
+      }
+
+   private def getElementType(key: String): FieldType = key match {
+      case AsInt(_) => elementsType
+      case _ => throw new RuntimeException("Key not found") // TODO exception type
+   }
+
+   def getType(path: List[String]): FieldType =
+      path match {
+         case Nil => this
+         case last :: Nil => getElementType(last)
+         case next :: rest => getElementType(next).asInstanceOf[TypedAggregateField].getType(rest)
       }
 
    override def makeEmpty: DMArray = DMArray(Vector.empty)

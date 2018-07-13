@@ -20,12 +20,14 @@
             <TextField path="Mother.Name"/>
             <TextField path="Mother.Surname"/>
             <TextField path="Mother.Profession"/>
+            <ChoiceField path="Mother.FooBar" />
         </vbox>
         <vbox>
             <Label>Father</Label>
             <TextField path="Father.Name"/>
             <TextField path="Father.Surname"/>
             <TextField path="Father.Profession"/>
+            <ChoiceField path="Father.FooBar" />
         </vbox>
         <vbox>
             <Label>Godparents</Label>
@@ -33,6 +35,7 @@
                 <TextColumn path="Name"/>
                 <TextColumn path="Surname"/>
                 <TextColumn path="Profession"/>
+                <ChoiceColumn path="FooBar" />
             </table>
         </vbox>
     </hbox>

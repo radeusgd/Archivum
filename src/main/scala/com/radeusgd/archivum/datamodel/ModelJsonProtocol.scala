@@ -18,7 +18,7 @@ object ModelJsonProtocol extends DefaultJsonProtocol {
       override def read(json: JsValue): Model = {
          json.asJsObject.getFields("name", "types", "fields") match {
             case Seq(JsString(name), JsObject(types), JsObject(fields)) =>
-               val customTypes: Map[String, FieldType] = types map (readCustomTypeDef _).tupled
+               val customTypes: Map[String, FieldType] = parseCustomTypes(types)
                new Model(name, readStructDef(customTypes)(fields))
             case _ => throw DeserializationException("Wrong model root structure")
          }
@@ -28,14 +28,18 @@ object ModelJsonProtocol extends DefaultJsonProtocol {
    private def readStructDef(customTypes: Map[String, FieldType])(fields: Map[String, JsValue]): StructField =
       StructField(fields mapValues readFieldType(customTypes))
 
-   private def readCustomTypeDef(name: String, json: JsValue): (String, FieldType) = {
+   private def parseCustomTypes(typeDefs: Map[String, JsValue]): Map[String, FieldType] =
+      typeDefs.foldLeft(Map.empty[String, FieldType])(
+         (soFar: Map[String, FieldType], kv: (String, JsValue)) => {
+            val key = kv._1
+            val json = kv._2
+            soFar.updated(key, readCustomTypeDef(soFar, json))
+         })
+
+   private def readCustomTypeDef(customTypesSoFar: Map[String, FieldType], json: JsValue): FieldType = {
       json match {
-         case JsArray(_) => name -> new EnumField(json.convertTo[IndexedSeq[String]])
-         /*
-          TODO for now custom types cannot use other custom types
-          (ie. custom struct cannot use enum), but it can easily be fixed
-          */
-         case JsObject(fields) => name -> readStructDef(Map.empty[String, FieldType])(fields)
+         case JsArray(_) => new EnumField(json.convertTo[IndexedSeq[String]])
+         case JsObject(fields) => readStructDef(customTypesSoFar)(fields)
          case _ => throw DeserializationException("Expected an enum or struct definition")
       }
    }

@@ -135,9 +135,10 @@ object TableControlFactory extends LayoutFactory {
 
    private val columnFactoriesList: Seq[ColumnFactory] = Seq(
       TextColumnFactory,
-      /*DateColumnFactory,
-      ClassicDateColumnFactory*/
-      ChoiceColumnFactory
+      DateColumnFactory,
+      ClassicDateColumnFactory,
+      ChoiceColumnFactory,
+      IntegerColumnFactory
    )
 
    private val columnFactories: Map[String, ColumnFactory] =

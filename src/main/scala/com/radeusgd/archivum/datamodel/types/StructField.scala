@@ -5,7 +5,7 @@ import com.radeusgd.archivum.persistence.strategies.{Fetch, Insert, Setup}
 import spray.json.{DeserializationException, JsObject, JsValue}
 
 // TODO computable fields
-case class StructField(fieldTypes: Map[String, FieldType]) extends FieldType {
+case class StructField(fieldTypes: Map[String, FieldType]) extends FieldType with TypedAggregateField {
    def validate(v: DMValue): List[ValidationError] =
       v match {
          case DMStruct(values, _) =>
@@ -30,7 +30,7 @@ case class StructField(fieldTypes: Map[String, FieldType]) extends FieldType {
       path match {
          case Nil => this
          case last :: Nil => fieldTypes(last)
-         case next :: rest => fieldTypes(next).asInstanceOf[StructField].getType(rest) // TODO FIXME add array support and error checking
+         case next :: rest => fieldTypes(next).asInstanceOf[TypedAggregateField].getType(rest)
       }
 
    override def makeEmpty: DMStruct = DMStruct(fieldTypes mapValues (_.makeEmpty), Map.empty)
