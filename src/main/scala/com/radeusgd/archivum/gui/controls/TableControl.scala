@@ -139,6 +139,7 @@ object TableControlFactory extends LayoutFactory {
       TextColumnFactory,
       DateColumnFactory,
       ClassicDateColumnFactory,
+      YearDateColumnFactory,
       ChoiceColumnFactory,
       IntegerColumnFactory
    )

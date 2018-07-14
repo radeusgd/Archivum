@@ -53,6 +53,7 @@ object ModelJsonProtocol extends DefaultJsonProtocol {
          case JsString("bigtext") => StringField
          case JsString("integer") => IntegerField
          case JsString("date") => DateField
+         case JsString("yeardate") => YearDateField
          case JsString(typename) => customTypes(typename)
          case _ => throw DeserializationException("Expected a typename")
       }

@@ -15,5 +15,9 @@ object ClassicDateColumnFactory
 object DateColumnFactory
    extends SimpleColumnFactory(ViewLanguage.DateColumn, new DateControl(_, _, _))
 
+
+object YearDateColumnFactory
+   extends SimpleColumnFactory(ViewLanguage.YearDateColumn, new YearDateControl(_, _, _))
+
 object IntegerColumnFactory
    extends SimpleColumnFactory(ViewLanguage.IntegerColumn, new IntegerControl(_, _, _))

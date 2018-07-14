@@ -78,6 +78,7 @@ object EditableView {
       ChoiceControlFactory,
       DateControlFactory,
       ClassicDateControlFactory,
+      YearDateControlFactory,
       TableControlFactory
    )
 

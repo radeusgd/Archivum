@@ -10,7 +10,7 @@
             <TextField path="Surname"/>
             <TextField path="City"/>
             <ChoiceField path="Gender"/>
-            <ClassicDateField path="Birthday" />
+            <YearDateField path="Birthday" />
             <IntegerField path="Siblings"/>
             <TextField path="Source"/>
         </vbox>

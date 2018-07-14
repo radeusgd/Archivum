@@ -10,12 +10,14 @@ object ViewLanguage {
    val IntegerField = "integerfield"
    val DateField = "datefield"
    val ClassicDateField = "classicdatefield"
+   val YearDateField = "yeardatefield"
    val BigTextField = "textarea"
 
    val TableRoot = "table"
    val TextColumn = "textcolumn"
    val DateColumn = "datecolumn"
    val ClassicDateColumn = "classicdatecolumn"
+   val YearDateColumn = "yeardatecolumn"
    val ChoiceColumn = "choicecolumn"
    val IntegerColumn = "integercolumn"
 
