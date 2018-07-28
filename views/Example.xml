@@ -4,7 +4,7 @@
         <vbox>
             <hbox>
                 <table path="Names">
-                    <TextColumn label="Name" />
+                    <TextColumn label="Names" />
                 </table>
             </hbox>
             <TextField path="Surname"/>
@@ -13,6 +13,9 @@
             <YearDateField path="Birthday" />
             <IntegerField path="Siblings"/>
             <TextField path="Source"/>
+            <table path="Images">
+                <ImageColumn label="Images"/>
+            </table>
         </vbox>
         <vbox>
             <hbox>

@@ -141,7 +141,8 @@ object TableControlFactory extends LayoutFactory {
       ClassicDateColumnFactory,
       YearDateColumnFactory,
       ChoiceColumnFactory,
-      IntegerColumnFactory
+      IntegerColumnFactory,
+      HackyImageColumnFactory
    )
 
    private val columnFactories: Map[String, ColumnFactory] =

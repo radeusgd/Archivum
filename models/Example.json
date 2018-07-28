@@ -4,22 +4,23 @@
     "gender": ["F","M"],
     "maybeboolean": [ "no data", "YES", "NO"],
     "parent": {
-      "Name": "string",
-      "Surname": "string",
-      "Profession": "string",
+      "Name": "text",
+      "Surname": "text",
+      "Profession": "text",
       "FooBar": "maybeboolean"
     }
   },
   "fields": {
-    "City": "string",
-    "Names": "array:string",
-    "Surname": "string",
+    "City": "text",
+    "Names": "array:text",
+    "Surname": "text",
     "Birthday": "yeardate",
     "Gender": "gender",
     "Father": "parent",
     "Mother": "parent",
     "Siblings": "integer",
     "Godparents": "array:parent",
-    "Source": "bigtext"
+    "Source": "bigtext",
+    "Images": "array:text"
   }
 }

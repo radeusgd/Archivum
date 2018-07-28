@@ -21,3 +21,6 @@ object YearDateColumnFactory
 
 object IntegerColumnFactory
    extends SimpleColumnFactory(ViewLanguage.IntegerColumn, new IntegerControl(_, _, _))
+
+object HackyImageColumnFactory
+   extends SimpleColumnFactory(ViewLanguage.ImageColumn, new HackyImageControl(_, _, _))

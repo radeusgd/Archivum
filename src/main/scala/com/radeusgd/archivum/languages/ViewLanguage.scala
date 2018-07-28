@@ -20,6 +20,7 @@ object ViewLanguage {
    val YearDateColumn = "yeardatecolumn"
    val ChoiceColumn = "choicecolumn"
    val IntegerColumn = "integercolumn"
+   val ImageColumn = "imagecolumn"
 
    val BindingPath = "path"
    val TextName = "name"

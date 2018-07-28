@@ -49,7 +49,7 @@ object ModelJsonProtocol extends DefaultJsonProtocol {
    private def readFieldType(customTypes: Map[String, FieldType])(json: JsValue): FieldType = {
       json match {
          case JsString(arrayPrefixed(suf)) => ArrayField(readFieldType(customTypes)(JsString(suf)))
-         case JsString("string") => StringField
+         case JsString("text") => StringField
          case JsString("bigtext") => StringField
          case JsString("integer") => IntegerField
          case JsString("date") => DateField
