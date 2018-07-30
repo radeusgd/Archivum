@@ -9,6 +9,7 @@ import com.radeusgd.archivum.gui.layout.{LayoutFactory, LayoutParseError, Parsed
 import com.radeusgd.archivum.gui.utils.XMLUtils
 import com.radeusgd.archivum.languages.ViewLanguage
 import scalafx.Includes._
+import scalafx.geometry.Insets
 import scalafx.scene.control.{Button, Label}
 import scalafx.scene.layout.{GridPane, VBox}
 
@@ -28,7 +29,9 @@ class TableControl(/* TODO some params */
    }
 
    val myColumns: Seq[Column] = makeMyColumns()
-   val headerRow: Seq[Label] = myColumns.map(col => new Label(col.headerName))
+   val headerRow: Seq[Label] = myColumns.map(col => new Label(col.headerName) {
+      padding = Insets(0, 5, 0, 0)
+   })
    var rows: Vector[Seq[Column.Cell]] = Vector()
 
    def makeRow(ith: Int): Seq[Column.Cell] =

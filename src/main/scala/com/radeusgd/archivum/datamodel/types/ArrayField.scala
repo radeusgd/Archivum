@@ -32,7 +32,7 @@ case class ArrayField(elementsType: FieldType) extends FieldType with TypedAggre
          case next :: rest => getElementType(next).asInstanceOf[TypedAggregateField].getType(rest)
       }
 
-   override def makeEmpty: DMArray = DMArray(Vector.empty)
+   override def makeEmpty: DMArray = DMArray(Vector(elementsType.makeEmpty))
 
    override def tableSetup(path: Seq[String], table: Setup): Unit = {
       val sub = table.addSubTable(path)
