@@ -21,5 +21,5 @@ object ApplicationMain extends JFXApp {
       scene = MainMenu.instance
    }
 
-   //Thread.setDefaultUncaughtExceptionHandler((th, ex) => utils.reportException("There was an unhandled error", ex))
+   Thread.setDefaultUncaughtExceptionHandler((th, ex) => utils.reportException("There was an unhandled error", ex))
 }

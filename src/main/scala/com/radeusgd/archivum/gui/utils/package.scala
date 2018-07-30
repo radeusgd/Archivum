@@ -2,8 +2,9 @@ package com.radeusgd.archivum.gui
 
 import java.io.{PrintWriter, StringWriter}
 
+import ch.qos.logback.classic.Logger
 import com.radeusgd.archivum.gui.ApplicationMain.stage
-
+import org.slf4j.LoggerFactory
 import scalafx.Includes.handle
 import scalafx.application.Platform
 import scalafx.scene.Scene
@@ -51,13 +52,14 @@ package object utils {
    def showInfo(header: String, content: String = ""): Unit = showMessage(header, content, AlertType.Information)
 
    def reportException(message: String, throwable: Throwable): Unit = {
-      throwable.printStackTrace()
-
       val stackTrace = {
          val sw = new StringWriter
          throwable.printStackTrace(new PrintWriter(sw))
          sw.toString
       }
+
+      LoggerFactory.getLogger("Unhandled Exception").error(stackTrace)
+      throwable.printStackTrace()
 
       new Alert(AlertType.Error) {
          initOwner(stage)

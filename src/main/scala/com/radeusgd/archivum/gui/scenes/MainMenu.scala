@@ -1,5 +1,7 @@
 package com.radeusgd.archivum.gui.scenes
 
+import java.io.File
+
 import com.radeusgd.archivum.gui.{ApplicationMain, utils}
 import com.radeusgd.archivum.persistence.Database
 import com.radeusgd.archivum.utils.IO
@@ -10,7 +12,7 @@ import scalafx.collections.ObservableBuffer
 import scalafx.geometry.Insets
 import scalafx.scene.Scene
 import scalafx.scene.control.Alert.AlertType
-import scalafx.scene.control.{Alert, Button, ComboBox, TextInputDialog}
+import scalafx.scene.control._
 import scalafx.scene.layout.{HBox, VBox}
 
 class MainMenu extends Scene {
@@ -41,10 +43,18 @@ class MainMenu extends Scene {
       children = Seq(
          new Button("Create repository") {
             onAction = handle {
-               val dialog = new TextInputDialog() {
+               val d = new File("models")
+               if (!d.exists || !d.isDirectory) {
+                  throw new RuntimeException("Models directory doesn't exist")
+               }
+               val availableModels = d.listFiles().filter(_.isFile).map(_.getPath).toList
+               if (availableModels.isEmpty) {
+                  throw new RuntimeException("Models directory is empty")
+               }
+               val dialog = new ChoiceDialog[String](availableModels.head, availableModels) {
                   title = "Model name"
                   headerText = "Importing model."
-                  contentText = "Model filename (relative):"
+                  contentText = "Model:"
                }
 
                val result = dialog.showAndWait()
