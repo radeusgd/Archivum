@@ -4,9 +4,10 @@ import com.radeusgd.archivum.datamodel._
 import com.radeusgd.archivum.datamodel.types.EnumField
 import com.radeusgd.archivum.gui.EditableView
 import com.radeusgd.archivum.languages.ViewLanguage
-
+import scalafx.Includes._
 import scalafx.geometry.Pos
 import scalafx.scene.control.{ComboBox, Label}
+import scalafx.scene.input.KeyEvent
 import scalafx.scene.layout.HBox
 
 // TODO add hotkey - pressing a key selects the first option starting with pressed letter
@@ -17,6 +18,15 @@ class ChoiceControl(val label: String, path: List[String], protected val editabl
 
    protected val choiceField: ComboBox[String] = new ComboBox[String](allowedValues) {
       value = allowedValues.head
+
+      onKeyTyped = (evt: javafx.scene.input.KeyEvent) => {
+         val char = evt.character
+         // TODO locale?
+         val chosenValue: Option[String] = allowedValues.find(choice => choice.toLowerCase.startsWith(char.toLowerCase))
+         chosenValue.foreach(value => {
+            choiceField.value = value
+         })
+      }
    }
 
    spacing = LayoutDefaults.defaultSpacing
@@ -31,9 +41,11 @@ class ChoiceControl(val label: String, path: List[String], protected val editabl
    protected val fieldGetter: DMValue => DMValue = DMUtils.makeGetter(path)
    protected val fieldSetter: (DMAggregate, DMValue) => DMAggregate = DMUtils.makeSetter(path)
 
-   choiceField.value.onChange((_, _, newValue) => {
-      editableView.update(fieldSetter(_, DMString(newValue)))
-   })
+   protected def setNewValue(value: String): Unit = {
+      editableView.update(fieldSetter(_, DMString(value)))
+   }
+
+   choiceField.value.onChange((_, _, newValue) => setNewValue(newValue))
 
    override def refreshBinding(newValue: DMStruct): Unit = {
       /*
