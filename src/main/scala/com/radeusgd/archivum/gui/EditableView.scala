@@ -26,7 +26,10 @@ class EditableView(val repo: Repository, xmlroot: xml.Node) extends Pane {
    children = root
 
    var currentRid: Long = -1
-   var modelInstance: DMStruct = model.roottype.makeEmpty
+   var modelInstance: DMStruct = model.roottype.makeEmpty // this is temporary and should be replaced by something else
+
+   def makeNewModelInstance(): DMStruct =
+      boundControls.foldLeft(model.roottype.makeEmpty)((value: DMStruct, control: BoundControl) => control.augmentFreshValue(value))
 
    def update(upd: (DMStruct) => DMAggregate): Unit = { // TODO come back to DMStruct, for now a hack
       //println("Updating")

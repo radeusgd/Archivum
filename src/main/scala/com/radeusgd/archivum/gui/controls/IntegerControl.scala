@@ -4,9 +4,9 @@ import com.radeusgd.archivum.gui.EditableView
 import com.radeusgd.archivum.gui.controls.dmbridges.IntegerBridge
 import com.radeusgd.archivum.languages.ViewLanguage
 
-class IntegerControl(label: String, path: List[String], editableView: EditableView)
-   extends BaseTextControl(IntegerBridge, label, path, editableView)
+class IntegerControl(properties: CommonProperties, path: List[String], editableView: EditableView)
+   extends BaseTextControl(IntegerBridge, properties, path, editableView)
 
-object IntegerControlFactory extends SimpleControlFactory(new IntegerControl(_, _, _)) {
+object IntegerControlFactory extends CommonControlFactory(new IntegerControl(_, _, _)) {
    override val nodeType: String = ViewLanguage.IntegerField
 }

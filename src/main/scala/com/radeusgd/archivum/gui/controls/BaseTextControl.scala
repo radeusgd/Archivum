@@ -8,14 +8,18 @@ import scalafx.geometry.Pos
 import scalafx.scene.control.{Label, TextField, TextInputControl, Tooltip}
 import scalafx.scene.layout.HBox
 
-class BaseTextControl(bridge: StringDMBridge, val label: String, path: List[String], protected val editableView: EditableView) extends HBox with BoundControl {
+class BaseTextControl(bridge: StringDMBridge,
+                      val properties: CommonProperties,
+                      path: List[String],
+                      protected val editableView: EditableView)
+   extends HBox with BoundControl {
    protected val textField: TextInputControl = new TextField() {
       prefWidth = 200 // TODO setting width
    }
    spacing = LayoutDefaults.defaultSpacing
    alignment = Pos.BaselineRight
-   children = if (label == "") Seq(textField) else Seq(
-      new Label(label) {
+   children = if (properties.label == "") Seq(textField) else Seq(
+      new Label(properties.label) {
          minWidth = LayoutDefaults.defaultFieldNameWidth
          alignment = Pos.CenterRight
       },
@@ -61,5 +65,16 @@ class BaseTextControl(bridge: StringDMBridge, val label: String, path: List[Stri
       }
 
       otherErrors
+   }
+
+   override def augmentFreshValue(newValue: DMStruct): DMStruct = {
+      val v = super.augmentFreshValue(newValue) // apply any parent modifications (probably none)
+      if (properties.sticky) {
+         ???
+      } else if (properties.default.isDefined) {
+         fieldSetter(v, toValue(properties.default.get)).asInstanceOf[DMStruct]
+      } else {
+         v
+      }
    }
 }

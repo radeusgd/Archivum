@@ -22,9 +22,4 @@ class SimpleColumnFactory(override val nodeType: String,
          val label = xmlnode.attribute(ViewLanguage.Label).map(_.text).getOrElse(path.last) // TODO FIXME path can be Nil!!!!
          Right(new SimpleColumn(label, (basePath: List[String], ev: EditableView) => make("", basePath ++ path, ev)))
       }
-
-   private def safeConstruct(path: List[String], label: Option[String], ev: EditableView): Either[LayoutParseError, scene.Node with BoundControl] =
-      Try(make(label.getOrElse(path.last), path, ev))
-         .toEither
-         .leftMap((t: Throwable) => LayoutParseError("Error in constructor", Some(t)))
 }

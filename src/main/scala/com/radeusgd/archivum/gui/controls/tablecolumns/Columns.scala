@@ -4,23 +4,23 @@ import com.radeusgd.archivum.gui.controls._
 import com.radeusgd.archivum.languages.ViewLanguage
 
 object TextColumnFactory
-   extends SimpleColumnFactory(ViewLanguage.TextColumn, new TextControl(_, _, _))
+   extends CommonColumnFactory(ViewLanguage.TextColumn, new TextControl(_, _, _))
 
 object ChoiceColumnFactory
    extends SimpleColumnFactory(ViewLanguage.ChoiceColumn, new ChoiceControl(_, _, _))
 
 object ClassicDateColumnFactory
-   extends SimpleColumnFactory(ViewLanguage.ClassicDateColumn, new ClassicDateControl(_, _, _))
+   extends CommonColumnFactory(ViewLanguage.ClassicDateColumn, new ClassicDateControl(_, _, _))
 
 object DateColumnFactory
-   extends SimpleColumnFactory(ViewLanguage.DateColumn, new DateControl(_, _, _))
+   extends CommonColumnFactory(ViewLanguage.DateColumn, new DateControl(_, _, _))
 
 
 object YearDateColumnFactory
-   extends SimpleColumnFactory(ViewLanguage.YearDateColumn, new YearDateControl(_, _, _))
+   extends CommonColumnFactory(ViewLanguage.YearDateColumn, new YearDateControl(_, _, _))
 
 object IntegerColumnFactory
-   extends SimpleColumnFactory(ViewLanguage.IntegerColumn, new IntegerControl(_, _, _))
+   extends CommonColumnFactory(ViewLanguage.IntegerColumn, new IntegerControl(_, _, _))
 
 object HackyImageColumnFactory
    extends SimpleColumnFactory(ViewLanguage.ImageColumn, new HackyImageControl(_, _, _))

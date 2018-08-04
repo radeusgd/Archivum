@@ -10,7 +10,7 @@ import scalafx.scene.control.{ComboBox, Label}
 import scalafx.scene.input.KeyEvent
 import scalafx.scene.layout.HBox
 
-// TODO add hotkey - pressing a key selects the first option starting with pressed letter
+// TODO add CommonProperties
 class ChoiceControl(val label: String, path: List[String], protected val editableView: EditableView) extends HBox with BoundControl {
 
    val allowedValues: Seq[String] =

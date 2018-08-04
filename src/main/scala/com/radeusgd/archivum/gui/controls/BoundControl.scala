@@ -7,4 +7,7 @@ trait BoundControl {
 
    // TODO during early-dev allow controls to not handle errors, but later remove this
    def refreshErrors(errors: List[ValidationError]): List[ValidationError] = errors
+
+   // by default don't do anything
+   def augmentFreshValue(newValue: DMStruct): DMStruct = newValue
 }

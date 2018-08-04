@@ -52,7 +52,7 @@ class EditRecords(val repository: Repository, val parentScene: Scene) extends Sc
    }
 
    private def insertEmpty(): Unit = {
-      val rid = repository.createRecord(model.makeEmpty)
+      val rid = repository.createRecord(editableView.makeNewModelInstance())
       setModelInstance(rid)
    }
 
