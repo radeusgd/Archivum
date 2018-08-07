@@ -7,6 +7,7 @@ import com.radeusgd.archivum.languages.ViewLanguage
 case class CommonProperties(
                            label: String,
                            width: Option[Int],
+                           rows: Option[Int], // this probably should go to TextAreaProperties, but in a hurry :(
                            sticky: Boolean,
                            default: Option[String]
                            )
@@ -19,6 +20,7 @@ object CommonProperties {
    def parseXML(xmlnode: xml.Node): Either[LayoutParseError, CommonProperties] = {
       val optLabel: Option[String] = getAttr(xmlnode, ViewLanguage.Label)
       val width: Option[Int] = getAttr(xmlnode, ViewLanguage.Width).map(_.toInt)
+      val rows: Option[Int] = getAttr(xmlnode, ViewLanguage.Rows).map(_.toInt)
       val default: Option[String] = getAttr(xmlnode, ViewLanguage.Default)
       val sticky: Either[LayoutParseError, Boolean] =
          getAttr(xmlnode, ViewLanguage.Sticky) match {
@@ -34,6 +36,7 @@ object CommonProperties {
       } yield CommonProperties(
          label,
          width,
+         rows,
          sticky,
          default
       )

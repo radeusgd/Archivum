@@ -5,7 +5,7 @@ import com.radeusgd.archivum.gui.EditableView
 import com.radeusgd.archivum.gui.controls.commonproperties.{CommonProperties, DefaultValueOnCreation, HasCommonProperties, PreviosValueOnCreation}
 import com.radeusgd.archivum.gui.controls.dmbridges.StringDMBridge
 import scalafx.geometry.Pos
-import scalafx.scene.control.{Label, TextField, TextInputControl, Tooltip}
+import scalafx.scene.control._
 import scalafx.scene.layout.HBox
 
 class BaseTextControl(bridge: StringDMBridge,
@@ -15,9 +15,21 @@ class BaseTextControl(bridge: StringDMBridge,
    extends HBox with BoundControl
    with DefaultValueOnCreation with PreviosValueOnCreation
 {
-   protected val textField: TextInputControl = new TextField() {
-      prefWidth = 200 // TODO setting width
-   }
+
+   private val rows: Int = properties.rows.getOrElse(1)
+   private val tfieldWidth: Double = properties.width.getOrElse(200).toDouble
+
+   protected val textField: TextInputControl =
+      if (rows == 1)
+         new TextField() {
+            prefWidth = tfieldWidth
+         }
+      else
+         new TextArea() {
+            prefWidth = tfieldWidth
+            prefRowCount = rows
+            wrapText = true
+         }
    spacing = LayoutDefaults.defaultSpacing
    alignment = Pos.BaselineRight
    children = if (properties.label == "") Seq(textField) else Seq(
