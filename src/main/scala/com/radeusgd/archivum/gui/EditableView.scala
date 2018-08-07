@@ -29,9 +29,9 @@ class EditableView(val repo: Repository, xmlroot: xml.Node) extends Pane {
    var modelInstance: DMStruct = model.roottype.makeEmpty // this is temporary and should be replaced by something else
 
    def makeNewModelInstance(): DMStruct =
-      boundControls.foldLeft(model.roottype.makeEmpty)((value: DMStruct, control: BoundControl) => control.augmentFreshValue(value))
+      boundControls.foldLeft(model.roottype.makeEmpty)((value: DMStruct, control: BoundControl) => control.augmentFreshValue(value).asInstanceOf[DMStruct])
 
-   def update(upd: (DMStruct) => DMAggregate): Unit = { // TODO come back to DMStruct, for now a hack
+   def update(upd: (DMValue) => DMValue): Unit = { // TODO this needs attention
       //println("Updating")
       val newInstance = upd(modelInstance).asInstanceOf[DMStruct] // FIXME I'm so sorry to write shit like this, but I'm in hurry :(
       val newErrors = model.roottype.validate(newInstance)

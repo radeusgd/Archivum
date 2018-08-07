@@ -16,10 +16,10 @@ class SimpleColumnFactory(override val nodeType: String,
                           make: (String, List[String], EditableView) => scene.Node with BoundControl)
    extends ColumnFactory {
    override def fromXML(xmlnode: Node, ev: EditableView): Either[LayoutParseError, Column] =
-      if (xmlnode.child != Nil) Left(LayoutParseError("This node shouldn't have any children"))
+      if (xmlnode.child != Nil) Left(LayoutParseError(xmlnode, "This node shouldn't have any children"))
       else {
          val path = XMLUtils.extractPath(xmlnode).getOrElse(Nil)
-         val label = xmlnode.attribute(ViewLanguage.Label).map(_.text).getOrElse(path.last) // TODO FIXME path can be Nil!!!!
+         val label = xmlnode.attribute(ViewLanguage.Label).map(_.text).getOrElse(path.lastOption.getOrElse(""))
          Right(new SimpleColumn(label, (basePath: List[String], ev: EditableView) => make("", basePath ++ path, ev)))
       }
 }

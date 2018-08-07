@@ -1,10 +1,10 @@
-package com.radeusgd.archivum.gui.controls
+package com.radeusgd.archivum.gui.controls.commonproperties
 
 import cats.implicits._
 import com.radeusgd.archivum.gui.EditableView
+import com.radeusgd.archivum.gui.controls.BoundControl
 import com.radeusgd.archivum.gui.layout.{LayoutFactory, LayoutParseError, ParsedLayout}
 import com.radeusgd.archivum.gui.utils.XMLUtils
-import com.radeusgd.archivum.languages.ViewLanguage
 import scalafx.scene
 
 import scala.util.Try

@@ -1,6 +1,6 @@
-package com.radeusgd.archivum.gui.controls
+package com.radeusgd.archivum.gui.controls.commonproperties
 
-import com.radeusgd.archivum.gui.layout.{LayoutParseError, ParsedLayout}
+import com.radeusgd.archivum.gui.layout.LayoutParseError
 import com.radeusgd.archivum.gui.utils.XMLUtils
 import com.radeusgd.archivum.languages.ViewLanguage
 
@@ -28,9 +28,8 @@ object CommonProperties {
             case Some(_) => Left(LayoutParseError("Invalid value for field 'sticky'"))
          }
 
+      val label: String = optLabel.getOrElse(XMLUtils.extractPath(xmlnode).flatMap(_.lastOption.toRight()).getOrElse(""))
       for {
-         path <- XMLUtils.extractPath(xmlnode)
-         label = optLabel.getOrElse(path.last)
          sticky <- sticky
       } yield CommonProperties(
          label,

@@ -1,6 +1,7 @@
 package com.radeusgd.archivum.gui.controls
 
 import com.radeusgd.archivum.gui.EditableView
+import com.radeusgd.archivum.gui.controls.commonproperties.{CommonControlFactory, CommonProperties}
 import com.radeusgd.archivum.gui.controls.dmbridges.DateBridge
 import com.radeusgd.archivum.languages.ViewLanguage
 

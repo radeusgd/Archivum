@@ -54,7 +54,7 @@ class TableControl(/* TODO some params */
          val btn: Button = new Button("x") {
             onAction = handle {
                // this is not exactly the way I'd like to do it
-               editableView.update(removeRow(idx))
+               editableView.update(v => removeRow(idx)(v.asInstanceOf[DMStruct])) // please forgive me
                refreshBinding(editableView.modelInstance)
             }
             focusTraversable = false
@@ -69,15 +69,15 @@ class TableControl(/* TODO some params */
 
    private val getter: DMStruct => DMValue = DMUtils.makeGetter(path)
 
-   private val setter: (DMAggregate, DMValue) => DMAggregate = DMUtils.makeSetter(path)
+   private val setter: (DMValue, DMValue) => DMValue = DMUtils.makeSetter(path)
 
    def update(idx: Int, upd: (DMValue) => DMValue): Unit = {
-      def rupd(root: DMStruct): DMStruct = {
-         val oldArray = getter(root).asInstanceOf[DMArray]
+      def rupd(root: DMValue): DMValue = {
+         val oldArray = getter(root.asInstanceOf[DMStruct]).asInstanceOf[DMArray]
          val oldElem = oldArray(idx)
          val newElem = upd(oldElem)
          val updatedArray = oldArray.updated(idx, newElem)
-         setter(root, updatedArray).asInstanceOf[DMStruct] // FIXME
+         setter(root, updatedArray)
       }
 
       editableView.update(rupd)
@@ -102,7 +102,16 @@ class TableControl(/* TODO some params */
 
    private def insertRow(root: DMStruct): DMStruct = {
       val oldArray = getter(root).asInstanceOf[DMArray]
-      val newArray = oldArray.appended(getMyFieldType.makeEmpty)
+      /*def helper(acc: DMValue, column: Column): DMValue = {
+         // creating cells just for accessing augmentFreshValue is an overkill, but not much can be done about it
+         // because I decided to have default / sticky in the view layer instead of model layer (which could be put into FieldType)
+         val tmpCell = column.createControl(Nil, editableView)
+         tmpCell.augmentFreshValue(acc)
+      }
+      val newInstance =
+         myColumns.foldLeft(getMyFieldType.makeEmpty)(helper)*/
+      val newInstance = getMyFieldType.makeEmpty
+      val newArray = oldArray.appended(newInstance)
       setter(root, newArray).asInstanceOf[DMStruct] // FIXME
    }
 
@@ -116,7 +125,7 @@ class TableControl(/* TODO some params */
    private val addButton: Button = new Button("+") {
       onAction = handle {
          // this is not exactly the way I'd like to do it
-         editableView.update(insertRow)
+         editableView.update(v => insertRow(v.asInstanceOf[DMStruct]))
          refreshBinding(editableView.modelInstance)
       }
       focusTraversable = false

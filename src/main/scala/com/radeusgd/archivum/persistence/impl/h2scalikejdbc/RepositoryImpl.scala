@@ -13,7 +13,11 @@ class RepositoryImpl(private val _model: Model,
    private val table: SQLSyntax = DBUtils.rawSql(tableName)
 
    override def createRecord(value: DMStruct): Rid = {
-      if (rootType.validate(value).nonEmpty) throw new IllegalArgumentException("Value does not conform to the model")
+      val errors = rootType.validate(value)
+      if (errors.nonEmpty) {
+         val errMsgs = errors.map(err => err.getPath.mkString(".") + ": " + err.getMessage)
+         throw new IllegalArgumentException("Value does not conform to the model\n" + errMsgs.mkString("\n"))
+      }
       val ins = new InsertImpl(tableName)
       rootType.tableInsert(Nil, ins, value)
       db.autoCommit({ implicit session => ins.insert(None) })

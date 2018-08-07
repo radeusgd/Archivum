@@ -13,7 +13,7 @@ object XMLUtils {
          pathAttr <- xmlnode.attribute(ViewLanguage.BindingPath)
          path <- pathAttr.headOption.map(n => DMUtils.parsePath(n.text))
          if path.nonEmpty
-      } yield path).toRight(LayoutParseError("Path not specified"))
+      } yield path).toRight(LayoutParseError(xmlnode, "Path not specified"))
 
    def properChildren(xmlnode: Node): Seq[Node] =
       xmlnode.child.filter(_.label != "#PCDATA")

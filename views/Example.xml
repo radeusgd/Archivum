@@ -7,8 +7,8 @@
                     <TextColumn label="Names" />
                 </table>
             </hbox>
-            <TextField path="Surname"/>
-            <TextField path="City"/>
+            <TextField path="Surname" default="Kowalski"/>
+            <TextField path="City" default="Warszawa"/>
             <ChoiceField path="Gender"/>
             <YearDateField path="Birthday" />
             <IntegerField path="Siblings"/>

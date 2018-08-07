@@ -7,7 +7,7 @@ object TextColumnFactory
    extends CommonColumnFactory(ViewLanguage.TextColumn, new TextControl(_, _, _))
 
 object ChoiceColumnFactory
-   extends SimpleColumnFactory(ViewLanguage.ChoiceColumn, new ChoiceControl(_, _, _))
+   extends CommonColumnFactory(ViewLanguage.ChoiceColumn, new ChoiceControl(_, _, _))
 
 object ClassicDateColumnFactory
    extends CommonColumnFactory(ViewLanguage.ClassicDateColumn, new ClassicDateControl(_, _, _))

@@ -24,7 +24,7 @@ class HackyImageControl(val label: String, path: List[String],
 
 
    protected val fieldGetter: DMValue => DMValue = DMUtils.makeGetter(path)
-   protected val fieldSetter: (DMAggregate, DMValue) => DMAggregate = DMUtils.makeSetter(path)
+   protected val fieldSetter: (DMValue, DMValue) => DMValue = DMUtils.makeSetter(path)
 
    // TODO awful hacks
    protected def fromValue(v: DMValue): String = bridge.fromDM(v)

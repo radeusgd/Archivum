@@ -14,14 +14,16 @@ object DMUtils {
             }
       }
 
-   def makeSetter(path: List[String]): (DMAggregate, DMValue) => DMAggregate =
+   def makeSetter(path: List[String]): (DMValue, DMValue) => DMValue =
       path match {
          case Nil => throw new IllegalArgumentException
-         case last :: Nil => _.updated(last, _)
+         case last :: Nil => _.asInstanceOf[DMAggregate].updated(last, _) // TODO this might be done better?
          case part :: rest =>
-            val nestedSetter: (DMAggregate, DMValue) => DMAggregate = makeSetter(rest)
-            (s: DMAggregate, v: DMValue) =>
-               s.updated(part, nestedSetter(s(part).asInstanceOf[DMAggregate], v))
+            val nestedSetter: (DMValue, DMValue) => DMValue = makeSetter(rest)
+            (s: DMValue, v: DMValue) => {
+               val agg = s.asInstanceOf[DMAggregate]
+               agg.updated(part, nestedSetter(agg(part), v))
+            }
       }
 
    def makeValueSetter(path: List[String]): (DMValue, DMValue) => DMValue =
