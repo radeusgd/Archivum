@@ -1,12 +1,17 @@
 package com.radeusgd.archivum.gui
 
+import java.time.LocalDateTime
+
 import com.radeusgd.archivum.datamodel._
 import com.radeusgd.archivum.gui.controls._
 import com.radeusgd.archivum.gui.layout._
+import com.radeusgd.archivum.persistence.DBUtils.Rid
 import com.radeusgd.archivum.persistence.Repository
+import scalafx.application.Platform
 
 import scala.xml.XML
 import scalafx.collections.ObservableBuffer
+import scalafx.scene.control.Label
 import scalafx.scene.layout.Pane
 
 class EditableView(val repo: Repository, xmlroot: xml.Node) extends Pane {
@@ -45,8 +50,7 @@ class EditableView(val repo: Repository, xmlroot: xml.Node) extends Pane {
          modelInstance = newInstance
 
          if (newErrors.isEmpty) {
-            // TODO debounce (if there are multiple changes during 3s or so make only one submission)
-            repo.updateRecord(currentRid, modelInstance)
+            saveInstance(currentRid, modelInstance)
          } else {
             println(newErrors)
             //TODO display errors
@@ -56,6 +60,44 @@ class EditableView(val repo: Repository, xmlroot: xml.Node) extends Pane {
       val unhandled = boundControls.foldLeft(newErrors)((e, c) => c.refreshErrors(e))
       unhandledErrors.setAll(unhandled: _*)
       errors.setAll(newErrors: _*)
+   }
+
+   var modifiedStatus: Option[Label] = None
+   private val debounceSeconds: Int = 3
+   case class SaveRequest(rid: Rid, value: DMStruct, time: LocalDateTime)
+   private var currentRequest: Option[SaveRequest] = None
+   private def saveInstance(rid: Rid, value: DMStruct): Unit = {
+      modifiedStatus.foreach(_.text = "Modified")
+
+      val ev = this
+      ev.synchronized {
+         currentRequest match {
+            case Some(SaveRequest(otherRid, otherValue, _))
+               if rid != otherRid =>
+               repo.updateRecord(otherRid, otherValue)
+            case _ =>
+         }
+         currentRequest = Some(SaveRequest(rid, value, LocalDateTime.now()))
+      }
+
+      val timer = new java.util.Timer()
+      val task = new java.util.TimerTask {
+         override def run(): Unit = {
+            timer.cancel() // prepare for cleanup
+            ev.synchronized {
+               currentRequest match {
+                  case Some(SaveRequest(rrid, rvalue, time))
+                     if LocalDateTime.now().isAfter(time.plusSeconds(debounceSeconds)) => {
+                     repo.updateRecord(rrid, rvalue)
+                     modifiedStatus.foreach(label => Platform.runLater { label.text = "Saved" })
+                     currentRequest = None
+                  }
+                  case _ =>
+               }
+            }
+         }
+      }
+      timer.schedule(task, debounceSeconds * 1000 + 100)
    }
 
    def setModelInstance(rid: Long): Unit = {

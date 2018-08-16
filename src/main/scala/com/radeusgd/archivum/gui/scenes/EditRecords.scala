@@ -45,6 +45,8 @@ class EditRecords(val repository: Repository, val parentScene: Scene) extends Sc
    }
 
    private val errorsLabel = new Label
+   private val modifiedLabel = new Label("TEST")
+   editableView.modifiedStatus = Some(modifiedLabel)
 
    private def deleteCurrent(): Unit = {
       repository.deleteRecord(currentRid)
@@ -72,7 +74,8 @@ class EditRecords(val repository: Repository, val parentScene: Scene) extends Sc
          utils.mkButton("-->", () => ridSet.getLastRid().foreach(setModelInstance)),
          utils.mkButton("Delete", deleteCurrent),
          utils.mkButton("Create empty", insertEmpty),
-         errorsLabel
+         errorsLabel,
+         modifiedLabel
       )
    }
 
