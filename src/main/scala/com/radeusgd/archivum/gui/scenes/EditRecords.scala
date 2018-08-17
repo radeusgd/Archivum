@@ -49,8 +49,10 @@ class EditRecords(val repository: Repository, val parentScene: Scene) extends Sc
    editableView.modifiedStatus = Some(modifiedLabel)
 
    private def deleteCurrent(): Unit = {
-      repository.deleteRecord(currentRid)
-      setSomeModelInstance(currentRid)
+      if (utils.ask("Are you sure you want to delete this entry?")) {
+         repository.deleteRecord(currentRid)
+         setSomeModelInstance(currentRid)
+      }
    }
 
    private def insertEmpty(): Unit = {
