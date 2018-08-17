@@ -1,14 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" ?>
 <vbox>
     <label>Birth record</label>
     <hbox>
         <vbox>
             <hbox>
                 <table path="Names">
-                    <TextColumn label="Names" />
+                    <AutocompleteTextColumn label="Names" sources="Names.*;Mother.Name;Father.Name;Godparents.*.Name"/>
                 </table>
             </hbox>
-            <TextField path="Surname" default="Kowalski"/>
-            <TextField path="City" default="Warszawa"/>
+            <AutocompleteTextField path="Surname" default="Kowalski" sources="Surname;Mother.Surname;Father.Surname;Godparents.*.Surname"/>
+            <AutocompleteTextField path="City" default="Warszawa" sources="miasta"/>
             <ChoiceField path="Gender"/>
             <YearDateField path="Birthday" />
             <IntegerField path="Siblings"/>

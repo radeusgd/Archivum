@@ -19,6 +19,9 @@ libraryDependencies ++= Seq(
    "ch.qos.logback"  %  "logback-classic"   % "1.2.3"
 )
 
+// https://mvnrepository.com/artifact/org.controlsfx/controlsfx
+libraryDependencies += "org.controlsfx" % "controlsfx" % "8.40.14"
+
 libraryDependencies += "org.typelevel" %% "cats-core" % "1.0.1"
 
 // TODO assembly setup

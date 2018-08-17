@@ -10,11 +10,15 @@ import scala.collection.mutable
 
 class SetupImpl(val tableName: String, val subOf: Option[String] = None) extends Setup {
    private val fields: mutable.Map[String, DBType] = mutable.Map.empty
+   private val indexedFields: mutable.MutableList[String] = mutable.MutableList.empty
    private val tables: mutable.Map[String, SetupImpl] = mutable.Map.empty
    private val sqlTableName: SQLSyntax = rawSql(tableName)
 
-   override def addField(path: Seq[String], typ: DBType): Unit = {
+   override def addField(path: Seq[String], typ: DBType, indexed: Boolean): Unit = {
       fields.put(pathToDb(path), typ)
+      if (indexed) {
+         indexedFields += pathToDb(path)
+      }
    }
 
    override def addSubTable(path: Seq[String]): Setup = {
@@ -37,6 +41,10 @@ class SetupImpl(val tableName: String, val subOf: Option[String] = None) extends
       val prid = subOf.map(parent => rawSql("_prid BIGINT AUTO_INCREMENT REFERENCES " + parent + " ON DELETE CASCADE"))
       val columns: SQLSyntax = join(List(rid) ++ prid.toList ++ fields.map({ case (name, typ) => defineColumn(name, typ) }), sqls",")
       val schem = sql"CREATE TABLE $sqlTableName ($columns);"
-      List(schem) ++ tables.values.toList.flatMap(_.createSchema())
+      val indexes = indexedFields.map(name => {
+         val sqlName = rawSql(s"$name")
+         sql"CREATE INDEX ON $sqlTableName($sqlName);"
+      })
+      List(schem) ++ tables.values.toList.flatMap(_.createSchema()) ++ indexes
    }
 }

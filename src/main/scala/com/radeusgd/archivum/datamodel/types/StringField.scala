@@ -15,7 +15,7 @@ object StringField extends FieldType {
    override def makeEmpty: DMValue = DMString("")
 
    override def tableSetup(path: Seq[String], table: Setup): Unit = {
-      table.addField(path, DBTypes.String)
+      table.addField(path, DBTypes.String, indexed = true)
    }
 
    override def tableFetch(path: Seq[String], table: Fetch): DMValue = DMString(table.getString(path))

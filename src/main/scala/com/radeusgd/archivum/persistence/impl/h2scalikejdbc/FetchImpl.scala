@@ -1,8 +1,5 @@
 package com.radeusgd.archivum.persistence.impl.h2scalikejdbc
 
-import com.radeusgd.archivum.datamodel.{DMInteger, DMNull, DMString, DMValue}
-import com.radeusgd.archivum.persistence.DBTypes
-import com.radeusgd.archivum.persistence.DBTypes.DBType
 import com.radeusgd.archivum.persistence.DBUtils.{pathToDb, rawSql, subtableName}
 import com.radeusgd.archivum.persistence.strategies.Fetch
 import scalikejdbc._

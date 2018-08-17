@@ -124,7 +124,8 @@ object EditableView {
       DateControlFactory,
       ClassicDateControlFactory,
       YearDateControlFactory,
-      TableControlFactory
+      TableControlFactory,
+      AutocompleteTextControlFactory
    )
 
    private val parsers: Map[String, LayoutFactory] =

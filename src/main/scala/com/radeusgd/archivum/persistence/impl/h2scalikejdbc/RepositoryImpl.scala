@@ -4,6 +4,8 @@ import com.radeusgd.archivum.datamodel.{DMStruct, Model}
 import com.radeusgd.archivum.persistence.{DBUtils, Repository, RidSetHelper, SearchCriteria}
 import scalikejdbc._
 
+import com.radeusgd.archivum.utils.splitList
+
 class RepositoryImpl(private val _model: Model,
                      private val tableName: String,
                      private val db: DB) extends Repository {
@@ -49,6 +51,23 @@ class RepositoryImpl(private val _model: Model,
    override def deleteRecord(rid: Rid): Unit = {
       db.autoCommit({ implicit session =>
          sql"DELETE FROM $table WHERE _rid = $rid;".update.apply()
+      })
+   }
+
+   override def fetchAutocompletions(path: Seq[String], hint: String, limit: Int): Seq[String] = {
+      val paths = splitList(path.toList, "*").reverse
+      val lastPath = paths.head
+      val subtables = paths.tail.reverse
+
+      val actualTableName = subtables.foldLeft(tableName)(
+         (tableName, part) => DBUtils.subtableName(tableName, part)
+      )
+      val actualTable = DBUtils.rawSql(actualTableName)
+      val columnName = DBUtils.rawSql(DBUtils.pathToDb(lastPath))
+
+      db.readOnly({ implicit session =>
+         sql"SELECT DISTINCT $columnName FROM $actualTable WHERE $columnName LIKE ${hint + "%"} LIMIT $limit;"
+            .map(rs => rs.string(1)).list.apply()
       })
    }
 

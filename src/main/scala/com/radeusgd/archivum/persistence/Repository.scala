@@ -15,6 +15,10 @@ trait Repository {
 
    def deleteRecord(rid: Rid): Unit
 
+   // path can contain * indicating all elements from array
+   // it's an imperfect way to implement this, but time budget is too small
+   def fetchAutocompletions(path: Seq[String], hint: String, limit: Int = 10): Seq[String]
+
    // TODO using this in processing will be slow, in the future we should extend Repository to handle Streams of records or something similar
    def fetchAllRecords(): Seq[(Rid, DMStruct)]
 

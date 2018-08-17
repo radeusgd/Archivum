@@ -6,6 +6,7 @@ object ViewLanguage {
 
    val Label = "label"
    val TextField = "textfield"
+   val AutocompleteTextField = "autocompletetextfield"
    val ChoiceField = "choicefield"
    val IntegerField = "integerfield"
    val DateField = "datefield"
@@ -15,6 +16,7 @@ object ViewLanguage {
 
    val TableRoot = "table"
    val TextColumn = "textcolumn"
+   val AutocompleteTextColumn = "autocompletetextcolumn"
    val DateColumn = "datecolumn"
    val ClassicDateColumn = "classicdatecolumn"
    val YearDateColumn = "yeardatecolumn"
@@ -31,6 +33,7 @@ object ViewLanguage {
 
    val Default = "default"
    val Sticky = "sticky"
+   val AutocompletionSources = "sources"
 
    val True = "true"
    val False = "false"

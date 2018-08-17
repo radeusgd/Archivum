@@ -1,8 +1,8 @@
 package com.radeusgd.archivum.gui.controls
 
 import cats.implicits._
-import com.radeusgd.archivum.datamodel.types.{ArrayField, FieldType, StructField}
 import com.radeusgd.archivum.datamodel._
+import com.radeusgd.archivum.datamodel.types.{ArrayField, FieldType, StructField}
 import com.radeusgd.archivum.gui.EditableView
 import com.radeusgd.archivum.gui.controls.tablecolumns._
 import com.radeusgd.archivum.gui.layout.{LayoutFactory, LayoutParseError, ParsedLayout}
@@ -154,7 +154,8 @@ object TableControlFactory extends LayoutFactory {
       YearDateColumnFactory,
       ChoiceColumnFactory,
       IntegerColumnFactory,
-      HackyImageColumnFactory
+      HackyImageColumnFactory,
+      AutocompleteTextColumnFactory
    )
 
    private val columnFactories: Map[String, ColumnFactory] =

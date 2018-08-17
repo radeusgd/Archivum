@@ -16,8 +16,8 @@ class BaseTextControl(bridge: StringDMBridge,
    with DefaultValueOnCreation with PreviosValueOnCreation
 {
 
-   private val rows: Int = properties.rows.getOrElse(1)
-   private val tfieldWidth: Double = properties.width.getOrElse(200).toDouble
+   protected val rows: Int = properties.rows.getOrElse(1)
+   protected val tfieldWidth: Double = properties.width.getOrElse(200).toDouble
 
    protected val textField: TextInputControl =
       if (rows == 1)

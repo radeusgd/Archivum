@@ -6,7 +6,7 @@ import scalikejdbc._
 trait Database {
    def openRepository(modelName: String): Option[Repository]
 
-   def createRepository(modelDefinition: String) // TODO
+   def createRepository(modelDefinition: String): Unit // TODO see Impl
 
    def listRepositories(): Seq[String]
 }
