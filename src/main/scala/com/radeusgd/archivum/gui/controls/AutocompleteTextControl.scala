@@ -1,9 +1,6 @@
 package com.radeusgd.archivum.gui.controls
 
-import cats.implicits._
 import com.radeusgd.archivum.datamodel.DMUtils
-
-import collection.JavaConverters._
 import com.radeusgd.archivum.gui.EditableView
 import com.radeusgd.archivum.gui.controls.commonproperties.CommonProperties
 import com.radeusgd.archivum.gui.controls.dmbridges.StringBridge
@@ -13,10 +10,9 @@ import com.radeusgd.archivum.gui.utils.XMLUtils
 import com.radeusgd.archivum.languages.ViewLanguage
 import javafx.util.Callback
 import org.controlsfx.control.textfield.{AutoCompletionBinding, TextFields}
-import scalafx.scene
-import scalafx.scene.control.{TextField, TextInputControl}
+import scalafx.scene.control.TextField
 
-import scala.util.Try
+import scala.collection.JavaConverters._
 import scala.xml.Node
 
 class AutocompleteTextControl(properties: CommonProperties,
@@ -39,7 +35,7 @@ class AutocompleteTextControl(properties: CommonProperties,
                } catch {
                   case e: Throwable =>
                      println(e)
-                     com.radeusgd.archivum.gui.utils.reportException("!!!",e)
+                     com.radeusgd.archivum.gui.utils.reportException("!!!", e)
                      throw e
                }
          ).toSet
@@ -58,7 +54,8 @@ object AutocompleteTextControlFactory extends LayoutFactory {
       else {
          for {
             path <- XMLUtils.extractPath(xmlnode)
-            sourcesText <- xmlnode.attribute(ViewLanguage.AutocompletionSources).map(_.text).toRight(LayoutParseError("Autocompletion sources missing"))
+            sourcesText = xmlnode.attribute(ViewLanguage.AutocompletionSources).map(_.text)
+               .getOrElse(path.mkString(".")) // suggest itself by default
             sources = sourcesText.split(';').toList
             properties <- CommonProperties.parseXML(xmlnode)
             node = new AutocompleteTextControl(properties, sources, path, ev)
@@ -76,10 +73,11 @@ object AutocompleteTextColumnFactory
       else {
          val path = XMLUtils.extractPath(xmlnode).getOrElse(Nil)
          for {
-            sourcesText <- xmlnode.attribute(ViewLanguage.AutocompletionSources).map(_.text).toRight(LayoutParseError("Autocompletion sources missing"))
+            sourcesText <- xmlnode.attribute(ViewLanguage.AutocompletionSources).map(_.text)
+               .toRight(LayoutParseError("Autocompletion sources missing"))
             sources = sourcesText.split(';').toList
             properties <- CommonProperties.parseXML(xmlnode)
-            moddedProps = properties.copy(label="")
+            moddedProps = properties.copy(label = "")
          } yield new SimpleColumn(
             properties.label,
             (basePath: List[String], ev: EditableView) =>
