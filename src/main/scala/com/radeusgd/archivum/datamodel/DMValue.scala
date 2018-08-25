@@ -89,7 +89,7 @@ case class DMArray(values: Vector[DMValue]) extends DMValue with DMAggregate {
       s match {
          case QueryLanguage.ArrayLength => DMInteger(values.length)
          case AsInt(ind) /*if ind >= 0 && ind < values.length*/ => values(ind) // TODO not sure what to throw here
-         case _ => throw new NoSuchFieldException
+         case _ => throw new NoSuchFieldException(s)
       }
 
    def apply(idx: Int): DMValue = values(idx)

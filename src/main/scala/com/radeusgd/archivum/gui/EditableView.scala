@@ -5,6 +5,7 @@ import java.time.LocalDateTime
 import com.radeusgd.archivum.datamodel._
 import com.radeusgd.archivum.gui.controls._
 import com.radeusgd.archivum.gui.layout._
+import com.radeusgd.archivum.gui.utils.XMLUtils
 import com.radeusgd.archivum.persistence.DBUtils.Rid
 import com.radeusgd.archivum.persistence.Repository
 import scalafx.application.Platform
@@ -112,7 +113,7 @@ class EditableView(val repo: Repository, xmlroot: xml.Node) extends Pane {
 
 object EditableView {
    def makeFromDefinition(repo: Repository, text: String): EditableView =
-      new EditableView(repo, XML.loadString(text)) // TODO add preprocessor
+      new EditableView(repo, XML.loadString(XMLUtils.preprocessXMLText(text)))
 
    private val parsersList: Seq[LayoutFactory] = Seq(
       HBoxFactory,

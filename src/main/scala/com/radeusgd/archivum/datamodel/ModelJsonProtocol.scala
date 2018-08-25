@@ -19,7 +19,6 @@ object ModelJsonProtocol extends DefaultJsonProtocol {
          json.asJsObject.getFields("name", "types", "fields") match {
             case Seq(JsString(name), JsArray(types), JsObject(fields)) =>
                val customTypes: Map[String, FieldType] = parseCustomTypes(types.map(_.asJsObject("Each type should be a JSON object")))
-               println(customTypes.keys)
                new Model(name, readStructDef(customTypes)(fields))
             case _ => throw DeserializationException("Wrong model root structure")
          }
@@ -55,10 +54,7 @@ object ModelJsonProtocol extends DefaultJsonProtocol {
          case JsString("integer") => IntegerField
          case JsString("date") => DateField
          case JsString("yeardate") => YearDateField
-         case JsString(typename) =>
-            println(typename)
-            println(customTypes.keySet)
-            customTypes(typename)
+         case JsString(typename) => customTypes(typename)
          case _ => throw DeserializationException("Expected a typename")
       }
    }
