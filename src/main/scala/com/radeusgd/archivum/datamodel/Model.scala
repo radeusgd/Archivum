@@ -13,8 +13,11 @@ case class Model(name: String, roottype: StructField) {
 object Model {
    def fromDefinition(definition: String): Try[Model] = {
       util.Try({
-         val json = JsonParser(definition)
+         val json = JsonParser(removeComments(definition))
          json.convertTo[Model]
       })
    }
+
+   private def removeComments(definition: String): String =
+      definition.split("\n").map(line => line.takeWhile(_ != '#')).mkString("\n")
 }
