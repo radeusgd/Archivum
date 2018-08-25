@@ -112,7 +112,7 @@ class EditableView(val repo: Repository, xmlroot: xml.Node) extends Pane {
 
 object EditableView {
    def makeFromDefinition(repo: Repository, text: String): EditableView =
-      new EditableView(repo, XML.loadString(text))
+      new EditableView(repo, XML.loadString(text)) // TODO add preprocessor
 
    private val parsersList: Seq[LayoutFactory] = Seq(
       HBoxFactory,

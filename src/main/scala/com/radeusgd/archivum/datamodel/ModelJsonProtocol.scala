@@ -17,8 +17,9 @@ object ModelJsonProtocol extends DefaultJsonProtocol {
 
       override def read(json: JsValue): Model = {
          json.asJsObject.getFields("name", "types", "fields") match {
-            case Seq(JsString(name), JsObject(types), JsObject(fields)) =>
-               val customTypes: Map[String, FieldType] = parseCustomTypes(types)
+            case Seq(JsString(name), JsArray(types), JsObject(fields)) =>
+               val customTypes: Map[String, FieldType] = parseCustomTypes(types.map(_.asJsObject("Each type should be a JSON object")))
+               println(customTypes.keys)
                new Model(name, readStructDef(customTypes)(fields))
             case _ => throw DeserializationException("Wrong model root structure")
          }
@@ -26,14 +27,14 @@ object ModelJsonProtocol extends DefaultJsonProtocol {
    }
 
    private def readStructDef(customTypes: Map[String, FieldType])(fields: Map[String, JsValue]): StructField =
-      StructField(fields mapValues readFieldType(customTypes))
+      StructField(fields.mapValues(readFieldType(customTypes)))
 
-   private def parseCustomTypes(typeDefs: Map[String, JsValue]): Map[String, FieldType] =
+   private def parseCustomTypes(typeDefs: Vector[JsObject]): Map[String, FieldType] =
       typeDefs.foldLeft(Map.empty[String, FieldType])(
-         (soFar: Map[String, FieldType], kv: (String, JsValue)) => {
-            val key = kv._1
-            val json = kv._2
-            soFar.updated(key, readCustomTypeDef(soFar, json))
+         (soFar: Map[String, FieldType], typedef: JsObject) => {
+            val JsString(key) = typedef.fields("name")
+            val definition = typedef.fields("def")
+            soFar.updated(key, readCustomTypeDef(soFar, definition))
          })
 
    private def readCustomTypeDef(customTypesSoFar: Map[String, FieldType], json: JsValue): FieldType = {
@@ -54,7 +55,10 @@ object ModelJsonProtocol extends DefaultJsonProtocol {
          case JsString("integer") => IntegerField
          case JsString("date") => DateField
          case JsString("yeardate") => YearDateField
-         case JsString(typename) => customTypes(typename)
+         case JsString(typename) =>
+            println(typename)
+            println(customTypes.keySet)
+            customTypes(typename)
          case _ => throw DeserializationException("Expected a typename")
       }
    }

@@ -22,7 +22,7 @@ class RepositoryImpl(private val _model: Model,
       }
       val ins = new InsertImpl(tableName)
       rootType.tableInsert(Nil, ins, value)
-      db.autoCommit({ implicit session => ins.insert(None) })
+      db.localTx({ implicit session => ins.insert(None) })
    }
 
    private def rsToDM(rs: WrappedResultSet)(implicit session: DBSession): DMStruct = {
@@ -44,12 +44,12 @@ class RepositoryImpl(private val _model: Model,
       deleteRecord(rid)
       val ins = new InsertImpl(tableName)
       rootType.tableInsert(Nil, ins, newValue)
-      val nrid = db.autoCommit({ implicit session => ins.insert(Some(rid)) })
+      val nrid = db.localTx({ implicit session => ins.insert(Some(rid)) })
       assert(rid == nrid)
    }
 
    override def deleteRecord(rid: Rid): Unit = {
-      db.autoCommit({ implicit session =>
+      db.localTx({ implicit session =>
          sql"DELETE FROM $table WHERE _rid = $rid;".update.apply()
       })
    }

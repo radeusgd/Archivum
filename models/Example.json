@@ -1,26 +1,42 @@
 {
-  "name": "Example",
-  "types": {
-    "gender": ["F","M"],
-    "maybeboolean": [ "no data", "YES", "NO"],
-    "parent": {
-      "Name": "text",
-      "Surname": "text",
-      "Profession": "text",
-      "FooBar": "maybeboolean"
+    "name": "Example",
+    "types": [
+        {
+            "name": "gender",
+            "def": [
+                "F",
+                "M"
+            ]
+        },
+        {
+            "name": "maybeboolean",
+            "def": [
+                "no data",
+                "YES",
+                "NO"
+            ]
+        },
+        {
+            "name": "parent",
+            "def": {
+                "Name": "text",
+                "Surname": "text",
+                "Profession": "text",
+                "FooBar": "maybeboolean"
+            }
+        }
+    ],
+    "fields": {
+        "City": "text",
+        "Names": "array:text",
+        "Surname": "text",
+        "Birthday": "yeardate",
+        "Gender": "gender",
+        "Father": "parent",
+        "Mother": "parent",
+        "Siblings": "integer",
+        "Godparents": "array:parent",
+        "Source": "bigtext",
+        "Images": "array:text"
     }
-  },
-  "fields": {
-    "City": "text",
-    "Names": "array:text",
-    "Surname": "text",
-    "Birthday": "yeardate",
-    "Gender": "gender",
-    "Father": "parent",
-    "Mother": "parent",
-    "Siblings": "integer",
-    "Godparents": "array:parent",
-    "Source": "bigtext",
-    "Images": "array:text"
-  }
 }

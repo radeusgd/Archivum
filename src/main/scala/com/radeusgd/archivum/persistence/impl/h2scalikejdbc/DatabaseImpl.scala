@@ -25,7 +25,7 @@ class DatabaseImpl(val db: DB) extends Database {
       val setup: SetupImpl = new SetupImpl(sanitizeName(model.name))
       model.roottype.tableSetup(Nil, setup)
       val modelCreation = setup.createSchema()
-      db.autoCommit { implicit session =>
+      db.localTx { implicit session =>
          sql"INSERT INTO models (name, definition) VALUES(${model.name}, $modelDefinition)".update.apply()
          modelCreation.foreach(_.update.apply())
       }
@@ -41,7 +41,7 @@ class DatabaseImpl(val db: DB) extends Database {
    }
 
    private def ensureModelTable(): Unit = {
-      db.autoCommit { implicit session =>
+      db.localTx { implicit session =>
          sql"""CREATE TABLE IF NOT EXISTS models (
                   name VARCHAR(100) PRIMARY KEY,
                   definition VARCHAR(9000)
