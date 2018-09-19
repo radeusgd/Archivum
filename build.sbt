@@ -1,6 +1,6 @@
 name := "Archivum"
 
-version := "0.2.2"
+version := "0.3.0"
 
 scalaVersion := "2.12.4"
 
@@ -23,6 +23,8 @@ libraryDependencies ++= Seq(
 libraryDependencies += "org.controlsfx" % "controlsfx" % "8.40.14"
 
 libraryDependencies += "org.typelevel" %% "cats-core" % "1.0.1"
+
+libraryDependencies += "org.parboiled" %% "parboiled" % "2.1.5"
 
 // TODO assembly setup
 mainClass in assembly := Some("com.radeusgd.archivum.gui.ApplicationMain")

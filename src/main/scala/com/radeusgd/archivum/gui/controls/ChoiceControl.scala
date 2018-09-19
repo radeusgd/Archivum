@@ -34,7 +34,7 @@ class ChoiceControl(val properties: CommonProperties, path: List[String], protec
          })
       }
    }
-
+   alignment = Pos.BaselineRight
    spacing = LayoutDefaults.defaultSpacing
    children = if (properties.label == "") Seq(choiceField) else Seq(
       new Label(properties.label) {
