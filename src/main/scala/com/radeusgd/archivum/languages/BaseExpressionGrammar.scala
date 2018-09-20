@@ -23,30 +23,41 @@ class BaseExpressionGrammar(val input: ParserInput) extends Parser {
       Factor
    }
 
-   def Factor: Rule1[AST.Expression] = rule { Number | Parens /*| FunctionCall */}
+   def Factor: Rule1[AST.Expression] = rule { FunctionCall | Text | Variable | Number | Parens }
 
-   /*def FunctionCall: Rule1[AST.Expression] = rule {
-      capture(Identifier) ~ '(' ~ (Expression * ',') ~ ')'
-         ~> ((name: String) => AST.IntValue(0))
-   }*/
+   def FunctionCall: Rule1[AST.Expression] = rule {
+      Identifier ~ FunctionCallArgs ~> ((name: String, args: Seq[AST.Expression]) => AST.FunctionCall(name, args.toList))
+   }
+
+   def FunctionCallArgs: Rule1[Seq[AST.Expression]] = rule {
+      ws('(') ~ (Expression * ws(',').named(",")) ~ ws(')')
+   }
 
    def Parens: Rule1[AST.Expression] = rule { ws('(') ~ Expression ~ ws(')') }
 
    def Number: Rule1[AST.Expression] = rule {
-      capture(oneOrMore(CharPredicate.Digit)) ~ zeroOrMore(WhitespaceChar) ~> ((d: String) => AST.IntValue(d.toInt))
+      capture(oneOrMore(CharPredicate.Digit)) ~ Whitespace ~> ((d: String) => AST.IntValue(d.toInt))
    }
 
    def Text: Rule1[AST.Expression] = rule {
-      ws('"') ~ capture(zeroOrMore(CharPredicate.All)) ~ ws('"') ~> ((quot: String) => AST.StringValue(quot))
+      ws('"') ~ capture(zeroOrMore(CharPredicate.from(_ != '"'))) ~ ws('"') ~> AST.StringValue
+   }
+
+   def Variable: Rule1[AST.Expression] = rule {
+      Identifier ~> AST.Variable
    }
 
    def Identifier: Rule1[String] = rule {
-      capture(CharPredicate.Alpha ~ zeroOrMore(CharPredicate.AlphaNum)) ~ zeroOrMore(WhitespaceChar)
+      capture(CharPredicate.Alpha ~ zeroOrMore(CharPredicate.AlphaNum)) ~ Whitespace
    }
 
-   def ws(c: Char): Rule0 = rule { c ~ zeroOrMore(WhitespaceChar) }
+   def Whitespace: Rule0 = rule {
+      zeroOrMore(quiet(WhitespaceChar))
+   }
 
-   val WhitespaceChar = CharPredicate(" \\n\\r\\t\\f")
+   def ws(c: Char): Rule0 = rule { c ~ Whitespace }
+
+   val WhitespaceChar = CharPredicate(" \n\r\t\f")
 }
 
 class TestExtendedGrammar(input: ParserInput) extends BaseExpressionGrammar(input) {
@@ -63,7 +74,7 @@ object Test {
       val result: Try[AST.Expression] = parser.Statement.run()
       result match {
          case Failure(error) => error match {
-            case pe: ParseError => println(parser.formatError(pe))
+            case pe: ParseError => println(parser.formatError(pe, new ErrorFormatter(showTraces = false)))
             case _ => println(error)
          }
          case Success(i) => println(i)
@@ -71,8 +82,11 @@ object Test {
    }
 
    def main(args: Array[String]): Unit = {
-      simpleParseTest("1+2")
+      simpleParseTest("""("abc" + "def")""")
       simpleParseTest("1 + 2")
       simpleParseTest("1+2*(3+4)")
+      simpleParseTest("f(0)")
+      simpleParseTest("f(x)")
+      simpleParseTest("f(1,2 + 3) * test(\"abc\", a, 2)")
    }
 }
