@@ -40,11 +40,11 @@ class BaseExpressionGrammar(val input: ParserInput) extends Parser {
    }
 
    def Text: Rule1[AST.Expression] = rule {
-      ws('"') ~ capture(zeroOrMore(CharPredicate.from(_ != '"'))) ~ ws('"') ~> AST.StringValue
+      '"' ~ capture(zeroOrMore(CharPredicate.from(_ != '"'))) ~ ws('"') ~> AST.StringValue
    }
 
    def Variable: Rule1[AST.Expression] = rule {
-      Identifier ~> AST.Variable
+      (Identifier | '`' ~ capture(oneOrMore(CharPredicate.from(_ != '`'))) ~ ws('`')) ~> AST.Variable
    }
 
    def Identifier: Rule1[String] = rule {

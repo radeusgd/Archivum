@@ -3,6 +3,8 @@ package com.radeusgd.archivum.datamodel
 object DMUtils {
    def parsePath(path: String): List[String] = path.split('.').toList
 
+   def makeGetter(path: String): (DMValue) => DMValue = makeGetter(parsePath(path))
+
    def makeGetter(path: List[String]): (DMValue) => DMValue =
       path match {
          case Nil => identity

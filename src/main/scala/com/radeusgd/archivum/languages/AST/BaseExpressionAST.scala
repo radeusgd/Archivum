@@ -1,6 +1,6 @@
 package com.radeusgd.archivum.languages.AST
 
-sealed class Expression
+sealed abstract class Expression
 
 case class Variable(name: String) extends Expression {
    override def toString: String = name
