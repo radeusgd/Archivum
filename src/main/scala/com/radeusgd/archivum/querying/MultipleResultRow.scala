@@ -56,6 +56,12 @@ case class MultipleResultRow(prefix: ResultRow, objects: Seq[DMValue]) {
 
       newRows.map(_.sortBy(sortBy))
    }
+
+   def aggregate(aggregations: Seq[(String, Seq[DMValue] => DMValue)]): ResultRow = {
+      aggregations.foldLeft(prefix){
+         case (agg: ResultRow, (name, f)) => agg.extend(name, f(objects))
+      }
+   }
 }
 
 object MultipleResultRow {

@@ -32,4 +32,8 @@ case class ResultSet(rows: Seq[MultipleResultRow]) {
    def groupBy[A](path: String, appendPrefix: Option[AppendPrefix], sortBy: DMValue => A)(implicit ord: Ordering[A]): ResultSet = {
       flatMap(_.groupBy(path, appendPrefix, sortBy))
    }
+
+   def aggregate(aggregations: Seq[(String, Seq[DMValue] => DMValue)]): Seq[ResultRow] = {
+      rows.map(_.aggregate(aggregations))
+   }
 }
