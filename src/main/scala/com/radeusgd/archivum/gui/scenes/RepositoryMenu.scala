@@ -2,11 +2,11 @@ package com.radeusgd.archivum.gui.scenes
 
 import com.radeusgd.archivum.gui.utils
 import com.radeusgd.archivum.persistence.Repository
-
+import com.radeusgd.archivum.querying.DAOGenerator
 import scalafx.Includes._
 import scalafx.geometry.Insets
 import scalafx.scene.Scene
-import scalafx.scene.control.{Button, Label}
+import scalafx.scene.control.{Button, Label, TextArea}
 import scalafx.scene.layout.VBox
 
 class RepositoryMenu(val repository: Repository) extends Scene {
@@ -30,7 +30,8 @@ class RepositoryMenu(val repository: Repository) extends Scene {
          }
       },
       utils.makeGoToButton("Export", exporter),
-      utils.makeGoToButton("Import", importer)
+      utils.makeGoToButton("Import", importer),
+      new ReplInterface(repository)
    ) {
       spacing = 5
       padding = Insets(15.0)
