@@ -22,7 +22,7 @@ class RepositoryImpl(private val _model: Model,
       }
       val ins = new InsertImpl(tableName)
       rootType.tableInsert(Nil, ins, value)
-      db.localTx({ implicit session => ins.insert(None) })
+      localTx({ implicit session => ins.insert(None) })
    }
 
    private def rsToDM(rs: WrappedResultSet)(implicit session: DBSession): DMStruct = {
@@ -31,7 +31,7 @@ class RepositoryImpl(private val _model: Model,
    }
 
    override def fetchRecord(rid: Rid): Option[DMStruct] = {
-      val record = db.readOnly({ implicit session =>
+      val record = readOnly({ implicit session =>
          sql"SELECT * FROM $table WHERE _rid = $rid"
             .map(rs => rsToDM(rs)(session)).single.apply()
       })
@@ -44,12 +44,12 @@ class RepositoryImpl(private val _model: Model,
       deleteRecord(rid)
       val ins = new InsertImpl(tableName)
       rootType.tableInsert(Nil, ins, newValue)
-      val nrid = db.localTx({ implicit session => ins.insert(Some(rid)) })
+      val nrid = localTx({ implicit session => ins.insert(Some(rid)) })
       assert(rid == nrid)
    }
 
    override def deleteRecord(rid: Rid): Unit = {
-      db.localTx({ implicit session =>
+      localTx({ implicit session =>
          sql"DELETE FROM $table WHERE _rid = $rid;".update.apply()
       })
    }
@@ -65,19 +65,27 @@ class RepositoryImpl(private val _model: Model,
       val actualTable = DBUtils.rawSql(actualTableName)
       val columnName = DBUtils.rawSql(DBUtils.pathToDb(lastPath))
 
-      db.readOnly({ implicit session =>
+      readOnly({ implicit session =>
          sql"SELECT DISTINCT $columnName FROM $actualTable WHERE $columnName LIKE ${hint + "%"} LIMIT $limit;"
             .map(rs => rs.string(1)).list.apply()
       })
    }
 
-   override def fetchAllRecords(): Seq[(Rid, DMStruct)] = {
-      val records = db.readOnly({ implicit session =>
+   override def fetchAllRecords(): Seq[(Rid, DMStruct)] = suppressLogging {
+      val records = readOnly({ implicit session =>
          sql"SELECT * FROM $table"
             .map(rs => (rs.long("_rid"), rsToDM(rs)(session))).list.apply()
       })
       assert(records.forall(r => rootType.validate(r._2).isEmpty))
       records
+   }
+
+   private def readOnly[T](execution: DBSession => T): T = synchronized {
+      db.readOnly { execution }
+   }
+
+   private def localTx[T](execution: DBSession => T): T = synchronized {
+      db.localTx { execution }
    }
 
    private lazy val ridSetHelper = new RidSetHelperImpl(db, table)
@@ -87,4 +95,22 @@ class RepositoryImpl(private val _model: Model,
    override def searchRecords(criteria: SearchCriteria): Seq[(Rid, DMStruct)] = ???
 
    override def model: Model = _model
+
+   private def suppressLogging[T](action: => T): T = {
+      val prevSettings = GlobalSettings.loggingSQLAndTime
+      GlobalSettings.loggingSQLAndTime = LoggingSQLAndTimeSettings(
+         enabled = false,
+         singleLineMode = false,
+         printUnprocessedStackTrace = false,
+         stackTraceDepth= 1,
+         logLevel = 'error,
+         warningEnabled = false,
+         warningThresholdMillis = 3000L,
+         warningLogLevel = 'warn
+      )
+      val res: T = action
+      GlobalSettings.loggingSQLAndTime = prevSettings
+      res
+   }
+
 }
