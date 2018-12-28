@@ -33,7 +33,7 @@ case class ResultSet(rows: Seq[MultipleResultRow]) {
       flatMap(_.groupBy(path, appendPrefix, sortBy))
    }
 
-   def aggregate(aggregations: Seq[(String, Seq[DMValue] => DMValue)]): Seq[ResultRow] = {
+   def aggregate(aggregations: (String, Seq[DMValue] => DMValue)*): Seq[ResultRow] = {
       rows.map(_.aggregate(aggregations))
    }
 }

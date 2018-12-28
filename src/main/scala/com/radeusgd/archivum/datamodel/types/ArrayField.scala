@@ -51,7 +51,7 @@ case class ArrayField(elementsType: FieldType) extends FieldType with TypedAggre
 
    override def toHumanJson(v: DMValue): JsValue = {
       val arr = v.asInstanceOf[DMArray]
-      JsArray(arr.values.map(toHumanJson))
+      JsArray(arr.values.map(elementsType.toHumanJson))
    }
 
    override def fromHumanJson(j: JsValue): Either[Throwable, DMValue] = j match {
