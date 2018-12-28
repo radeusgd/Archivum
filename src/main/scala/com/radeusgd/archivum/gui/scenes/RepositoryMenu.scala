@@ -13,6 +13,7 @@ class RepositoryMenu(val repository: Repository) extends Scene {
    lazy val editRecords: EditRecords = new EditRecords(repository, this)
    lazy val exporter: ExportRepository = new ExportRepository(repository, this)
    lazy val importer: ImportRepository = new ImportRepository(repository, this)
+   lazy val queries: RunQueries= new RunQueries(repository, this)
 
    content = new VBox(
       new Label(repository.model.name) {
@@ -24,11 +25,7 @@ class RepositoryMenu(val repository: Repository) extends Scene {
             utils.notImplemented()
          }
       },
-      new Button("Queries") {
-         onAction = handle {
-            utils.notImplemented()
-         }
-      },
+      utils.makeGoToButton("Queries", queries),
       utils.makeGoToButton("Export", exporter),
       utils.makeGoToButton("Import", importer)
    ) {

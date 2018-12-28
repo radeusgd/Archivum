@@ -4,7 +4,7 @@ import com.radeusgd.archivum.datamodel.{DMArray, DMStruct, DMUtils, DMValue}
 
 import scala.math.Ordering
 
-case class AppendPrefix(columnName: String, mapping: DMValue => DMValue)
+case class AppendPrefix(columnName: String, mapping: DMValue => DMValue = identity)
 
 case class MultipleResultRow(prefix: ResultRow, objects: Seq[DMValue]) {
    def values(path: String): Seq[DMValue] =
