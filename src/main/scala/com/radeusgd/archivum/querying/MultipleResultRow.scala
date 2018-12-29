@@ -33,17 +33,6 @@ case class MultipleResultRow(prefix: ResultRow, objects: Seq[DMValue]) {
       MultipleResultRow(prefix, objects.sortBy(f))
 
    def groupBy(grouping: Grouping): Seq[MultipleResultRow] = {
-      def makeGroups(): Map[DMValue, Seq[DMValue]] = {
-         val getter = DMUtils.makeGetter(grouping.path)
-         val groups = collection.mutable.Map.empty[DMValue, List[DMValue]]
-         objects.foreach(obj => {
-            val groupName = getter(obj)
-            val tail = groups.getOrElse(groupName, Nil)
-            groups(groupName) = obj :: tail
-         })
-         groups.toMap
-      }
-
       def alterPrefix(groupName: DMValue): ResultRow = {
          grouping.appendColumnMode match {
             case DoNotAppend => prefix
@@ -53,7 +42,7 @@ case class MultipleResultRow(prefix: ResultRow, objects: Seq[DMValue]) {
          }
       }
 
-      val groups: Seq[(DMValue, Seq[DMValue])] = makeGroups().toList
+      val groups: Seq[(DMValue, Seq[DMValue])] = objects.groupBy(DMUtils.makeGetter(grouping.path)).toList
 
       def ascendingToOrder[A](order: SortingOrder)(list: Seq[A]): Seq[A] = order match {
          case Ascending => list

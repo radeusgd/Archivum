@@ -95,7 +95,7 @@ class RepositoryImpl(private val _model: Model,
 
    override def ridSet: RidSetHelper = ridSetHelper
 
-   override def searchRecords(criteria: SearchCriteria): Seq[(Rid, DMStruct)] = ???
+   //override def searchRecords(criteria: SearchCriteria): Seq[(Rid, DMStruct)] = ???
 
    override def model: Model = _model
 

@@ -1,6 +1,6 @@
 package com.radeusgd.archivum.persistence
 
-import com.radeusgd.archivum.datamodel.{DMStruct, Model}
+import com.radeusgd.archivum.datamodel._
 import com.radeusgd.archivum.querying.{Grouping, MultipleResultRow, ResultSet}
 
 trait Repository {
@@ -23,14 +23,27 @@ trait Repository {
    // TODO using this in processing will be slow, in the future we should extend Repository to handle Streams of records or something similar
    def fetchAllRecords(): Seq[(Rid, DMStruct)]
 
-   def fetchAllGrouped(groups: Grouping*): ResultSet = {
-      val base = fetchAllRecords().map(_._2)
+   // this should be overriden with a faster implementation
+   def fetchAllGrouped(filter: SearchCriteria, groups: Grouping*): ResultSet = {
+      val base = searchRecords(filter).map(_._2)
       val all = ResultSet(Seq(MultipleResultRow(base)))
 
       groups.foldLeft(all)(_.groupBy(_))
    }
 
+   def fetchAllGrouped(groups: Grouping*): ResultSet = fetchAllGrouped(Truth, groups:_*)
+
    def ridSet: RidSetHelper
 
-   def searchRecords(criteria: SearchCriteria): Seq[(Rid, DMStruct)]
+   // this should be overriden with a faster implementation
+   def searchRecords(criteria: SearchCriteria): Seq[(Rid, DMStruct)] = {
+      println("WARNING! Using a very slow implementation!")
+      val all = fetchAllRecords()
+      all.filter(t => criteria.check(t._2))
+   }
+
+   def getAllDistinctValues(path: List[String]): List[DMValue] = {
+      println("WARNING! Using a very slow implementation!")
+      fetchAllRecords().map(_._2).map(DMUtils.makeGetter(path)).toList.distinct
+   }
 }
