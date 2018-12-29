@@ -1,21 +1,21 @@
 package com.radeusgd.archivum.querying.builtinqueries
-import com.radeusgd.archivum.datamodel.DMStruct
-import com.radeusgd.archivum.persistence.Repository
+
 import com.radeusgd.archivum.querying._
 
-class Chrzty extends BuiltinQuery {
+class Chrzty(years: Int = 1) extends BuiltinQuery(years, Seq("Parafia", "Miejscowość")) {
    override def toString: String = "Chrzty"
 
-   override val queries: Map[String,Repository => Seq[ResultRow]] = Map(
-      "test" -> testQ
+   override val queries: Map[String, ResultSet => Seq[ResultRow]] = Map(
+      "test_nazwiska" -> testQ
    )
 
-   def testQ(repo: Repository): Seq[ResultRow] = {
-      val grouped = repo.fetchAllGrouped(
-         Grouping("Miejscowość", PopularitySorted(Descending))
+   def testQ(all: ResultSet): Seq[ResultRow] = {
+      val grouped = all.groupBy(
+         GroupBy("Nazwisko", PopularitySorted(Descending))
       )
+
       grouped.aggregate(
-         "Liczba" -> Aggregations.count
+         "Liczba osób" -> Aggregations.count
       )
    }
 }

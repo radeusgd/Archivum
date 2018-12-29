@@ -128,7 +128,7 @@ case class DMYearDate(value: Either[Int, DMValue.Date]) extends DMValue with DMA
 
    override def compare(that: DMOrdered): Int =
       that match {
-         case thatd: DMYearDate => year compare thatd.year
+         case thatd: DMYearDate => year compare thatd.year // TODO if both have full date add full comparison!
          case _ => throw new IncompatibleTypeComparison
       }
 

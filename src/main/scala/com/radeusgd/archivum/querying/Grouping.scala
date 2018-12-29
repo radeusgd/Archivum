@@ -15,4 +15,19 @@ object DoNotAppend extends AppendColumnMode
 object Default extends AppendColumnMode // uses path as columnName and identity mapping
 case class CustomAppendColumn(columnName: String, mapping: DMValue => DMValue) extends AppendColumnMode
 
-case class Grouping(path: String, sortType: GroupingSortType, appendColumnMode: AppendColumnMode = Default)
+sealed abstract class Grouping(val appendColumnMode: AppendColumnMode) {
+   def defaultColumnName: String
+}
+case class GroupBy(
+                     path: String,
+                     sortType: GroupingSortType = CanonicalSorting(Ascending),
+                     override val appendColumnMode: AppendColumnMode = Default)
+   extends Grouping(appendColumnMode) {
+   override def defaultColumnName: String = path // TODO maybe convert dots to something human readable ?
+}
+case class GroupByYears(datePath: String, yearInterval: Int, override val appendColumnMode: AppendColumnMode = Default) extends Grouping(appendColumnMode) {
+   override def defaultColumnName: String = datePath
+}
+case class GroupByWithSummary(path: String) extends Grouping(Default) {
+   override def defaultColumnName: String = path
+}

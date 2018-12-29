@@ -36,23 +36,43 @@ case class MultipleResultRow(prefix: ResultRow, objects: Seq[DMValue]) {
       def alterPrefix(groupName: DMValue): ResultRow = {
          grouping.appendColumnMode match {
             case DoNotAppend => prefix
-            case Default => prefix.extend(grouping.path, groupName)
+            case Default => prefix.extend(grouping.defaultColumnName, groupName)
             case CustomAppendColumn(columnName, mapping) =>
                prefix.extend(columnName, mapping(groupName))
          }
       }
 
-      val groups: Seq[(DMValue, Seq[DMValue])] = objects.groupBy(DMUtils.makeGetter(grouping.path)).toList
+      def extractYearFromDateDM(v: DMValue): Int = v match {
+         case DMDate(value) => value.getYear
+         case yd: DMYearDate => yd.year
+         case _ => throw new RuntimeException("Trying to extract year from non-date value")
+      }
+
+      val groups: Seq[(DMValue, Seq[DMValue])] = grouping match {
+         case GroupBy(path, _, _) =>
+            objects.groupBy(DMUtils.makeGetter(path)).toList
+         case GroupByYears(datePath, yearInterval, _) =>
+            val getter = DMUtils.makeGetter(datePath)
+            val grouped = objects.groupBy(root => extractYearFromDateDM(getter(root))).toList
+            grouped.map(t => (DMInteger(t._1), t._2))
+         case GroupByWithSummary(path) =>
+            val groups = objects.groupBy(DMUtils.makeGetter(path))
+            groups.updated(DMString("ALL"), objects).toList
+      }
 
       def ascendingToOrder[A](order: SortingOrder)(list: Seq[A]): Seq[A] = order match {
          case Ascending => list
          case Descending => list.reverse
       }
 
-      val sorted = grouping.sortType match {
+      val sorted = grouping match {
+         case GroupBy(_, sortType, _) => sortType match {
             // TODO what about canonical sorting on DMValues that are not DMOrdered? at least try giving a better error message
-         case CanonicalSorting(order) => ascendingToOrder(order)(groups.sortBy(_._1.asInstanceOf[DMOrdered]))
-         case PopularitySorted(order) => ascendingToOrder(order)(groups.sortBy(_._2.length))
+            case CanonicalSorting(order) => ascendingToOrder(order)(groups.sortBy(_._1.asInstanceOf[DMOrdered]))
+            case PopularitySorted(order) => ascendingToOrder(order)(groups.sortBy(_._2.length))
+         }
+         case GroupByYears(_, _, _) => groups.sortBy(_._1.asInstanceOf[DMOrdered])
+         case _: GroupByWithSummary => groups
       }
 
       sorted.map({ case (groupName, elems) =>

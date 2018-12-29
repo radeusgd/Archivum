@@ -25,6 +25,7 @@ trait Repository {
 
    // this should be overriden with a faster implementation
    def fetchAllGrouped(filter: SearchCriteria, groups: Grouping*): ResultSet = {
+      println("WARNING! Using a slow implementation! (GROUP BY)")
       val base = searchRecords(filter).map(_._2)
       val all = ResultSet(Seq(MultipleResultRow(base)))
 
@@ -37,13 +38,13 @@ trait Repository {
 
    // this should be overriden with a faster implementation
    def searchRecords(criteria: SearchCriteria): Seq[(Rid, DMStruct)] = {
-      println("WARNING! Using a very slow implementation!")
+      println("WARNING! Using a very slow implementation! (FILTER)")
       val all = fetchAllRecords()
       all.filter(t => criteria.check(t._2))
    }
 
-   def getAllDistinctValues(path: List[String]): List[DMValue] = {
-      println("WARNING! Using a very slow implementation!")
-      fetchAllRecords().map(_._2).map(DMUtils.makeGetter(path)).toList.distinct
+   def getAllDistinctValues(path: List[String], filter: SearchCriteria = Truth): List[DMValue] = {
+      println("WARNING! Using a very slow implementation! (DISTINCT)")
+      searchRecords(filter).map(_._2).map(DMUtils.makeGetter(path)).toList.distinct
    }
 }
