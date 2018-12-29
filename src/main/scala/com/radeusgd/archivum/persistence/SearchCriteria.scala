@@ -9,7 +9,9 @@ case class Equal(path: Seq[String], value: DMValue) extends SearchCriteria
 case class HasPrefix(path: Seq[String], prefix: String) extends SearchCriteria
 case class And(criteria: SearchCriteria*) extends SearchCriteria
 case class Or(criteria: SearchCriteria*) extends SearchCriteria
-object Truth extends SearchCriteria
+object Truth extends SearchCriteria {
+   override def toString: String = "True"
+}
 
 object SearchCriteria {
    def makePredicate(sc: SearchCriteria)(v: DMValue): Boolean = sc match {

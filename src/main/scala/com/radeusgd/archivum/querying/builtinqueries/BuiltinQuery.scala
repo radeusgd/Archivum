@@ -44,7 +44,7 @@ abstract class BuiltinQuery(years: Int, folderGroupings: Seq[String]) {
 
                def runQuery(filter: SearchCriteria, subName: String): Unit = {
                   val all = repo.fetchAllGrouped(
-
+                     filter,
                      folderGroupings.tail.map(path => GroupByWithSummary(path)):_*
                   )
                   val res = query(all)

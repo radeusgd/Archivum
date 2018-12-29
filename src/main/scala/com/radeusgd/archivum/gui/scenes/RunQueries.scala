@@ -37,7 +37,11 @@ class RunQueries(val repository: Repository, parentScene: Scene) extends Scene {
                statusText.text.unbind()
                statusText.text.bind(task.messageProperty())
 
-               task.setOnFailed((event: WorkerStateEvent) => utils.reportException("Task failed", task.getException))
+               task.setOnFailed((event: WorkerStateEvent) => {
+                  utils.reportException("Task failed", task.getException)
+                  statusText.text.unbind()
+                  statusText.text = "Failed: " + task.getException.toString
+               })
 
                val t = new Thread(task)
                t.start()

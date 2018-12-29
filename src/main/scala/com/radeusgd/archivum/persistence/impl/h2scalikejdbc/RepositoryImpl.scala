@@ -84,8 +84,17 @@ class RepositoryImpl(private val _model: Model,
    // TODO make it optimized by using SELECT * ORDER BY (a,b,c) and than split groups in O(N)
    // override def fetchAllGrouped
 
-   override def searchRecords(criteria: SearchCriteria): Seq[(Rid, DMStruct)] =
-      super.searchRecords(criteria) // TODO
+   override def searchRecords(criteria: SearchCriteria): Seq[(Rid, DMStruct)] = suppressLogging {
+      println(criteria)
+      val cond = makeCondition(criteria)
+      println(cond)
+      val records = readOnly({ implicit session =>
+         sql"SELECT * FROM $table WHERE $cond"
+            .map(rs => (rs.long("_rid"), rsToDM(rs)(session))).list.apply()
+      })
+      assert(records.forall(r => rootType.validate(r._2).isEmpty))
+      records
+   }
 
    override def getAllDistinctValues(path: List[String], filter: SearchCriteria): List[DMValue] = {
       val table = rawSql(tableName)
@@ -128,8 +137,25 @@ class RepositoryImpl(private val _model: Model,
          singleLineMode = false,
          printUnprocessedStackTrace = false,
          stackTraceDepth= 1,
-         logLevel = 'error,
+         logLevel = 'debug,
          warningEnabled = false,
+         warningThresholdMillis = 3000L,
+         warningLogLevel = 'warn
+      )
+      val res: T = action
+      GlobalSettings.loggingSQLAndTime = prevSettings
+      res
+   }
+
+   private def minimalLogging[T](action: => T): T = {
+      val prevSettings = GlobalSettings.loggingSQLAndTime
+      GlobalSettings.loggingSQLAndTime = LoggingSQLAndTimeSettings(
+         enabled = true,
+         singleLineMode = true,
+         printUnprocessedStackTrace = false,
+         stackTraceDepth= 0,
+         logLevel = 'debug,
+         warningEnabled = true,
          warningThresholdMillis = 3000L,
          warningLogLevel = 'warn
       )
