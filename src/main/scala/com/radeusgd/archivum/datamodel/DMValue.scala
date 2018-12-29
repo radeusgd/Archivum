@@ -77,7 +77,8 @@ object DMDate {
    def safe(v: DMValue.Date): Option[DMDate] = if (DateField.isDateSupported(v)) Some(DMDate(v)) else None
 }
 
-case class DMArray(values: Vector[DMValue]) extends DMValue with DMAggregate {
+trait DMArray extends DMValue with DMAggregate {
+   def values: Vector[DMValue]
    override def toString: String = "DMArray(" + values.map(_.toString).mkString(", ") + ")"
    def length: Int = values.length
 
@@ -97,6 +98,20 @@ case class DMArray(values: Vector[DMValue]) extends DMValue with DMAggregate {
    def appended(v: DMValue): DMArray = DMArray(values ++ Vector(v))
 
    def without(idx: Int): DMArray = DMArray(values.take(idx) ++ values.drop(idx + 1))
+}
+
+object DMArray {
+   def apply(values: Vector[DMValue]): DMArray = EagerDMArray(values)
+   def unapply(arg: DMArray): Option[Vector[DMValue]] = Some(arg.values)
+}
+
+case class EagerDMArray(vals: Vector[DMValue]) extends DMArray {
+   def values: Vector[DMValue] = vals
+}
+
+class LazyDMArray(computeValues: () => Vector[DMValue]) extends DMArray {
+   private lazy val innerValues = computeValues()
+   override def values: Vector[DMValue] = innerValues
 }
 
 // this computables format is deprecated

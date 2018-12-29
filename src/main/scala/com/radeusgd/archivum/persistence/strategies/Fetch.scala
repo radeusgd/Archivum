@@ -7,5 +7,5 @@ trait Fetch {
    def getString(path: Seq[String]): String
    def getInt(path: Seq[String]): Option[Int] // ints are nullable
 
-   def getSubTable[T](path: Seq[String], subMapper: Fetch => T): Seq[T]
+   def getSubTable[T](path: Seq[String], subMapper: Fetch => T): () => Seq[T]
 }

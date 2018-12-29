@@ -7,6 +7,10 @@ import com.radeusgd.archivum.utils.splitList
 import com.radeusgd.archivum.persistence.DBUtils.{pathToDb, rawSql}
 import com.radeusgd.archivum.persistence.strategies.Insert
 
+trait ReadOnlySessionProvider {
+   def readOnlySession[T](execution: DBSession => T): T
+}
+
 class RepositoryImpl(private val _model: Model,
                      private val tableName: String,
                      private val db: DB) extends Repository {
@@ -26,15 +30,15 @@ class RepositoryImpl(private val _model: Model,
       localTx({ implicit session => ins.insert(None) })
    }
 
-   private def rsToDM(rs: WrappedResultSet)(implicit session: DBSession): DMStruct = {
-      val f = new FetchImpl(rs, tableName)
+   private def rsToDM(rs: WrappedResultSet): DMStruct = {
+      val f = new FetchImpl(rs, tableName)(makeRSP)
       rootType.tableFetch(Nil, f)
    }
 
    override def fetchRecord(rid: Rid): Option[DMStruct] = {
       val record = readOnly({ implicit session =>
          sql"SELECT * FROM $table WHERE _rid = $rid"
-            .map(rs => rsToDM(rs)(session)).single.apply()
+            .map(rs => rsToDM(rs)).single.apply()
       })
       assert(record.forall(rootType.validate(_).isEmpty))
       record
@@ -75,22 +79,24 @@ class RepositoryImpl(private val _model: Model,
    override def fetchAllRecords(): Seq[(Rid, DMStruct)] = suppressLogging {
       val records = readOnly({ implicit session =>
          sql"SELECT * FROM $table"
-            .map(rs => (rs.long("_rid"), rsToDM(rs)(session))).list.apply()
+            .map(rs => (rs.long("_rid"), rsToDM(rs))).list.apply()
       })
-      assert(records.forall(r => rootType.validate(r._2).isEmpty))
+      //assert(records.forall(r => rootType.validate(r._2).isEmpty))
+      assert(records.headOption.forall(r => rootType.validate(r._2).isEmpty)) // check only first record
       records
    }
 
    // TODO make it optimized by using SELECT * ORDER BY (a,b,c) and than split groups in O(N)
    // override def fetchAllGrouped
 
-   override def searchRecords(criteria: SearchCriteria): Seq[(Rid, DMStruct)] = suppressLogging {
+   override def searchRecords(criteria: SearchCriteria): Seq[(Rid, DMStruct)] = minimalLogging {
       val cond = makeCondition(criteria)
       val records = readOnly({ implicit session =>
          sql"SELECT * FROM $table WHERE $cond"
-            .map(rs => (rs.long("_rid"), rsToDM(rs)(session))).list.apply()
+            .map(rs => (rs.long("_rid"), rsToDM(rs))).list.apply()
       })
-      assert(records.forall(r => rootType.validate(r._2).isEmpty))
+      //assert(records.forall(r => rootType.validate(r._2).isEmpty))
+      assert(records.headOption.forall(r => rootType.validate(r._2).isEmpty)) // check only first record
       records
    }
 
@@ -101,8 +107,8 @@ class RepositoryImpl(private val _model: Model,
 
       val typ = rootType.getType(path)
 
-      def rsToDV(rs: WrappedResultSet)(implicit session: DBSession): DMValue = {
-         val f = new FetchImpl(rs, null) // TODO distinct values won't work with subtables
+      def rsToDV(rs: WrappedResultSet): DMValue = {
+         val f = new FetchImpl(rs, null)(makeRSP) // TODO distinct values won't work with subtables
          typ.tableFetch(path, f)
       }
 
@@ -114,6 +120,10 @@ class RepositoryImpl(private val _model: Model,
 
    private def readOnly[T](execution: DBSession => T): T = synchronized {
       db.readOnly { execution }
+   }
+
+   def makeRSP: ReadOnlySessionProvider = new ReadOnlySessionProvider {
+      override def readOnlySession[T](execution: DBSession => T): T = readOnly(execution)
    }
 
    private def localTx[T](execution: DBSession => T): T = synchronized {

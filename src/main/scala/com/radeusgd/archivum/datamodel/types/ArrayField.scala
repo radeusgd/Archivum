@@ -1,6 +1,6 @@
 package com.radeusgd.archivum.datamodel.types
 
-import com.radeusgd.archivum.datamodel.{DMArray, DMValue, TypeError, ValidationError}
+import com.radeusgd.archivum.datamodel._
 import com.radeusgd.archivum.persistence.strategies.{Fetch, Insert, Setup}
 import spray.json.{DeserializationException, JsArray, JsValue}
 import cats.implicits._
@@ -39,8 +39,10 @@ case class ArrayField(elementsType: FieldType) extends FieldType with TypedAggre
       elementsType.tableSetup(Nil, sub)
    }
 
-   override def tableFetch(path: Seq[String], table: Fetch): DMValue =
-      DMArray(table.getSubTable(path, sub => elementsType.tableFetch(Nil, sub)).toVector)
+   override def tableFetch(path: Seq[String], table: Fetch): DMValue = {
+      val maker = table.getSubTable(path, sub => elementsType.tableFetch(Nil, sub))
+      new LazyDMArray(() => maker().toVector)
+   }
 
    override def tableInsert(path: Seq[String], table: Insert, value: DMValue): Unit = {
       val arr: DMArray = value.asInstanceOf[DMArray]
@@ -59,7 +61,7 @@ case class ArrayField(elementsType: FieldType) extends FieldType with TypedAggre
          val values: Vector[Either[Throwable, DMValue]] = elements.map(elementsType.fromHumanJson)
          type EitherThrowable[A] = Either[Throwable, A]
          values.sequence[EitherThrowable, DMValue]
-            .map(DMArray)
+            .map(DMArray.apply)
       case _ => Left(DeserializationException("Expected an object"))
    }
 }
