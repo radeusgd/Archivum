@@ -32,6 +32,7 @@ case class MultipleResultRow(prefix: ResultRow, objects: Seq[DMValue]) {
    def sortBy[B](f: DMValue => B)(implicit ord: Ordering[B]): MultipleResultRow =
       MultipleResultRow(prefix, objects.sortBy(f))
 
+   //noinspection ScalaStyle
    def groupBy(grouping: Grouping): Seq[MultipleResultRow] = {
       def alterPrefix(groupName: DMValue): ResultRow = {
          grouping.appendColumnMode match {
@@ -59,6 +60,10 @@ case class MultipleResultRow(prefix: ResultRow, objects: Seq[DMValue]) {
          case GroupByWithSummary(path) =>
             val groups = objects.groupBy(DMUtils.makeGetter(path))
             groups.updated(DMString("ALL"), objects).toList
+         case CustomGroupBy(path, mapping, _, filter, _) =>
+            val getter = DMUtils.makeGetter(path)
+            val filtered = objects.filter(v => filter(getter(v)))
+            filtered.groupBy(v => mapping(getter(v))).toList
       }
 
       def ascendingToOrder[A](order: SortingOrder)(list: Seq[A]): Seq[A] = order match {
@@ -74,6 +79,9 @@ case class MultipleResultRow(prefix: ResultRow, objects: Seq[DMValue]) {
          }
          case GroupByYears(_, _, _) => groups.sortBy(_._1.asInstanceOf[DMOrdered])
          case _: GroupByWithSummary => groups
+         case customGroupBy: CustomGroupBy[Any] =>
+            val getter = DMUtils.makeGetter(customGroupBy.path)
+            groups.sortBy(t => customGroupBy.orderMapping(getter(t._2.head)))(customGroupBy.ord)
       }
 
       sorted.map({ case (groupName, elems) =>

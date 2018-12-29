@@ -1,6 +1,6 @@
 package com.radeusgd.archivum.querying
 
-import com.radeusgd.archivum.datamodel.{DMStruct, DMValue}
+import com.radeusgd.archivum.datamodel.{DMStruct, DMUtils, DMValue}
 
 case class ResultSet(rows: Seq[MultipleResultRow]) {
    def getResult: Seq[ResultRow] = rows.map(_.prefix)
@@ -45,4 +45,19 @@ case class ResultSet(rows: Seq[MultipleResultRow]) {
       groupBy(GroupBy(path, PopularitySorted(Descending), CustomAppendColumn(nameColumn))).aggregate(
          countColumn -> Aggregations.count
       )
+
+   def countTransposed(path: String, traits: Seq[(String, DMValue)], default: Option[String]): Seq[ResultRow] = {
+      val traitsAggregations =
+         traits.map { case (name, value) => name -> Aggregations.countEqual(path, value) }
+      val aggs = default match {
+         case Some(defaultName) =>
+            val countedVals = Set(traits.map(_._2):_*)
+            val getter = DMUtils.makeGetter(path)
+            val pred: DMValue => Boolean = v =>
+               !countedVals.contains(getter(v))
+            traitsAggregations ++ Seq(defaultName -> Aggregations.countPredicate(pred))
+         case None => traitsAggregations
+      }
+      aggregate(aggs:_*)
+   }
 }

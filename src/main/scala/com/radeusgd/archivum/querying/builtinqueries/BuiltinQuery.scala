@@ -22,8 +22,8 @@ abstract class BuiltinQuery(years: Int, folderGroupings: Seq[String]) {
    val queries: Map[String, Query]
 
    private def prepareYearGrouping(yearGrouping: YearGrouping): Seq[Grouping] = yearGrouping match {
-      case DataChrztu => GroupByYears("Data chrztu", years) :: Nil
-      case DataUrodzenia => GroupByYears("Data urodzenia", years) :: Nil
+      case DataChrztu => GroupByYears("Data chrztu", years, CustomAppendColumn("Rok")) :: Nil
+      case DataUrodzenia => GroupByYears("Data urodzenia", years, CustomAppendColumn("Rok")) :: Nil
       case NoYearGrouping => Nil
    }
 
@@ -39,6 +39,7 @@ abstract class BuiltinQuery(years: Int, folderGroupings: Seq[String]) {
                val all = repo.fetchAllGrouped(prepareYearGrouping(yg) : _*)
                val res = query(all)
                CSVExport.export(new File(resultPath + qname + ".csv"), res)
+               println(s"Query $qname written ${res.length} rows in total")
                updateProgress(index + 1, workToDo)
             }
 
@@ -64,6 +65,7 @@ abstract class BuiltinQuery(years: Int, folderGroupings: Seq[String]) {
                   )
                   val res = query(all)
                   CSVExport.exportToSubFolders(Paths.get(resultPath).resolve(subName), qname + ".csv", folderGroupings.tail.length, res)
+                  println(s"Query $qname @ $subName written ${res.length} rows in total")
                }
 
                for (firstLevelGroupValue <- firstLevelGroupings) {

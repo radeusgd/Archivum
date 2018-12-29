@@ -1,6 +1,6 @@
 package com.radeusgd.archivum.querying
 
-import com.radeusgd.archivum.datamodel.DMValue
+import com.radeusgd.archivum.datamodel._
 
 sealed abstract class SortingOrder
 object Ascending extends SortingOrder
@@ -30,4 +30,32 @@ case class GroupByYears(datePath: String, yearInterval: Int, override val append
 }
 case class GroupByWithSummary(path: String) extends Grouping(Default) {
    override def defaultColumnName: String = path
+}
+case class CustomGroupBy[A](path: String,
+                            mapping: DMValue => DMValue,
+                            orderMapping: DMValue => A,
+                            filter: DMValue => Boolean = _ => true,
+                            override val appendColumnMode: AppendColumnMode = Default)(implicit ordering: Ordering[A]) extends Grouping(appendColumnMode) {
+   override def defaultColumnName: String = path
+   def ord: Ordering[A] = ordering
+}
+
+object CustomGroupBy {
+   def groupByMonth(path: String, appendColumnMode: AppendColumnMode = Default): CustomGroupBy[Int] = {
+      CustomGroupBy(path,
+         filter = {
+            case _: DMDate => true
+            case DMYearDate(Right(_)) => true
+            case _ => false
+         },
+         mapping = {
+            case DMDate(date) => DMString(date.getMonth.toString)
+            case DMYearDate(Right(date)) => DMString(date.getMonth.toString)
+         },
+         orderMapping = {
+            case DMDate(date) => date.getMonthValue
+            case DMYearDate(Right(date)) => date.getMonthValue
+         }
+      )
+   }
 }
