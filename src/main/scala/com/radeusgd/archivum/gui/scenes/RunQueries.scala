@@ -5,6 +5,8 @@ import java.io.{File, PrintWriter}
 import com.radeusgd.archivum.gui.utils
 import com.radeusgd.archivum.persistence.Repository
 import com.radeusgd.archivum.querying.builtinqueries.{BuiltinQuery, Chrzty}
+import javafx.concurrent.WorkerStateEvent
+import javafx.event.EventHandler
 import scalafx.Includes.handle
 import scalafx.geometry.Insets
 import scalafx.scene.Scene
@@ -34,7 +36,11 @@ class RunQueries(val repository: Repository, parentScene: Scene) extends Scene {
                progressBar.progress.bind(task.progressProperty())
                statusText.text.unbind()
                statusText.text.bind(task.messageProperty())
-               new Thread(task).start()
+
+               task.setOnFailed((event: WorkerStateEvent) => utils.reportException("Task failed", task.getException))
+
+               val t = new Thread(task)
+               t.start()
             }
          }
       ),

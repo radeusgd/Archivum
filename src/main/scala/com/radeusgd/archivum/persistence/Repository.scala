@@ -40,7 +40,8 @@ trait Repository {
    def searchRecords(criteria: SearchCriteria): Seq[(Rid, DMStruct)] = {
       println("WARNING! Using a very slow implementation! (FILTER)")
       val all = fetchAllRecords()
-      all.filter(t => criteria.check(t._2))
+      val pred: DMValue => Boolean = SearchCriteria.makePredicate(criteria)
+      all.filter(t => pred(t._2))
    }
 
    def getAllDistinctValues(path: List[String], filter: SearchCriteria = Truth): List[DMValue] = {

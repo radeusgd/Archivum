@@ -1,10 +1,11 @@
 package com.radeusgd.archivum.persistence.impl.h2scalikejdbc
 
-import com.radeusgd.archivum.datamodel.{DMStruct, Model}
-import com.radeusgd.archivum.persistence.{DBUtils, Repository, RidSetHelper, SearchCriteria}
+import com.radeusgd.archivum.datamodel.{DMStruct, DMUtils, DMValue, Model}
+import com.radeusgd.archivum.persistence._
 import scalikejdbc._
-
 import com.radeusgd.archivum.utils.splitList
+import com.radeusgd.archivum.persistence.DBUtils.{pathToDb, rawSql}
+import com.radeusgd.archivum.persistence.strategies.Insert
 
 class RepositoryImpl(private val _model: Model,
                      private val tableName: String,
@@ -62,8 +63,8 @@ class RepositoryImpl(private val _model: Model,
       val actualTableName = subtables.foldLeft(tableName)(
          (tableName, part) => DBUtils.subtableName(tableName, part)
       )
-      val actualTable = DBUtils.rawSql(actualTableName)
-      val columnName = DBUtils.rawSql(DBUtils.pathToDb(lastPath))
+      val actualTable = rawSql(actualTableName)
+      val columnName = rawSql(pathToDb(lastPath))
 
       readOnly({ implicit session =>
          sql"SELECT DISTINCT $columnName FROM $actualTable WHERE $columnName LIKE ${hint + "%"} LIMIT $limit;"
@@ -82,6 +83,27 @@ class RepositoryImpl(private val _model: Model,
 
    // TODO make it optimized by using SELECT * ORDER BY (a,b,c) and than split groups in O(N)
    // override def fetchAllGrouped
+
+   override def searchRecords(criteria: SearchCriteria): Seq[(Rid, DMStruct)] =
+      super.searchRecords(criteria) // TODO
+
+   override def getAllDistinctValues(path: List[String], filter: SearchCriteria): List[DMValue] = {
+      val table = rawSql(tableName)
+      val columnName = rawSql(pathToDb(path))
+      val cond = makeCondition(filter)
+
+      val typ = rootType.getType(path)
+
+      def rsToDV(rs: WrappedResultSet)(implicit session: DBSession): DMValue = {
+         val f = new FetchImpl(rs, null) // TODO distinct values won't work with subtables
+         typ.tableFetch(path, f)
+      }
+
+      readOnly({ implicit session =>
+         sql"SELECT DISTINCT $columnName FROM $table WHERE $cond;"
+            .map(rsToDV).list.apply()
+      })
+   }
 
    private def readOnly[T](execution: DBSession => T): T = synchronized {
       db.readOnly { execution }
@@ -115,5 +137,37 @@ class RepositoryImpl(private val _model: Model,
       GlobalSettings.loggingSQLAndTime = prevSettings
       res
    }
+
+   private def convertDMToDBForCondition(path: Seq[String], v: DMValue): Any = {
+      class FakeInsert extends Insert {
+         var innerValue: Any = null
+         override def setValue(path: Seq[String], value: Any): Unit = innerValue = value
+         override def setSubTable(path: Seq[String], amount: Int): Seq[Insert] = throw new RuntimeException("Filtering over table content not supported")
+      }
+
+      val fakeInsert = new FakeInsert
+      rootType.getType(path.toList).tableInsert(Nil, fakeInsert, v)
+      fakeInsert.innerValue
+   }
+
+   private def makeCondition(sc: SearchCriteria): SQLSyntax =
+      sc match {
+         case Equal(path, value) =>
+            val fieldName = rawSql(pathToDb(path))
+            val sqlvalue = convertDMToDBForCondition(path, value)
+            sqls"$fieldName = $sqlvalue"
+         case HasPrefix(path, prefix) =>
+            val fieldName = rawSql(pathToDb(path))
+            val pref = prefix + "%"
+            sqls"$fieldName LIKE $pref" // FIXME THIS IS UNTESTED AND LIKELY MAY NOT WORK CORRECTLY
+            throw new NotImplementedError("This may work but has to be tested")
+         case And() => makeCondition(Truth)
+         case And(cond) => makeCondition(cond)
+         case And(c1, rest @_*) => sqls"($c1 AND ${makeCondition(And(rest:_*))})"
+         case Or() => makeCondition(Truth)
+         case Or(cond) => makeCondition(cond)
+         case Or(c1, rest @_*) => sqls"($c1 OR ${makeCondition(Or(rest:_*))})"
+         case Truth => sqls"(1 = 1)"
+      }
 
 }
