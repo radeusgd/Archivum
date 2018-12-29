@@ -11,10 +11,9 @@ class Chrzty extends BuiltinQuery {
    )
 
    def testQ(repo: Repository): Seq[ResultRow] = {
-      val values = repo.fetchAllRecords().map(_._2)
-      val all = ResultSet(Seq(MultipleResultRow(values)))
-      val grouped = all.groupBy("Miejscowość", Some(AppendPrefix("Miejscowość")), _.toString)
-
+      val grouped = repo.fetchAllGrouped(
+         Grouping("Miejscowość", PopularitySorted(Descending))
+      )
       grouped.aggregate(
          "Liczba" -> Aggregations.count
       )

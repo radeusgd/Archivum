@@ -27,54 +27,14 @@ case class ResultSet(rows: Seq[MultipleResultRow]) {
 
    /*
    Groups results contained in each of MultipleResultRows into separate, smaller MultipleResultRows.
-   If columnName is specified, value that has been grouped by is
     */
-   def groupBy[A](path: String, appendPrefix: Option[AppendPrefix], sortBy: DMValue => A)(implicit ord: Ordering[A]): ResultSet = {
-      flatMap(_.groupBy(path, appendPrefix, sortBy))
+   def groupBy(grouping: Grouping): ResultSet = {
+      flatMap(_.groupBy(grouping))
    }
+
+   //def sortBy[A](sorter: MultipleResultRow => A)
 
    def aggregate(aggregations: (String, Seq[DMValue] => DMValue)*): Seq[ResultRow] = {
       rows.map(_.aggregate(aggregations))
-   }
-}
-import scala.tools.nsc.interpreter.IMain
-import scala.tools.nsc.Settings
-
-object Helper {
-   var diff: Int = 5
-   val f: Int => Int = (x: Int) => x + diff
-}
-
-object Tmp {
-   def main(args: Array[String]): Unit = {
-      evaluate()
-   }
-
-   def evaluate(): Unit = {
-      val clazz = prepareClass
-      val settings = new Settings
-      settings.usejavacp.value = true
-      settings.deprecation.value = true
-
-      println("Evaluating...")
-      val eval = new IMain(settings)
-      //val evaluated = eval.beSilentDuring(eval.interpret(clazz))
-      eval.directBind("Helper", Helper)
-      val evaluated = eval.interpret(clazz)
-      val res = eval.valueOfTerm("res0").get.asInstanceOf[Int => Int]
-      println(res)
-      println(res(0))
-      Helper.diff = 100
-      println(res(0))
-   }
-
-   private def prepareClass: String = {
-      /*s"""
-         |val f = (x: Int) => x + 5
-         |f
-         |""".stripMargin*/
-      s"""
-         |Helper.f
-         |""".stripMargin
    }
 }

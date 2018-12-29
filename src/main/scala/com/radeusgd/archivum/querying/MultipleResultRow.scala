@@ -1,10 +1,9 @@
 package com.radeusgd.archivum.querying
 
-import com.radeusgd.archivum.datamodel.{DMArray, DMStruct, DMUtils, DMValue}
+import com.radeusgd.archivum.datamodel._
 
+import scala.collection.immutable
 import scala.math.Ordering
-
-case class AppendPrefix(columnName: String, mapping: DMValue => DMValue = identity)
 
 case class MultipleResultRow(prefix: ResultRow, objects: Seq[DMValue]) {
    def values(path: String): Seq[DMValue] =
@@ -33,9 +32,9 @@ case class MultipleResultRow(prefix: ResultRow, objects: Seq[DMValue]) {
    def sortBy[B](f: DMValue => B)(implicit ord: Ordering[B]): MultipleResultRow =
       MultipleResultRow(prefix, objects.sortBy(f))
 
-   def groupBy[A](path: String, appendPrefixOpt: Option[AppendPrefix], sortBy: DMValue => A)(implicit ord: Ordering[A]): Seq[MultipleResultRow] = {
+   def groupBy(grouping: Grouping): Seq[MultipleResultRow] = {
       def makeGroups(): Map[DMValue, Seq[DMValue]] = {
-         val getter = DMUtils.makeGetter(path)
+         val getter = DMUtils.makeGetter(grouping.path)
          val groups = collection.mutable.Map.empty[DMValue, List[DMValue]]
          objects.foreach(obj => {
             val groupName = getter(obj)
@@ -46,15 +45,30 @@ case class MultipleResultRow(prefix: ResultRow, objects: Seq[DMValue]) {
       }
 
       def alterPrefix(groupName: DMValue): ResultRow = {
-         appendPrefixOpt.map(appendPrefix => prefix.extend(appendPrefix.columnName, appendPrefix.mapping(groupName))).getOrElse(prefix)
+         grouping.appendColumnMode match {
+            case DoNotAppend => prefix
+            case Default => prefix.extend(grouping.path, groupName)
+            case CustomAppendColumn(columnName, mapping) =>
+               prefix.extend(columnName, mapping(groupName))
+         }
       }
 
-      val groups = makeGroups()
-      val newRows = groups.toList.map({ case (groupName, elems) =>
+      val groups: Seq[(DMValue, Seq[DMValue])] = makeGroups().toList
+
+      def ascendingToOrder[A](order: SortingOrder)(list: Seq[A]): Seq[A] = order match {
+         case Ascending => list
+         case Descending => list.reverse
+      }
+
+      val sorted = grouping.sortType match {
+            // TODO what about canonical sorting on DMValues that are not DMOrdered? at least try giving a better error message
+         case CanonicalSorting(order) => ascendingToOrder(order)(groups.sortBy(_._1.asInstanceOf[DMOrdered]))
+         case PopularitySorted(order) => ascendingToOrder(order)(groups.sortBy(_._2.length))
+      }
+
+      sorted.map({ case (groupName, elems) =>
          MultipleResultRow(alterPrefix(groupName), elems)
       })
-
-      newRows.map(_.sortBy(sortBy))
    }
 
    def aggregate(aggregations: Seq[(String, Seq[DMValue] => DMValue)]): ResultRow = {

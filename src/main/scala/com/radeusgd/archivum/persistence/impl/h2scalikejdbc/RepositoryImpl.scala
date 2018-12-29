@@ -80,6 +80,9 @@ class RepositoryImpl(private val _model: Model,
       records
    }
 
+   // TODO make it optimized by using SELECT * ORDER BY (a,b,c) and than split groups in O(N)
+   // override def fetchAllGrouped
+
    private def readOnly[T](execution: DBSession => T): T = synchronized {
       db.readOnly { execution }
    }

@@ -1,6 +1,7 @@
 package com.radeusgd.archivum.persistence
 
 import com.radeusgd.archivum.datamodel.{DMStruct, Model}
+import com.radeusgd.archivum.querying.{Grouping, MultipleResultRow, ResultSet}
 
 trait Repository {
    type Rid = Long
@@ -21,6 +22,13 @@ trait Repository {
 
    // TODO using this in processing will be slow, in the future we should extend Repository to handle Streams of records or something similar
    def fetchAllRecords(): Seq[(Rid, DMStruct)]
+
+   def fetchAllGrouped(groups: Grouping*): ResultSet = {
+      val base = fetchAllRecords().map(_._2)
+      val all = ResultSet(Seq(MultipleResultRow(base)))
+
+      groups.foldLeft(all)(_.groupBy(_))
+   }
 
    def ridSet: RidSetHelper
 
