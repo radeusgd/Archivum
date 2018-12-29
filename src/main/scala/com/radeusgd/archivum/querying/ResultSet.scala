@@ -37,4 +37,12 @@ case class ResultSet(rows: Seq[MultipleResultRow]) {
    def aggregate(aggregations: (String, Seq[DMValue] => DMValue)*): Seq[ResultRow] = {
       rows.map(_.aggregate(aggregations))
    }
+
+   def countGroups(path: String, countColumn: String): Seq[ResultRow] =
+      countGroups(path, path, countColumn)
+
+   def countGroups(path: String, nameColumn: String, countColumn: String): Seq[ResultRow] =
+      groupBy(GroupBy(path, PopularitySorted(Descending), CustomAppendColumn(nameColumn))).aggregate(
+         countColumn -> Aggregations.count
+      )
 }

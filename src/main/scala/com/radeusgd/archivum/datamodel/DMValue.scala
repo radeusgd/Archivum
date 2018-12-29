@@ -23,7 +23,7 @@ object DMValue {
    type Date = LocalDate
 }
 
-trait DMAggregate extends DMValue with ((String) => DMValue) {
+sealed trait DMAggregate extends DMValue with ((String) => DMValue) {
    def updated(key: String, v: DMValue): DMAggregate
 }
 

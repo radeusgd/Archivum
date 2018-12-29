@@ -13,7 +13,7 @@ case class PopularitySorted(order: SortingOrder) extends GroupingSortType
 sealed abstract class AppendColumnMode
 object DoNotAppend extends AppendColumnMode
 object Default extends AppendColumnMode // uses path as columnName and identity mapping
-case class CustomAppendColumn(columnName: String, mapping: DMValue => DMValue) extends AppendColumnMode
+case class CustomAppendColumn(columnName: String, mapping: DMValue => DMValue = identity) extends AppendColumnMode
 
 sealed abstract class Grouping(val appendColumnMode: AppendColumnMode) {
    def defaultColumnName: String

@@ -9,13 +9,6 @@ class Chrzty(years: Int = 1) extends BuiltinQuery(years, Seq("Parafia", "Miejsco
       "test_nazwiska" -> Query(DataUrodzenia, testQ)
    )
 
-   def testQ(all: ResultSet): Seq[ResultRow] = {
-      val grouped = all.groupBy(
-         GroupBy("Nazwisko", PopularitySorted(Descending))
-      )
-
-      grouped.aggregate(
-         "Liczba osób" -> Aggregations.count
-      )
-   }
+   def testQ(all: ResultSet): Seq[ResultRow] =
+      all.countGroups("Nazwisko", "Liczba osób")
 }
