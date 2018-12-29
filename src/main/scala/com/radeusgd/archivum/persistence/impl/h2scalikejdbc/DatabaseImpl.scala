@@ -11,6 +11,17 @@ import scalikejdbc._
    so if later rewriting for multiple backends that will need to be refactored into some kind of TypeSerializer[FieldType]
  */
 class DatabaseImpl(val db: DB) extends Database {
+   GlobalSettings.loggingSQLAndTime = LoggingSQLAndTimeSettings(
+      enabled = true,
+      singleLineMode = true,
+      printUnprocessedStackTrace = false,
+      stackTraceDepth= 0,
+      logLevel = 'debug,
+      warningEnabled = true,
+      warningThresholdMillis = 3000L,
+      warningLogLevel = 'warn
+   )
+
    ensureModelTable()
 
    override def openRepository(modelName: String): Option[Repository] = {

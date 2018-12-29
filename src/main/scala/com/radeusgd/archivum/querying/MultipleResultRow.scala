@@ -53,7 +53,8 @@ case class MultipleResultRow(prefix: ResultRow, objects: Seq[DMValue]) {
             objects.groupBy(DMUtils.makeGetter(path)).toList
          case GroupByYears(datePath, yearInterval, _) =>
             val getter = DMUtils.makeGetter(datePath)
-            val grouped = objects.groupBy(root => extractYearFromDateDM(getter(root))).toList
+            val filtered = objects.filter(root => getter(root) != DMNull) // when we group by year, we drop all records that have it missing
+            val grouped = filtered.groupBy(root => extractYearFromDateDM(getter(root))).toList
             grouped.map(t => (DMInteger(t._1), t._2))
          case GroupByWithSummary(path) =>
             val groups = objects.groupBy(DMUtils.makeGetter(path))

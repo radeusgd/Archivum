@@ -85,9 +85,7 @@ class RepositoryImpl(private val _model: Model,
    // override def fetchAllGrouped
 
    override def searchRecords(criteria: SearchCriteria): Seq[(Rid, DMStruct)] = suppressLogging {
-      println(criteria)
       val cond = makeCondition(criteria)
-      println(cond)
       val records = readOnly({ implicit session =>
          sql"SELECT * FROM $table WHERE $cond"
             .map(rs => (rs.long("_rid"), rsToDM(rs)(session))).list.apply()
