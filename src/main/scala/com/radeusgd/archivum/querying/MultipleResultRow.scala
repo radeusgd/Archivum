@@ -10,27 +10,11 @@ case class MultipleResultRow(prefix: ResultRow, objects: Seq[DMValue]) {
       objects.map(DMUtils.makeGetter(path))
 
    /*
-   First steps towards array support.
-   Maps every contained object into a list of objects contained in its array.
-   Unfortunately it discards all other properties of that object,
-   so one cannot access arrays and non-arrays at the same time at one level of grouping.
-    */
-   def unpackArray(path: String): MultipleResultRow = {
-      val getter = DMUtils.makeGetter(path)
-      def accessArray(obj: DMValue): Seq[DMValue] =
-         getter(obj).asInstanceOf[DMArray].values
-      MultipleResultRow(prefix, objects.flatMap(accessArray))
-   }
-
-   /*
    Filters contained objects with given predicate.
    Resulting row may be empty (just a prefix).
     */
    def filter(predicate: DMValue => Boolean): MultipleResultRow =
       MultipleResultRow(prefix, objects.filter(predicate))
-
-   def sortBy[B](f: DMValue => B)(implicit ord: Ordering[B]): MultipleResultRow =
-      MultipleResultRow(prefix, objects.sortBy(f))
 
    //noinspection ScalaStyle
    def groupBy(grouping: Grouping): Seq[MultipleResultRow] = {
@@ -55,8 +39,15 @@ case class MultipleResultRow(prefix: ResultRow, objects: Seq[DMValue]) {
          case GroupByYears(datePath, yearInterval, _) =>
             val getter = DMUtils.makeGetter(datePath)
             val filtered = objects.filter(root => getter(root) != DMNull) // when we group by year, we drop all records that have it missing
-            val grouped = filtered.groupBy(root => extractYearFromDateDM(getter(root))).toList
-            grouped.map(t => (DMInteger(t._1), t._2))
+            val grouped: Seq[(Int, Seq[DMValue])] = filtered.groupBy(root => extractYearFromDateDM(getter(root)) / yearInterval).toList
+            def makeYearRange(int: Int): DMValue =
+               if (yearInterval == 1) DMInteger(int)
+               else {
+                  val start = int * yearInterval
+                  val end = start + yearInterval - 1
+                  DMString(start + " - " + end)
+               }
+            grouped.map(t => (makeYearRange(t._1), t._2))
          case GroupByWithSummary(path) =>
             val groups = objects.groupBy(DMUtils.makeGetter(path))
             groups.updated(DMString("ALL"), objects).toList
@@ -93,6 +84,10 @@ case class MultipleResultRow(prefix: ResultRow, objects: Seq[DMValue]) {
       aggregations.foldLeft(prefix){
          case (agg: ResultRow, (name, f)) => agg.updated(name, f(objects))
       }
+   }
+
+   def aggregate(f: Seq[DMValue] => ResultRow): ResultRow = {
+      prefix.append(f(objects))
    }
 }
 

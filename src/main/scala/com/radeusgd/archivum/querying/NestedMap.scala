@@ -10,6 +10,9 @@ class ListMap[K, V] private (private val elems: List[(K, V)]) {
    def mapValues[U](f: V => U): ListMap[K, U] = new ListMap[K, U](
       elems.map((t) => (t._1, f(t._2)))
    )
+
+   def append(other: ListMap[K, V]): ListMap[K, V] =
+      ListMap.fromList(entries ++ other.entries)
 }
 
 object ListMap {
@@ -55,6 +58,9 @@ case class NestedMap[K, V](mapping: ListMap[K, NestedMapADT[K, V]]) extends Nest
          case NestedMapElement(v) => v :: Nil
          case m: NestedMap[K, V] => m.flatten
       }
+
+   def append(other: NestedMap[K, V]): NestedMap[K, V] =
+      NestedMap(mapping.append(other.mapping))
 }
 
 object NestedMap {
