@@ -74,11 +74,14 @@ case class MultipleResultRow(prefix: ResultRow, objects: NestedMapADT[String, Se
          }
       }
 
-      ???
-      /*
-      sorted.map({ case (groupName, elems) =>
-         MultipleResultRow(alterPrefix(groupName), elems)
-      })*/
+      objects match {
+         case NestedMapElement(value) =>
+            val sorted = groupDMs(value, grouping)
+            sorted.map({ case (groupName, elems) =>
+               MultipleResultRow(alterPrefix(groupName), elems)
+            })
+         case NestedMap(mapping) => ??? // FIXME this is hard but possible, need to gather into groups in each leaf of NestedMap, than merge these groups by the grouping into rows and put them back into NestedMap, filling missing places with empty lists
+      }
    }
 
    def groupByHorizontal(grouping: Grouping): MultipleResultRow = {
