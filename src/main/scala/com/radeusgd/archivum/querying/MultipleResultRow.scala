@@ -2,31 +2,16 @@ package com.radeusgd.archivum.querying
 
 import com.radeusgd.archivum.datamodel._
 
-import scala.collection.immutable
-import scala.math.Ordering
-
-case class MultipleResultRow(prefix: ResultRow, objects: Seq[DMValue]) {
-   def values(path: String): Seq[DMValue] =
-      objects.map(DMUtils.makeGetter(path))
-
+case class MultipleResultRow(prefix: ResultRow, objects: NestedMapADT[String, Seq[DMValue]]) {
    /*
    Filters contained objects with given predicate.
    Resulting row may be empty (just a prefix).
     */
    def filter(predicate: DMValue => Boolean): MultipleResultRow =
-      MultipleResultRow(prefix, objects.filter(predicate))
+      MultipleResultRow(prefix, objects.map(_.filter(predicate)))
 
    //noinspection ScalaStyle
-   def groupBy(grouping: Grouping): Seq[MultipleResultRow] = {
-      def alterPrefix(groupName: DMValue): ResultRow = {
-         grouping.appendColumnMode match {
-            case DoNotAppend => prefix
-            case Default => prefix.updated(grouping.defaultColumnName, groupName)
-            case CustomAppendColumn(columnName, mapping) =>
-               prefix.updated(columnName, mapping(groupName))
-         }
-      }
-
+   private def groupDMs(objects: Seq[DMValue], grouping: Grouping): Seq[(DMValue, Seq[DMValue])] = {
       def extractYearFromDateDM(v: DMValue): Int = v match {
          case DMDate(value) => value.getYear
          case yd: DMYearDate => yd.year
@@ -39,7 +24,7 @@ case class MultipleResultRow(prefix: ResultRow, objects: Seq[DMValue]) {
          case GroupByYears(datePath, yearInterval, _) =>
             val getter = DMUtils.makeGetter(datePath)
             val filtered = objects.filter(root => getter(root) != DMNull) // when we group by year, we drop all records that have it missing
-            val grouped: Seq[(Int, Seq[DMValue])] = filtered.groupBy(root => extractYearFromDateDM(getter(root)) / yearInterval).toList
+         val grouped: Seq[(Int, Seq[DMValue])] = filtered.groupBy(root => extractYearFromDateDM(getter(root)) / yearInterval).toList
             def makeYearRange(int: Int): DMValue =
                if (yearInterval == 1) DMInteger(int)
                else {
@@ -75,23 +60,52 @@ case class MultipleResultRow(prefix: ResultRow, objects: Seq[DMValue]) {
             groups.sortBy(t => customGroupBy.orderMapping(getter(t._2.head)))(customGroupBy.ord)
       }
 
+      sorted
+   }
+
+   //noinspection ScalaStyle
+   def groupBy(grouping: Grouping): Seq[MultipleResultRow] = {
+      def alterPrefix(groupName: DMValue): ResultRow = {
+         grouping.appendColumnMode match {
+            case DoNotAppend => prefix
+            case Default => prefix.updated(grouping.defaultColumnName, groupName)
+            case CustomAppendColumn(columnName, mapping) =>
+               prefix.updated(columnName, mapping(groupName))
+         }
+      }
+
+      ???
+      /*
       sorted.map({ case (groupName, elems) =>
          MultipleResultRow(alterPrefix(groupName), elems)
-      })
+      })*/
+   }
+
+   def groupByHorizontal(grouping: Grouping): MultipleResultRow = {
+      MultipleResultRow(prefix, objects.flatMap(
+         (objs: Seq[DMValue]) => {
+            groupDMs(objs, grouping).foldLeft[NestedMap[String, Seq[DMValue]]](NestedMap.empty)({
+               case (nm, (key, vals)) =>
+                  nm.updated(key.toString, vals) // TODO maybe something better than toString ?
+            })
+      }))
    }
 
    def aggregate(aggregations: Seq[(String, Seq[DMValue] => DMValue)]): ResultRow = {
-      aggregations.foldLeft(prefix){
-         case (agg: ResultRow, (name, f)) => agg.updated(name, f(objects))
-      }
+      prefix.append(objects.flatMap(
+         (objs: Seq[DMValue]) =>
+            aggregations.foldLeft[ResultRow](NestedMap.empty){
+               case (agg: ResultRow, (name, f)) => agg.updated(name, f(objs))
+            }
+      ))
    }
 
    def aggregate(f: Seq[DMValue] => ResultRow): ResultRow = {
-      prefix.append(f(objects))
+      prefix.append(objects.flatMap(f))
    }
 }
 
 object MultipleResultRow {
-   def apply(prefix: ResultRow, objects: Seq[DMValue]): MultipleResultRow = new MultipleResultRow(prefix, objects)
-   def apply(objects: Seq[DMValue]): MultipleResultRow = MultipleResultRow(NestedMap.empty, objects)
+   def apply(prefix: ResultRow, objects: Seq[DMValue]): MultipleResultRow = new MultipleResultRow(prefix, NestedMapElement(objects))
+   def apply(objects: Seq[DMValue]): MultipleResultRow = MultipleResultRow(NestedMap.empty[String, DMValue], objects)
 }

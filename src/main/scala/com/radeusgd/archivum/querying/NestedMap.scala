@@ -22,7 +22,8 @@ object ListMap {
 
 sealed abstract class NestedMapADT[K, +V] {
    def map[U](f: V => U): NestedMapADT[K, U]
-   def flatMap[U](f: V => NestedMapADT[K, U]): NestedMapADT[K, U]
+   def flatMap1[U](f: V => NestedMapADT[K, U]): NestedMapADT[K, U]
+   def flatMap[U](f: V => NestedMap[K, U]): NestedMap[K, U]
 }
 
 object NestedMapADT {
@@ -33,7 +34,9 @@ object NestedMapADT {
 case class NestedMapElement[K, +V](value: V) extends NestedMapADT[K,V] {
    def map[U](f: V => U): NestedMapElement[K, U] = NestedMapElement(f(value))
 
-   override def flatMap[U](f: V => NestedMapADT[K, U]): NestedMapADT[K, U] = f(value)
+   override def flatMap1[U](f: V => NestedMapADT[K, U]): NestedMapADT[K, U] = f(value)
+
+   override def flatMap[U](f: V => NestedMap[K, U]): NestedMap[K, U] = f(value)
 }
 
 case class NestedMap[K, V](mapping: ListMap[K, NestedMapADT[K, V]]) extends NestedMapADT[K,V] {
@@ -50,7 +53,10 @@ case class NestedMap[K, V](mapping: ListMap[K, NestedMapADT[K, V]]) extends Nest
    def updated(k: K, m: NestedMap[K, V]): NestedMap[K, V] =
       NestedMap(mapping.updated(k, m))
 
-   override def flatMap[U](f: V => NestedMapADT[K, U]): NestedMap[K, U] =
+   override def flatMap1[U](f: V => NestedMapADT[K, U]): NestedMap[K, U] =
+      NestedMap(mapping.mapValues(_.flatMap1(f)))
+
+   override def flatMap[U](f: V => NestedMap[K, U]): NestedMap[K, U] =
       NestedMap(mapping.mapValues(_.flatMap(f)))
 
    def flatten: List[V] =
