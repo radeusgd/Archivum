@@ -21,4 +21,6 @@ package object querying {
          DMUtils.makeGetter(sc.s(args))
 
    }
+
+   type ResultRow = NestedMap[String, DMValue]
 }

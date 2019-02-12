@@ -37,9 +37,9 @@ case class MultipleResultRow(prefix: ResultRow, objects: Seq[DMValue]) {
       def alterPrefix(groupName: DMValue): ResultRow = {
          grouping.appendColumnMode match {
             case DoNotAppend => prefix
-            case Default => prefix.extend(grouping.defaultColumnName, groupName)
+            case Default => prefix.updated(grouping.defaultColumnName, groupName)
             case CustomAppendColumn(columnName, mapping) =>
-               prefix.extend(columnName, mapping(groupName))
+               prefix.updated(columnName, mapping(groupName))
          }
       }
 
@@ -91,12 +91,12 @@ case class MultipleResultRow(prefix: ResultRow, objects: Seq[DMValue]) {
 
    def aggregate(aggregations: Seq[(String, Seq[DMValue] => DMValue)]): ResultRow = {
       aggregations.foldLeft(prefix){
-         case (agg: ResultRow, (name, f)) => agg.extend(name, f(objects))
+         case (agg: ResultRow, (name, f)) => agg.updated(name, f(objects))
       }
    }
 }
 
 object MultipleResultRow {
    def apply(prefix: ResultRow, objects: Seq[DMValue]): MultipleResultRow = new MultipleResultRow(prefix, objects)
-   def apply(objects: Seq[DMValue]): MultipleResultRow = MultipleResultRow(ResultRow.empty, objects)
+   def apply(objects: Seq[DMValue]): MultipleResultRow = MultipleResultRow(NestedMap.empty, objects)
 }
