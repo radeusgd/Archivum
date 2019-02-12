@@ -26,6 +26,10 @@ libraryDependencies += "org.typelevel" %% "cats-core" % "1.0.1"
 
 libraryDependencies += "org.parboiled" %% "parboiled" % "2.1.5"
 
+libraryDependencies ++= Seq(
+   "com.norbitltd" %% "spoiwo" % "1.4.1"
+)
+
 // TODO assembly setup
 mainClass in assembly := Some("com.radeusgd.archivum.gui.ApplicationMain")
 

@@ -46,18 +46,6 @@ case class ResultSet(rows: Seq[MultipleResultRow]) {
          countColumn -> Aggregations.count
       )
 
-   def countTransposed(path: String, traits: Seq[(String, DMValue)], default: Option[String]): Seq[ResultRow] = {
-      val traitsAggregations =
-         traits.map { case (name, value) => name -> Aggregations.countEqual(path, value) }
-      val aggs = default match {
-         case Some(defaultName) =>
-            val countedVals = Set(traits.map(_._2):_*)
-            val getter = DMUtils.makeGetter(path)
-            val pred: DMValue => Boolean = v =>
-               !countedVals.contains(getter(v))
-            traitsAggregations ++ Seq(defaultName -> Aggregations.countPredicate(pred))
-         case None => traitsAggregations
-      }
-      aggregate(aggs:_*)
-   }
+   def countTransposed(path: String, traits: Seq[(String, DMValue)], default: Option[String]): Seq[ResultRow] =
+      aggregate(Aggregations.countTransposed(path, traits, default):_*)
 }

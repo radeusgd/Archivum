@@ -14,10 +14,20 @@ class Chrzty(years: Int = 1) extends BuiltinQuery(years, Seq("Parafia", "Miejsco
          "Dziewczynki" -> "K"
       ), Some("brak danych"))
 
+   private def podsumujCzySlubne(rs: ResultSet): Seq[ResultRow] =
+      rs.aggregate(
+         "Wszystkie" -> Aggregations.count,
+         /*Aggregations.countTransposed("Urodzenie ślubne", Seq(
+            "Slubne" -> "Tak",
+            "Nieślubne" -> "Nie"
+         ), None):_**/
+      )
+
    override val queries: Map[String, Query] = Map(
       "test_nazwiska" -> Query(DataUrodzenia, _.countGroups("Nazwisko", "Liczba osób")),
       "urodzenia_rocznie" -> Query(DataUrodzenia, podsumujPłcie),
       "urodzenia_miesięcznie" -> Query(DataUrodzenia,
          rs => rs.groupBy(groupByMonth("Data urodzenia")) |> podsumujPłcie),
+      "ślubne_rocznie" -> Query(DataUrodzenia, podsumujCzySlubne),
    )
 }

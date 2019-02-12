@@ -1,12 +1,11 @@
 package com.radeusgd.archivum.querying.builtinqueries
 
-import java.io.File
 import java.nio.file.{Path, Paths}
 
 import com.radeusgd.archivum.datamodel.{DMUtils, DMValue}
 import com.radeusgd.archivum.persistence.{Equal, Repository, SearchCriteria, Truth}
 import com.radeusgd.archivum.querying._
-import com.radeusgd.archivum.querying.utils.CSVExport
+import com.radeusgd.archivum.querying.utils.XLSExport
 import javafx.concurrent.Task
 
 sealed abstract class YearGrouping
@@ -27,6 +26,8 @@ abstract class BuiltinQuery(years: Int, folderGroupings: Seq[String]) {
       case NoYearGrouping => Nil
    }
 
+   private val fileExt: String = ".xlsx"
+
    def prepareTask(resultPath: String, repo: Repository): Task[Unit] = new Task[Unit]() {
       override def call(): Unit = {
          if (folderGroupings.isEmpty) {
@@ -38,7 +39,7 @@ abstract class BuiltinQuery(years: Int, folderGroupings: Seq[String]) {
                updateMessage("Running " + qname)
                val all = repo.fetchAllGrouped(prepareYearGrouping(yg) : _*)
                val res = query(all)
-               CSVExport.export(new File(resultPath + qname + ".csv"), res)
+               XLSExport.export(resultPath + qname + fileExt, res)
                println(s"Query $qname written ${res.length} rows in total")
                updateProgress(index + 1, workToDo)
             }
@@ -64,7 +65,7 @@ abstract class BuiltinQuery(years: Int, folderGroupings: Seq[String]) {
                      groupings:_*
                   )
                   val res = query(all)
-                  CSVExport.exportToSubFolders(Paths.get(resultPath).resolve(subName), qname + ".csv", folderGroupings.tail.length, res)
+                  XLSExport.exportToSubFolders(Paths.get(resultPath).resolve(subName), qname + fileExt, folderGroupings.tail.length, res)
                   println(s"Query $qname @ $subName written ${res.length} rows in total")
                }
 

@@ -1,36 +1,41 @@
 package com.radeusgd.archivum.querying.utils
-import java.io.{File, FileWriter, PrintWriter}
+
 import java.nio.file.{Files, Path}
 
+import com.norbitltd.spoiwo.model.{Cell, Row, Sheet}
+import com.norbitltd.spoiwo.natures.xlsx.Model2XlsxConversions._
+import com.radeusgd.archivum.datamodel.{DMDate, DMInteger, DMValue}
 import com.radeusgd.archivum.querying.{ResultCell, ResultRow}
 
-object CSVExport {
+object XLSExport {
 
-   def escape(str: String): String =
-      "\"" + str.replace("\"", "\\\"") + "\""
-
-   def cellToString(cell: ResultCell): String = {
-      cell.value.toString // TODO may conider using StringBridges ?
+   def makeCell(cell: ResultCell): Cell = {
+      cell.value match {
+         case DMInteger(x) => Cell(x)
+         case DMDate(d) => Cell(d)
+         case other: DMValue => Cell(other.toString)
+      }
    }
 
    private val sep: String = ","
 
-   def export(printWriter: PrintWriter, results: Seq[ResultRow]): Unit = {
+   def export(fileName: String, results: Seq[ResultRow]): Unit = {
       if (results.nonEmpty) {
-         val header = results.head.columnNames.reverse
-         val headLine = header.map(escape).mkString(sep)
-         printWriter.println(headLine)
-         for (row <- results) {
-            val line = row.cells.reverse.map(cellToString).map(escape).mkString(sep)
-            printWriter.println(line)
-         }
-      }
-   }
 
-   def export(file: File, results: Seq[ResultRow]): Unit = {
-      val pw = new PrintWriter(new FileWriter(file))
-      export(pw, results)
-      pw.close()
+         val headerCols = results.head.columnNames.reverse
+         val header = Row(headerCols.map(Cell(_)))
+         val rows = results.map((row: ResultRow) =>
+            Row(row.cells.reverse.map(makeCell))
+         ).toList
+
+         val sheet = Sheet(
+            name = "Results", // TODO better naming?
+            rows = header :: rows
+         )
+         sheet.saveAsXlsx(fileName)
+      } else {
+         println("Warning! Empty result set, export will not take effect.")
+      }
    }
 
    def exportToSubFolders(path: Path, filename: String, columnsToFolders: Int, results: Seq[ResultRow]): Unit = {
@@ -45,7 +50,7 @@ object CSVExport {
       def exportHelper(path: Path, columns: Int, results: Seq[ResultRow]): Unit = {
          if (columns == 0) {
             Files.createDirectories(path)
-            export(new File(path.resolve(filename).toUri), reverseRows(results))
+            export(path.resolve(filename).toString, reverseRows(results))
          }
          else {
             val cut = cutFirstCell(results)
