@@ -57,6 +57,27 @@ case class MultipleResultRow(prefix: ResultRow, objects: NestedMapADT[String, Se
          }))
    }
 
+   def countWithPercentages(grouping: Grouping, presetGroupings: Seq[String]): ResultRow = {
+      prefix.append(objects.flatMap(
+         (objs: Seq[DMValue]) => {
+            val allCount = objs.length
+            val grouped: Map[String, Seq[DMValue]] =
+               grouping.groupDMs(objs).mapFirst(Grouping.groupkeyToString)
+                  .toMap.withDefault(_ => Nil)
+
+            val reordered = presetGroupings.foldLeft[NestedMap[String, Seq[DMValue]]](NestedMap.empty)({
+               case (nm, key) => nm.updated(key, grouped(key))
+            })
+
+            reordered.flatMap((objs: Seq[DMValue]) =>
+               ResultRow(
+                  "l.b." -> DMInteger(objs.length),
+                  "%" -> percentage(objs.length, allCount)
+               )
+            )
+         }))
+   }
+
    def aggregate(aggregations: Seq[(String, Seq[DMValue] => DMValue)]): ResultRow = {
       prefix.append(objects.flatMap(
          (objs: Seq[DMValue]) =>

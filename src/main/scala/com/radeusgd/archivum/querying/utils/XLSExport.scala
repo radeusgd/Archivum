@@ -1,11 +1,14 @@
 package com.radeusgd.archivum.querying.utils
 
-import java.nio.file.{Files, Path}
+import java.nio.file.{Files, Path, Paths}
 
-import com.norbitltd.spoiwo.model.{Cell, CellRange, Row, Sheet}
+import com.norbitltd.spoiwo.model._
+import com.norbitltd.spoiwo.model.enums.{CellHorizontalAlignment, CellVerticalAlignment}
 import com.norbitltd.spoiwo.natures.xlsx.Model2XlsxConversions._
-import com.radeusgd.archivum.datamodel.{DMDate, DMInteger, DMValue}
+import com.radeusgd.archivum.datamodel.{DMDate, DMInteger, DMStruct, DMValue}
 import com.radeusgd.archivum.querying.{ListMap, NestedMap, NestedMapElement, ResultRow}
+
+import scala.collection.Map
 
 object XLSExport {
 
@@ -13,6 +16,22 @@ object XLSExport {
       cellValue match {
          case DMInteger(x) => Cell(x)
          case DMDate(d) => Cell(d)
+         case struct @ DMStruct(mapping, _) =>
+            val fraction: Option[(DMValue, DMValue)] = for {
+               part <- mapping.get("part")
+               whole <- mapping.get("whole")
+            } yield (part, whole)
+
+            val fracCell: Option[Cell] = fraction match {
+               case Some((DMInteger(part), DMInteger(whole))) =>
+                  if (whole != 0)
+                     Some(Cell(100.0 * part / whole))
+                  else
+                     Some(Cell(null))
+               case _ => None
+            }
+
+            fracCell.getOrElse(Cell(struct.toString))
          case other: DMValue => Cell(other.toString)
       }
    }
@@ -27,13 +46,19 @@ object XLSExport {
       def height: Int = rows.length
    }
 
+   private val headerStyle = CellStyle(
+      font=Font(bold = true),
+      horizontalAlignment = CellHorizontalAlignment.Center,
+      verticalAlignment = CellVerticalAlignment.Center
+   )
+
    private def emptyCells(width: Int): List[Cell] =
-      List.fill(width)(Cell(null))
+      List.fill(width)(Cell(null, style = headerStyle))
 
    private def makeHeader(name: String, width: Int, offset: Int): HeaderAccumulator = {
       println("Make leaf " + name + ", " + offset)
       HeaderAccumulator(
-         rows = (Cell(name) :: emptyCells(width - 1)) :: Nil,
+         rows = (Cell(name, style = headerStyle) :: emptyCells(width - 1)) :: Nil,
          mergedRegions = Nil,
          topMergedRegions = CellRange((0, 0), (0, 0)) :: Nil,
          width = width
@@ -43,7 +68,7 @@ object XLSExport {
    private def extendHeader(name: String, header: HeaderAccumulator, offset: Int): HeaderAccumulator = {
       println("Extend " + name + " : " + header.width + ", " + offset)
       HeaderAccumulator(
-         rows = (Cell(name) :: emptyCells(header.width - 1)) :: header.rows,
+         rows = (Cell(name, style = headerStyle) :: emptyCells(header.width - 1)) :: header.rows,
          mergedRegions = Nil, // TODO
          topMergedRegions = Nil,
          width = header.width
@@ -131,6 +156,7 @@ object XLSExport {
    }
 
    def export(fileName: String, results: Seq[ResultRow]): Unit = {
+      Files.createDirectories(Paths.get(fileName).getParent)
       makeSheet(results).saveAsXlsx(fileName)
    }
 

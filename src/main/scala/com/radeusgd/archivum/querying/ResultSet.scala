@@ -1,6 +1,6 @@
 package com.radeusgd.archivum.querying
 
-import com.radeusgd.archivum.datamodel.{DMStruct, DMUtils, DMValue}
+import com.radeusgd.archivum.datamodel._
 import com.radeusgd.archivum.utils.BetterTuples._
 
 case class ResultSet(rows: Seq[MultipleResultRow]) {
@@ -23,17 +23,22 @@ case class ResultSet(rows: Seq[MultipleResultRow]) {
       flatMap(_.groupBy(grouping))
    }
 
-   def groupByHorizontal(grouping: Grouping): ResultSet = {
+   private def computeHorizontalGroupingPreset(grouping: Grouping): Seq[String] = {
       // TODO this can be optimized to not do the grouping twice
       val ALLTHERESULTS: Seq[DMValue] = rows.flatMap(_.objects.flatten).flatten
       val ALLGROUPED = grouping.groupDMs(ALLTHERESULTS)
       val preset: Seq[String] = ALLGROUPED.extractFirsts.map(Grouping.groupkeyToString)
+      preset
+   }
+
+   def groupByHorizontal(grouping: Grouping): ResultSet = {
+      val preset = computeHorizontalGroupingPreset(grouping)
       map(_.groupByHorizontal(grouping, preset))
    }
 
    //def sortBy[A](sorter: MultipleResultRow => A)
 
-   def aggregate(aggregations: (String, Seq[DMValue] => DMValue)*): Seq[ResultRow] = {
+   def aggregateClassic(aggregations: (String, ClassicAggregations.Aggregation)*): Seq[ResultRow] = {
       rows.map(_.aggregate(aggregations))
    }
 
@@ -45,10 +50,16 @@ case class ResultSet(rows: Seq[MultipleResultRow]) {
       countGroups(path, path, countColumn)
 
    def countGroups(path: String, nameColumn: String, countColumn: String): Seq[ResultRow] =
-      groupBy(GroupBy(path, PopularitySorted(Descending), CustomAppendColumn(nameColumn))).aggregate(
+      groupBy(GroupBy(path, PopularitySorted(Descending), CustomAppendColumn(nameColumn))).aggregateClassic(
          countColumn -> ClassicAggregations.count
       )
 
    def countTransposed(path: String, traits: Seq[(String, DMValue)], default: Option[String]): Seq[ResultRow] =
-      aggregate(ClassicAggregations.countTransposed(path, traits, default):_*)
+      aggregateClassic(ClassicAggregations.countTransposed(path, traits, default):_*)
+
+   def countWithPercentages(grouping: Grouping): Seq[ResultRow] = {
+      val preset = computeHorizontalGroupingPreset(grouping)
+      rows.map(_.countWithPercentages(grouping, preset))
+   }
+
 }

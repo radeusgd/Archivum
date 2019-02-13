@@ -13,12 +13,16 @@ object DataChrztu extends YearGrouping
 object DataUrodzenia extends YearGrouping
 object NoYearGrouping extends YearGrouping
 
-case class Query(yearGrouping: YearGrouping, realization: ResultSet => Seq[ResultRow])
+case class Query(yearGrouping: YearGrouping, realization: ResultSet => Seq[ResultRow]) {
+   def withFilter(predicate: DMValue => Boolean): Query =
+      Query(yearGrouping, (rs: ResultSet) => realization(rs.filter(predicate)))
+}
 
 //noinspection ScalaStyle
 abstract class BuiltinQuery(years: Int, folderGroupings: Seq[String]) {
 
-   val queries: Map[String, Query]
+   val groupedQueries: Map[String, Query]
+   val manualQueries: Map[String, ResultSet => Seq[ResultRow]]
 
    private def prepareYearGrouping(yearGrouping: YearGrouping): Seq[Grouping] = yearGrouping match {
       case DataChrztu => GroupByYears("Data chrztu", years, CustomAppendColumn("Rok")) :: Nil
@@ -29,19 +33,32 @@ abstract class BuiltinQuery(years: Int, folderGroupings: Seq[String]) {
    private val fileExt: String = ".xlsx"
 
    def prepareTask(resultPath: String, repo: Repository): Task[Unit] = new Task[Unit]() {
+      private def runManualQueries(workToDo: Int): Unit = {
+         for (((qname, query), index) <- manualQueries.zipWithIndex) {
+            val all = repo.fetchAll()
+            val res = query(all)
+
+            XLSExport.export(resultPath + qname + fileExt, res)
+            println(s"Query $qname written ${res.length} rows in total")
+            updateProgress(index + 1, workToDo)
+         }
+      }
+
       override def call(): Unit = {
          if (folderGroupings.isEmpty) {
-            val workToDo = queries.size
+            val workToDo = groupedQueries.size + manualQueries.size
 
             updateProgress(0, workToDo)
 
-            for (((qname, Query(yg, query)), index) <- queries.zipWithIndex) {
+            runManualQueries(workToDo)
+
+            for (((qname, Query(yg, query)), index) <- groupedQueries.zipWithIndex) {
                updateMessage("Running " + qname)
                val all = repo.fetchAllGrouped(prepareYearGrouping(yg) : _*)
                val res = query(all)
                XLSExport.export(resultPath + qname + fileExt, res)
                println(s"Query $qname written ${res.length} rows in total")
-               updateProgress(index + 1, workToDo)
+               updateProgress(manualQueries.size + index + 1, workToDo)
             }
 
             updateMessage("Done")
@@ -50,12 +67,16 @@ abstract class BuiltinQuery(years: Int, folderGroupings: Seq[String]) {
             val firstLevelGroupPath = DMUtils.parsePath(folderGroupings.head)
             val firstLevelGroupings = repo.getAllDistinctValues(firstLevelGroupPath)
             val flgLen = firstLevelGroupings.length
-            val workToDo = queries.size * (flgLen + 1) + 1
-            var progress = 1
+            val workToDo = groupedQueries.size * (flgLen + 1) + 1 + manualQueries.size
+            updateProgress(1, workToDo)
+
+            runManualQueries(workToDo)
+
+            var progress = manualQueries.size + 1
             updateProgress(progress, workToDo)
             println("Will run for " + firstLevelGroupings)
 
-            for ((qname, Query(yg, query)) <- queries) {
+            for ((qname, Query(yg, query)) <- groupedQueries) {
 
                def runQuery(filter: SearchCriteria, subName: String): Unit = {
                   val groupings =

@@ -2,6 +2,7 @@ package com.radeusgd.archivum.persistence
 
 import com.radeusgd.archivum.datamodel._
 import com.radeusgd.archivum.querying.{Grouping, MultipleResultRow, ResultSet}
+import com.radeusgd.archivum.utils.BetterTuples._
 
 trait Repository {
    type Rid = Long
@@ -22,6 +23,9 @@ trait Repository {
 
    // TODO using this in processing will be slow, in the future we should extend Repository to handle Streams of records or something similar
    def fetchAllRecords(): Seq[(Rid, DMStruct)]
+
+   def fetchAll(): ResultSet =
+      ResultSet(Seq(MultipleResultRow(fetchAllRecords().extractSeconds)))
 
    // this should be overriden with a faster implementation
    def fetchAllGrouped(filter: SearchCriteria, groups: Grouping*): ResultSet = {

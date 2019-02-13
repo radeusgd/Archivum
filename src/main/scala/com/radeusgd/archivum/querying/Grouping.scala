@@ -44,7 +44,7 @@ sealed abstract class Grouping(val appendColumnMode: AppendColumnMode) {
             grouped.map(t => (makeYearRange(t._1), t._2))
          case GroupByWithSummary(path) =>
             val groups = objects.groupBy(DMUtils.makeGetter(path))
-            groups.updated(DMString("ALL"), objects).toList
+            groups.updated(DMString("Razem"), objects).toList
          case CustomGroupBy(path, mapping, _, filter, _) =>
             val getter = DMUtils.makeGetter(path)
             val filtered = objects.filter(v => filter(getter(v)))
@@ -100,6 +100,10 @@ case class CustomGroupBy[A](path: String,
 }
 
 object CustomGroupBy {
+   private val monthNames = Array(
+      "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII"
+   )
+
    def groupByMonth(path: String, appendColumnMode: AppendColumnMode = Default): CustomGroupBy[Int] = {
       CustomGroupBy(path,
          filter = {
@@ -108,8 +112,8 @@ object CustomGroupBy {
             case _ => false
          },
          mapping = {
-            case DMDate(date) => DMString(date.getMonth.toString)
-            case DMYearDate(Right(date)) => DMString(date.getMonth.toString)
+            case DMDate(date) => DMString(monthNames(date.getMonthValue - 1))
+            case DMYearDate(Right(date)) => DMString(monthNames(date.getMonthValue - 1))
          },
          orderMapping = {
             case DMDate(date) => date.getMonthValue
