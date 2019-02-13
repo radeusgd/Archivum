@@ -1,5 +1,7 @@
 package com.radeusgd.archivum.querying.builtinqueries
 
+import java.time.temporal.ChronoUnit
+
 import com.radeusgd.archivum.datamodel._
 import com.radeusgd.archivum.querying._
 import com.radeusgd.archivum.querying.CustomGroupBy._
@@ -38,6 +40,33 @@ class Chrzty(years: Int = 5) extends BuiltinQuery(years, Seq("Parafia", "Miejsco
       })
    }
 
+   private def hasDate(path: String)(dMValue: DMValue): Boolean =
+      DMUtils.makeGetter(path)(dMValue).asType[DMYearDate].exists(_.fullDate.isDefined)
+
+   private def liczbaDniOdUrodzeniaDoChrztu(rs: ResultSet): Seq[ResultRow] = {
+      rs.filter(hasDate("Data urodzenia") _ && hasDate("Data chrztu")).countWithPercentages(ComputedGroupBy(
+         getter = (dmv: DMValue) => {
+            val diff: Option[Int] = for {
+               bdatefield <- path"Data urodzenia"(dmv).asType[DMYearDate]
+               bdate <- bdatefield.fullDate
+               cdatefield <- path"Data chrztu"(dmv).asType[DMYearDate]
+               cdate <- cdatefield.fullDate
+            } yield ChronoUnit.DAYS.between(bdate, cdate).toInt
+
+            val d = diff.get // we know this will exist because of earlier filter
+            if (d < 0) DMString("błąd")
+            else if (d >= 15) DMString("15>")
+            else DMInteger(d)
+         },
+         orderMapping = {
+            case DMInteger(v) => v
+            case DMString(s) =>
+               if (s == "15>") 15
+               else -1
+         }
+      ))
+   }
+
    private val bliźniętaEnum: Seq[DMString] = Seq("M+M", "M+K", "K+K").map(DMString)
    private val urodzeniaWielokrotneEnum: Seq[DMString] = Seq("M+M+M",
                 "M+M+K",
@@ -51,7 +80,7 @@ class Chrzty(years: Int = 5) extends BuiltinQuery(years, Seq("Parafia", "Miejsco
       queries.foldLeft[Map[String, Query]](Map.empty){ case (map, (name, query)) =>
          map.merged(Map(
             name -> query,
-            "ślubne/" + name ->
+            /*"ślubne/" + name ->
                query.withFilter(d => path"Urodzenie ślubne"(d).taknieasBool.contains(true)),
             "nieślubne/" + name ->
                query.withFilter(d => path"Urodzenie ślubne"(d).taknieasBool.contains(false)),
@@ -61,7 +90,7 @@ class Chrzty(years: Int = 5) extends BuiltinQuery(years, Seq("Parafia", "Miejsco
                query.withFilter(d => path"Ciąża mnoga"(d) == DMString("NIE")),
             "urodzenia_bliźniacze/" + name ->
                query.withFilter(d => bliźniętaEnum.contains(path"Ciąża mnoga"(d))),
-            "urodzenia_wielorakie/" + name ->
+            //FIXME temporarily disable for faster testing*/"urodzenia_wielorakie/" + name ->
                query.withFilter(d => urodzeniaWielokrotneEnum.contains(path"Ciąża mnoga"(d)))
          ))
       }
@@ -74,6 +103,8 @@ class Chrzty(years: Int = 5) extends BuiltinQuery(years, Seq("Parafia", "Miejsco
       "urodzenia_rocznie" -> Query(DataUrodzenia, podsumujPłcie),
       "urodzenia_miesięcznie" -> Query(DataUrodzenia,
          rs => rs.groupByHorizontal(groupByMonth("Data urodzenia")) |> podsumujPłcie),
+      "dni_od_urodzenia_do_chrztu" -> Query(DataChrztu, liczbaDniOdUrodzeniaDoChrztu),
+      "dni_debug" -> Query(DataChrztu, rs => rs.filter(hasDate("Data urodzenia") _ && hasDate("Data chrztu")).aggregateClassic("l" -> ClassicAggregations.count))
    ))
 
    override val manualQueries: Map[String, ResultSet => Seq[ResultRow]] = Map(

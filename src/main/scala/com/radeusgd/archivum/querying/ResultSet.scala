@@ -62,4 +62,8 @@ case class ResultSet(rows: Seq[MultipleResultRow]) {
       rows.map(_.countWithPercentages(grouping, preset))
    }
 
+   def countAfterGrouping(): Seq[ResultRow] = {
+      rows.map(_.aggregate(objs => ResultRow("l.b." -> DMInteger(objs.length))))
+   }
+
 }

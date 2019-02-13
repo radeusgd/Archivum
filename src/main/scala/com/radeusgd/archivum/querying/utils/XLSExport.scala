@@ -12,9 +12,12 @@ import scala.collection.Map
 
 object XLSExport {
 
+   private val percentageStyle = CellStyle(dataFormat = CellDataFormat("0.0"))
+   private val integerStyle = CellStyle(dataFormat = CellDataFormat("0"))
+
    def makeCell(cellValue: DMValue): Cell = {
       cellValue match {
-         case DMInteger(x) => Cell(x)
+         case DMInteger(x) => Cell(x, style = integerStyle)
          case DMDate(d) => Cell(d)
          case struct @ DMStruct(mapping, _) =>
             val fraction: Option[(DMValue, DMValue)] = for {
@@ -25,7 +28,7 @@ object XLSExport {
             val fracCell: Option[Cell] = fraction match {
                case Some((DMInteger(part), DMInteger(whole))) =>
                   if (whole != 0)
-                     Some(Cell(100.0 * part / whole))
+                     Some(Cell(100.0 * part / whole, style = percentageStyle))
                   else
                      Some(Cell(null))
                case _ => None

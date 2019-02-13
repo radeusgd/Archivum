@@ -49,6 +49,13 @@ sealed abstract class Grouping(val appendColumnMode: AppendColumnMode) {
             val getter = DMUtils.makeGetter(path)
             val filtered = objects.filter(v => filter(getter(v)))
             filtered.groupBy(v => mapping(getter(v))).toList
+         case ComputedGroupBy(getter, _, filter, _) =>
+            val filtered = objects.filter(v => filter(getter(v)))
+            filtered.groupBy(v => getter(v)).toList
+         case GroupByPredicates(predicates @ _*) =>
+            for {
+               (groupname, pred) <- predicates
+            } yield (DMString(groupname), objects.filter(pred))
       }
 
       def ascendingToOrder[A](order: SortingOrder)(list: Seq[A]): Seq[A] = order match {
@@ -67,6 +74,10 @@ sealed abstract class Grouping(val appendColumnMode: AppendColumnMode) {
          case customGroupBy: CustomGroupBy[Any] =>
             val getter = DMUtils.makeGetter(customGroupBy.path)
             groups.sortBy(t => customGroupBy.orderMapping(getter(t._2.head)))(customGroupBy.ord)
+         case computedGroupBy: ComputedGroupBy[Any] =>
+            val getter = computedGroupBy.getter
+            groups.sortBy(t => computedGroupBy.orderMapping(getter(t._2.head)))(computedGroupBy.ord)
+         case _: GroupByPredicates => groups
       }
 
       sorted
@@ -97,6 +108,17 @@ case class CustomGroupBy[A](path: String,
                             override val appendColumnMode: AppendColumnMode = Default)(implicit ordering: Ordering[A]) extends Grouping(appendColumnMode) {
    override def defaultColumnName: String = path
    def ord: Ordering[A] = ordering
+}
+case class ComputedGroupBy[A](getter: DMValue => DMValue,
+                              orderMapping: DMValue => A,
+                              filter: DMValue => Boolean = _ => true,
+                              override val appendColumnMode: AppendColumnMode = Default)(implicit ordering: Ordering[A]) extends Grouping(appendColumnMode) {
+   override def defaultColumnName: String = ??? // TODO not sure if want to leave that
+   def ord: Ordering[A] = ordering
+}
+
+case class GroupByPredicates(predicates: (String, DMValue => Boolean)*) extends Grouping(Default) {
+   override def defaultColumnName: String = ??? // TODO add support for vertical grouping ?
 }
 
 object CustomGroupBy {
