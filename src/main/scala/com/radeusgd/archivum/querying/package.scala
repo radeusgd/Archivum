@@ -23,4 +23,9 @@ package object querying {
    }
 
    type ResultRow = NestedMap[String, DMValue]
+
+   object ResultRow {
+      def apply(values: (String, DMValue)*): ResultRow =
+         NestedMap.fromList(values.toList)
+   }
 }

@@ -1,6 +1,6 @@
 package com.radeusgd.archivum.querying
 
-class ListMap[K, V] private (private val elems: List[(K, V)]) {
+case class ListMap[K, V] private (private val elems: List[(K, V)]) {
    def entries: List[(K, V)] = elems.reverse
    def values: List[V] = elems.map(_._2).reverse
    def keys: List[K] = elems.map(_._1).reverse
@@ -13,6 +13,8 @@ class ListMap[K, V] private (private val elems: List[(K, V)]) {
 
    def append(other: ListMap[K, V]): ListMap[K, V] =
       ListMap.fromList(entries ++ other.entries)
+
+   override def toString: String = entries.toString()
 }
 
 object ListMap {
@@ -24,6 +26,7 @@ sealed abstract class NestedMapADT[K, +V] {
    def map[U](f: V => U): NestedMapADT[K, U]
    def flatMap1[U](f: V => NestedMapADT[K, U]): NestedMapADT[K, U]
    def flatMap[U](f: V => NestedMap[K, U]): NestedMap[K, U]
+   def flatten: List[V]
 }
 
 object NestedMapADT {
@@ -37,6 +40,10 @@ case class NestedMapElement[K, +V](value: V) extends NestedMapADT[K,V] {
    override def flatMap1[U](f: V => NestedMapADT[K, U]): NestedMapADT[K, U] = f(value)
 
    override def flatMap[U](f: V => NestedMap[K, U]): NestedMap[K, U] = f(value)
+
+   override def flatten: List[V] = value :: Nil
+
+   override def toString: String = value.toString
 }
 
 case class NestedMap[K, V](mapping: ListMap[K, NestedMapADT[K, V]]) extends NestedMapADT[K,V] {
@@ -59,7 +66,7 @@ case class NestedMap[K, V](mapping: ListMap[K, NestedMapADT[K, V]]) extends Nest
    override def flatMap[U](f: V => NestedMap[K, U]): NestedMap[K, U] =
       NestedMap(mapping.mapValues(_.flatMap(f)))
 
-   def flatten: List[V] =
+   override def flatten: List[V] =
       mapping.values.flatMap {
          case NestedMapElement(v) => v :: Nil
          case m: NestedMap[K, V] => m.flatten
@@ -67,8 +74,15 @@ case class NestedMap[K, V](mapping: ListMap[K, NestedMapADT[K, V]]) extends Nest
 
    def append(other: NestedMap[K, V]): NestedMap[K, V] =
       NestedMap(mapping.append(other.mapping))
+
+   override def toString: String =
+      "NestedMap(" + mapping.entries.map({ case (k, v) => k + "->" + v}).mkString(", ") + ")"
 }
 
 object NestedMap {
    def empty[K, V]: NestedMap[K, V] = NestedMap(ListMap.empty)
+   def fromList[K, V](l: List[(K, V)]): NestedMap[K, V] =
+      NestedMap(ListMap.fromList(
+         l.map({case (key, value) => (key, NestedMapElement[K, V](value))})
+      ))
 }

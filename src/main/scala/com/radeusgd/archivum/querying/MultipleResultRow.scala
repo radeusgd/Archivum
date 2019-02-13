@@ -1,6 +1,7 @@
 package com.radeusgd.archivum.querying
 
 import com.radeusgd.archivum.datamodel._
+import com.radeusgd.archivum.utils.BetterTuples._
 
 case class MultipleResultRow(prefix: ResultRow, objects: NestedMapADT[String, Seq[DMValue]]) {
    /*
@@ -10,58 +11,6 @@ case class MultipleResultRow(prefix: ResultRow, objects: NestedMapADT[String, Se
    def filter(predicate: DMValue => Boolean): MultipleResultRow =
       MultipleResultRow(prefix, objects.map(_.filter(predicate)))
 
-   //noinspection ScalaStyle
-   private def groupDMs(objects: Seq[DMValue], grouping: Grouping): Seq[(DMValue, Seq[DMValue])] = {
-      def extractYearFromDateDM(v: DMValue): Int = v match {
-         case DMDate(value) => value.getYear
-         case yd: DMYearDate => yd.year
-         case _ => throw new RuntimeException("Trying to extract year from non-date value")
-      }
-
-      val groups: Seq[(DMValue, Seq[DMValue])] = grouping match {
-         case GroupBy(path, _, _) =>
-            objects.groupBy(DMUtils.makeGetter(path)).toList
-         case GroupByYears(datePath, yearInterval, _) =>
-            val getter = DMUtils.makeGetter(datePath)
-            val filtered = objects.filter(root => getter(root) != DMNull) // when we group by year, we drop all records that have it missing
-         val grouped: Seq[(Int, Seq[DMValue])] = filtered.groupBy(root => extractYearFromDateDM(getter(root)) / yearInterval).toList
-            def makeYearRange(int: Int): DMValue =
-               if (yearInterval == 1) DMInteger(int)
-               else {
-                  val start = int * yearInterval
-                  val end = start + yearInterval - 1
-                  DMString(start + " - " + end)
-               }
-            grouped.map(t => (makeYearRange(t._1), t._2))
-         case GroupByWithSummary(path) =>
-            val groups = objects.groupBy(DMUtils.makeGetter(path))
-            groups.updated(DMString("ALL"), objects).toList
-         case CustomGroupBy(path, mapping, _, filter, _) =>
-            val getter = DMUtils.makeGetter(path)
-            val filtered = objects.filter(v => filter(getter(v)))
-            filtered.groupBy(v => mapping(getter(v))).toList
-      }
-
-      def ascendingToOrder[A](order: SortingOrder)(list: Seq[A]): Seq[A] = order match {
-         case Ascending => list
-         case Descending => list.reverse
-      }
-
-      val sorted = grouping match {
-         case GroupBy(_, sortType, _) => sortType match {
-            // TODO what about canonical sorting on DMValues that are not DMOrdered? at least try giving a better error message
-            case CanonicalSorting(order) => ascendingToOrder(order)(groups.sortBy(_._1.asInstanceOf[DMOrdered]))
-            case PopularitySorted(order) => ascendingToOrder(order)(groups.sortBy(_._2.length))
-         }
-         case GroupByYears(_, _, _) => groups.sortBy(_._1.asInstanceOf[DMOrdered])
-         case _: GroupByWithSummary => groups
-         case customGroupBy: CustomGroupBy[Any] =>
-            val getter = DMUtils.makeGetter(customGroupBy.path)
-            groups.sortBy(t => customGroupBy.orderMapping(getter(t._2.head)))(customGroupBy.ord)
-      }
-
-      sorted
-   }
 
    //noinspection ScalaStyle
    def groupBy(grouping: Grouping): Seq[MultipleResultRow] = {
@@ -76,7 +25,7 @@ case class MultipleResultRow(prefix: ResultRow, objects: NestedMapADT[String, Se
 
       objects match {
          case NestedMapElement(value) =>
-            val sorted = groupDMs(value, grouping)
+            val sorted = grouping.groupDMs(value)
             sorted.map({ case (groupName, elems) =>
                MultipleResultRow(alterPrefix(groupName), elems)
             })
@@ -84,14 +33,28 @@ case class MultipleResultRow(prefix: ResultRow, objects: NestedMapADT[String, Se
       }
    }
 
+
    def groupByHorizontal(grouping: Grouping): MultipleResultRow = {
       MultipleResultRow(prefix, objects.flatMap(
          (objs: Seq[DMValue]) => {
-            groupDMs(objs, grouping).foldLeft[NestedMap[String, Seq[DMValue]]](NestedMap.empty)({
+            grouping.groupDMs(objs).foldLeft[NestedMap[String, Seq[DMValue]]](NestedMap.empty)({
                case (nm, (key, vals)) =>
-                  nm.updated(key.toString, vals) // TODO maybe something better than toString ?
+                  nm.updated(Grouping.groupkeyToString(key), vals)
             })
       }))
+   }
+
+   def groupByHorizontal(grouping: Grouping, presetGroupings: Seq[String]): MultipleResultRow = {
+      MultipleResultRow(prefix, objects.flatMap(
+         (objs: Seq[DMValue]) => {
+            val grouped: Map[String, Seq[DMValue]] =
+               grouping.groupDMs(objs).mapFirst(Grouping.groupkeyToString)
+                  .toMap.withDefault(_ => Nil)
+
+            presetGroupings.foldLeft[NestedMap[String, Seq[DMValue]]](NestedMap.empty)({
+               case (nm, key) => nm.updated(key, grouped(key))
+            })
+         }))
    }
 
    def aggregate(aggregations: Seq[(String, Seq[DMValue] => DMValue)]): ResultRow = {

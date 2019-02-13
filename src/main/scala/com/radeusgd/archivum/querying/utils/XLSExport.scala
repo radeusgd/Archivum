@@ -31,6 +31,7 @@ object XLSExport {
       List.fill(width)(Cell(null))
 
    private def makeHeader(name: String, width: Int, offset: Int): HeaderAccumulator = {
+      println("Make leaf " + name + ", " + offset)
       HeaderAccumulator(
          rows = (Cell(name) :: emptyCells(width - 1)) :: Nil,
          mergedRegions = Nil,
@@ -39,13 +40,15 @@ object XLSExport {
       )
    }
 
-   private def extendHeader(name: String, header: HeaderAccumulator, offset: Int): HeaderAccumulator =
+   private def extendHeader(name: String, header: HeaderAccumulator, offset: Int): HeaderAccumulator = {
+      println("Extend " + name + " : " + header.width + ", " + offset)
       HeaderAccumulator(
-         rows = (Cell(name) :: emptyCells(header.width)) :: header.rows,
+         rows = (Cell(name) :: emptyCells(header.width - 1)) :: header.rows,
          mergedRegions = Nil, // TODO
          topMergedRegions = Nil,
          width = header.width
       )
+   }
 
    private def padRowsToHeight(height: Int)(header: HeaderAccumulator): HeaderAccumulator =
       header.copy(
@@ -65,6 +68,8 @@ object XLSExport {
    }
 
    private def mergeHeaders(hs: List[HeaderAccumulator]): HeaderAccumulator = {
+      println("Rows: " + hs.map(_.rows))
+      println("Merged: " + mergeRows(hs.map(_.rows)))
       HeaderAccumulator(
          rows = mergeRows(hs.map(_.rows)),
          mergedRegions = hs.flatMap(_.mergedRegions),
@@ -80,7 +85,7 @@ object XLSExport {
                case NestedMapElement(value) =>
                   makeHeader(key, value, noffset)
                case m: NestedMap[String, Int] =>
-                  makeHeader(m, noffset)
+                  extendHeader(key, makeHeader(m, noffset), offset)
             }
             (noffset + ha.width, ha :: l)
       })
@@ -93,14 +98,22 @@ object XLSExport {
       mergeHeaders(padded)
    }
 
-   private def makeHeader(resultRow: ResultRow): (List[Row], List[CellRange]) = {
-      val ha = makeHeader(resultRow.map(_ => 1), 0)
+   private def makeHeader(results: Seq[ResultRow]): (List[Row], List[CellRange]) = {
+      val headerStructures: Seq[NestedMap[String, Int]] = results.map(_.map(_ => 1))
+      val headerStruct1 = headerStructures.head
+      val structuresIsomorphic = headerStructures.forall(_ == headerStruct1)
+      if (!structuresIsomorphic) {
+         println(headerStructures.map(_.toString).mkString("\n"))
+         throw new RuntimeException("Row headers are not the same for all rows!")
+      }
+      println(headerStruct1)
+      val ha = makeHeader(headerStruct1, 0)
       (ha.rows.map(Row(_)), ha.mergedRegions ++ ha.topMergedRegions)
    }
 
    def makeSheet(results: Seq[ResultRow]): Sheet = {
       if (results.nonEmpty) {
-         val (headerRows, headerMerges) = makeHeader(results.head)
+         val (headerRows, headerMerges) = makeHeader(results)
          val rows = results.map((row: ResultRow) =>
             Row(row.flatten.map(makeCell))
          )

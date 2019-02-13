@@ -1,5 +1,6 @@
 package com.radeusgd.archivum.querying.builtinqueries
 
+import com.radeusgd.archivum.datamodel.{DMInteger, DMValue}
 import com.radeusgd.archivum.querying._
 import com.radeusgd.archivum.querying.CustomGroupBy._
 import com.radeusgd.archivum.datamodel.LiftDMValue._
@@ -9,14 +10,20 @@ class Chrzty(years: Int = 1) extends BuiltinQuery(years, Seq("Parafia", "Miejsco
    override def toString: String = "Chrzty"
 
    private def podsumujPłcie(rs: ResultSet): Seq[ResultRow] =
-      rs.countTransposed("Płeć", Seq(
+      rs.groupByHorizontal(GroupBy("Płeć")).aggregate(
+         (objs: Seq[DMValue]) => ResultRow(
+            "Liczba" -> ClassicAggregations.count(objs),
+            "%" -> 0
+         )
+      )
+      /*rs.countTransposed("Płeć", Seq(
          "Chłopcy" -> "M",
          "Dziewczynki" -> "K"
-      ), Some("brak danych"))
+      ), Some("brak danych"))*/
 
    private def podsumujCzySlubne(rs: ResultSet): Seq[ResultRow] =
       rs.aggregate(
-         "Wszystkie" -> Aggregations.count,
+         "Wszystkie" -> ClassicAggregations.count,
          /*Aggregations.countTransposed("Urodzenie ślubne", Seq(
             "Slubne" -> "Tak",
             "Nieślubne" -> "Nie"
