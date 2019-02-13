@@ -118,6 +118,9 @@ object XLSExport {
             (noffset + ha.width, ha :: l)
       })
       val haccs = rhaccs.reverse
+      if (haccs.isEmpty) {
+         return HeaderAccumulator(Nil, Nil, Nil, 0)
+      }
 
       val maxHeight = haccs.map(_.height).max
 

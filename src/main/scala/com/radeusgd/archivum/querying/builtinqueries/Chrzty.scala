@@ -67,6 +67,27 @@ class Chrzty(years: Int = 5) extends BuiltinQuery(years, Seq("Parafia", "Miejsco
       ))
    }
 
+   private def liczbaImion(rs: ResultSet): Seq[ResultRow] =
+      rs.groupByHorizontal(GroupByWithSummary("Płeć"))
+      .groupByHorizontal(GroupBy("Imiona.length"))
+      .countAfterGrouping()
+
+   private def pierwszeImionaPion(płeć: String)(rs: ResultSet): Seq[ResultRow] =
+      rs
+         .filter(path"Płeć"(_) == DMString(płeć))
+         .filter(path"Imiona.length"(_).asInstanceOf[DMInteger].value > 0)
+         .groupBy(GroupBy("Imiona.0",
+            appendColumnMode = CustomAppendColumn("Imię"),
+            sortType = PopularitySorted(Descending)))
+         .aggregateClassic("Liczba" -> ClassicAggregations.count)
+
+   private def pierwszeImiona(płeć: String)(rs: ResultSet): Seq[ResultRow] =
+      rs
+         .filter(path"Płeć"(_) == DMString(płeć))
+         .filter(path"Imiona.length"(_).asInstanceOf[DMInteger].value > 0)
+         .groupByHorizontal(GroupBy("Imiona.0", appendColumnMode = CustomAppendColumn("Imię")))
+         .countAfterGrouping()
+
    private val bliźniętaEnum: Seq[DMString] = Seq("M+M", "M+K", "K+K").map(DMString)
    private val urodzeniaWielokrotneEnum: Seq[DMString] = Seq("M+M+M",
                 "M+M+K",
@@ -104,7 +125,11 @@ class Chrzty(years: Int = 5) extends BuiltinQuery(years, Seq("Parafia", "Miejsco
       "urodzenia_miesięcznie" -> Query(DataUrodzenia,
          rs => rs.groupByHorizontal(groupByMonth("Data urodzenia")) |> podsumujPłcie),
       "dni_od_urodzenia_do_chrztu" -> Query(DataChrztu, liczbaDniOdUrodzeniaDoChrztu),
-      "dni_debug" -> Query(DataChrztu, rs => rs.filter(hasDate("Data urodzenia") _ && hasDate("Data chrztu")).aggregateClassic("l" -> ClassicAggregations.count))
+      "liczba_imion" -> Query(DataUrodzenia, liczbaImion),
+      "pierwsze_imiona_pionowo_M" -> Query(DataUrodzenia, pierwszeImionaPion("M")),
+      "pierwsze_imiona_pionowo_K" -> Query(DataUrodzenia, pierwszeImionaPion("K")),
+      "pierwsze_imiona_M" -> Query(DataUrodzenia, pierwszeImiona("M")),
+      "pierwsze_imiona_K" -> Query(DataUrodzenia, pierwszeImiona("K"))
    ))
 
    override val manualQueries: Map[String, ResultSet => Seq[ResultRow]] = Map(
