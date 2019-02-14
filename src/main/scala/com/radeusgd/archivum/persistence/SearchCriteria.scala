@@ -12,6 +12,7 @@ case class Or(criteria: SearchCriteria*) extends SearchCriteria
 object Truth extends SearchCriteria {
    override def toString: String = "True"
 }
+//case class Not(criteria: SearchCriteria) extends SearchCriteria
 
 object SearchCriteria {
    def makePredicate(sc: SearchCriteria)(v: DMValue): Boolean = sc match {

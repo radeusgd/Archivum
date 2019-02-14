@@ -48,6 +48,9 @@ trait Repository {
       all.filter(t => pred(t._2))
    }
 
+   def search(criteria: SearchCriteria): ResultSet =
+      ResultSet(Seq(MultipleResultRow(searchRecords(criteria).extractSeconds)))
+
    def getAllDistinctValues(path: List[String], filter: SearchCriteria = Truth): List[DMValue] = {
       println("WARNING! Using a very slow implementation! (DISTINCT)")
       searchRecords(filter).map(_._2).map(DMUtils.makeGetter(path)).toList.distinct

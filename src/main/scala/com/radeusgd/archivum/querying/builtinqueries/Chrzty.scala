@@ -9,7 +9,9 @@ import com.radeusgd.archivum.querying._
 import com.radeusgd.archivum.utils.Pipe._
 import com.radeusgd.archivum.querying.CustomGroupBy._
 
-class Chrzty(years: Int = 5) extends BuiltinQuery(years, Seq("Parafia", "Miejscowość")) {
+class Chrzty(years: Int = 5, folderGroupings: Seq[String] = Seq("Parafia", "Miejscowość"), charakter: Option[String] = None)
+   extends BuiltinQuery(years, folderGroupings, charakter) {
+
    override def toString: String = "Chrzty"
 
    private def podsumujPłcie: ResultSet => Seq[ResultRow] =

@@ -90,7 +90,7 @@ class RepositoryImpl(private val _model: Model,
    // override def fetchAllGrouped
 
    override def searchRecords(criteria: SearchCriteria): Seq[(Rid, DMStruct)] = minimalLogging {
-      val cond = makeCondition(criteria)
+      val cond: SQLSyntax = makeCondition(criteria)
       val records = readOnly({ implicit session =>
          sql"SELECT * FROM $table WHERE $cond"
             .map(rs => (rs.long("_rid"), rsToDM(rs))).list.apply()
@@ -197,10 +197,10 @@ class RepositoryImpl(private val _model: Model,
             throw new NotImplementedError("This may work but has to be tested")
          case And() => makeCondition(Truth)
          case And(cond) => makeCondition(cond)
-         case And(c1, rest @_*) => sqls"($c1 AND ${makeCondition(And(rest:_*))})"
+         case And(c1, rest @_*) => sqls"(${makeCondition(c1)} AND ${makeCondition(And(rest:_*))})"
          case Or() => makeCondition(Truth)
          case Or(cond) => makeCondition(cond)
-         case Or(c1, rest @_*) => sqls"($c1 OR ${makeCondition(Or(rest:_*))})"
+         case Or(c1, rest @_*) => sqls"(${makeCondition(c1)} OR ${makeCondition(Or(rest:_*))})"
          case Truth => sqls"(1 = 1)"
       }
 

@@ -2,8 +2,8 @@ package com.radeusgd.archivum.querying.builtinqueries
 
 import java.nio.file.Paths
 
-import com.radeusgd.archivum.datamodel.{DMUtils, DMValue}
-import com.radeusgd.archivum.persistence.{Equal, Repository, SearchCriteria, Truth}
+import com.radeusgd.archivum.datamodel.{DMString, DMUtils, DMValue}
+import com.radeusgd.archivum.persistence._
 import com.radeusgd.archivum.querying._
 import com.radeusgd.archivum.querying.utils.XLSExport
 import javafx.concurrent.Task
@@ -19,7 +19,7 @@ case class Query(yearGrouping: YearGrouping, realization: ResultSet => Seq[Resul
 }
 
 //noinspection ScalaStyle
-abstract class BuiltinQuery(years: Int, folderGroupings: Seq[String]) {
+abstract class BuiltinQuery(years: Int, folderGroupings: Seq[String], charakter: Option[String]) {
 
    val groupedQueries: Map[String, Query]
    val manualQueries: Map[String, ResultSet => Seq[ResultRow]]
@@ -33,9 +33,13 @@ abstract class BuiltinQuery(years: Int, folderGroupings: Seq[String]) {
    private val fileExt: String = ".xlsx"
 
    def prepareTask(resultPath: String, repo: Repository): Task[Unit] = new Task[Unit]() {
+
+      val charakterFilter: SearchCriteria =
+         charakter.map(ch => Equal(Seq("Charakter miejscowości"), DMString(ch))).getOrElse(Truth)
+
       private def runManualQueries(workToDo: Int): Unit = {
          for (((qname, query), index) <- manualQueries.zipWithIndex) {
-            val all = repo.fetchAll()
+            val all = repo.search(charakterFilter)
             val res = query(all)
 
             XLSExport.export(resultPath + qname + fileExt, res)
@@ -55,7 +59,7 @@ abstract class BuiltinQuery(years: Int, folderGroupings: Seq[String]) {
 
             for (((qname, Query(yg, query)), index) <- groupedQueries.zipWithIndex) {
                updateMessage("Running " + qname)
-               val all = repo.fetchAllGrouped(prepareYearGrouping(yg) : _*)
+               val all = repo.fetchAllGrouped(charakterFilter, prepareYearGrouping(yg) : _*)
                val res = query(all)
                XLSExport.export(resultPath + qname + fileExt, res)
                println(s"Query $qname written ${res.length} rows in total")
@@ -67,7 +71,7 @@ abstract class BuiltinQuery(years: Int, folderGroupings: Seq[String]) {
          } else {
             updateProgress(0, 1)
             val firstLevelGroupPath = DMUtils.parsePath(folderGroupings.head)
-            val firstLevelGroupings = repo.getAllDistinctValues(firstLevelGroupPath)
+            val firstLevelGroupings = repo.getAllDistinctValues(firstLevelGroupPath, filter = charakterFilter)
             val flgLen = firstLevelGroupings.length
             val workToDo = groupedQueries.size * (flgLen + 1) + 1 + manualQueries.size
             updateProgress(1, workToDo)
@@ -84,7 +88,7 @@ abstract class BuiltinQuery(years: Int, folderGroupings: Seq[String]) {
                   val groupings =
                      folderGroupings.tail.map(path => GroupByWithSummary(path)) ++ prepareYearGrouping(yg)
                   val all = repo.fetchAllGrouped(
-                     filter,
+                     And(filter, charakterFilter),
                      groupings:_*
                   )
                   val res = query(all)
