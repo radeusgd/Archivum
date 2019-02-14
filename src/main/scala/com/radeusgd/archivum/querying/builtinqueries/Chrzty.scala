@@ -7,6 +7,7 @@ import com.radeusgd.archivum.datamodel.LiftDMValue._
 import com.radeusgd.archivum.datamodel._
 import com.radeusgd.archivum.querying._
 import com.radeusgd.archivum.utils.Pipe._
+import com.radeusgd.archivum.querying.CustomGroupBy._
 
 class Chrzty(years: Int = 5) extends BuiltinQuery(years, Seq("Parafia", "Miejscowość")) {
    override def toString: String = "Chrzty"
@@ -115,6 +116,9 @@ class Chrzty(years: Int = 5) extends BuiltinQuery(years, Seq("Parafia", "Miejsco
          appendColumnMode = CustomAppendColumn(path)
       ))
 
+   private def grupujMiesiącamiV(path: String): ResultSet => ResultSet =
+      rs => rs.groupBy(groupByMonth("Data urodzenia"))
+
    private val bliźniętaEnum: Seq[DMString] = Seq("M+M", "M+K", "K+K").map(DMString)
    private val urodzeniaWielokrotneEnum: Seq[DMString] = Seq("M+M+M",
                 "M+M+K",
@@ -146,6 +150,8 @@ class Chrzty(years: Int = 5) extends BuiltinQuery(years, Seq("Parafia", "Miejsco
    override val groupedQueries: Map[String, Query] = Map(
       "test_nazwiska" -> Query(DataUrodzenia, _.countGroups("Nazwisko", "Liczba osób")),
       "ślubne_rocznie" -> Query(DataUrodzenia, podsumujCzySlubne),
+      "księża" -> Query(DataChrztu, grupujPoOsobie("Udzielający chrztu") |> grupujPoRodzajachUrodzeń |> podsumujPłcie),
+      "akuszerki" -> Query(DataChrztu, grupujPoOsobie("Akuszerka") |> grupujPoRodzajachUrodzeń |> podsumujPłcie),
    ).merged(makeAlternativesForSpecialGroups(
       /*"urodzenia_rocznie" -> Query(DataUrodzenia, podsumujPłcie),
       "urodzenia_miesięcznie" -> Query(DataUrodzenia,
@@ -154,10 +160,11 @@ class Chrzty(years: Int = 5) extends BuiltinQuery(years, Seq("Parafia", "Miejsco
       "liczba_imion" -> Query(DataUrodzenia, liczbaImion),
       "pierwsze_imiona_pionowo_M" -> Query(DataUrodzenia, pierwszeImionaPion("M")),
       "pierwsze_imiona_pionowo_K" -> Query(DataUrodzenia, pierwszeImionaPion("K")),
-      "pierwsze_imiona_M" -> Query(DataUrodzenia, pierwszeImiona("M")),
-      "pierwsze_imiona_K" -> Query(DataUrodzenia, pierwszeImiona("K"))*/
-      "księża" -> Query(DataChrztu, grupujPoOsobie("Udzielający chrztu") |> grupujPoRodzajachUrodzeń |> podsumujPłcie),
-      "akuszerki" -> Query(DataChrztu, grupujPoOsobie("Akuszerka") |> grupujPoRodzajachUrodzeń |> podsumujPłcie)
+      "pierwsze_imiona_M" -> Query(DataUrodzenia, pierwszeImiona("M")),*/
+      "pierwsze_imiona_K" -> Query(DataUrodzenia, pierwszeImiona("K")),
+      "pierwsze_imiona_miesiącami_M" -> Query(NoYearGrouping, grupujMiesiącamiV("Data urodzenia") |> pierwszeImiona("M")),
+      "pierwsze_imiona_miesiącami_K" -> Query(NoYearGrouping, grupujMiesiącamiV("Data urodzenia") |> pierwszeImiona("K")),
+      "liczba_chrzestnych" -> Query(DataChrztu, rs => rs.countWithPercentages(GroupBy("Chrzestni.length")))
    ))
 
    override val manualQueries: Map[String, ResultSet => Seq[ResultRow]] = Map(
