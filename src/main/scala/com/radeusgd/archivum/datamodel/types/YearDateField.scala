@@ -6,7 +6,9 @@ import com.radeusgd.archivum.datamodel._
 import com.radeusgd.archivum.persistence.DBTypes
 import com.radeusgd.archivum.persistence.strategies.{Fetch, Insert, Setup}
 import com.radeusgd.archivum.utils.AsInt
-import spray.json.{JsNull, JsString, JsValue}
+import spray.json.{DeserializationException, JsArray, JsBoolean, JsNull, JsNumber, JsObject, JsString, JsValue}
+
+import scala.util.Try
 
 object YearDateField extends FieldType {
    def validate(v: DMValue): List[ValidationError] =
@@ -70,5 +72,10 @@ object YearDateField extends FieldType {
       case _ => throw new IllegalArgumentException
    }
 
-   override def fromHumanJson(j: JsValue): Either[Throwable, DMValue] = ??? // TODO
+   override def fromHumanJson(j: JsValue): Either[Throwable, DMValue] = j match {
+      case JsNull => Right(DMNull)
+      case JsString(AsInt(year)) => Right(DMYearDate(year))
+      case JsString(s) => Try(DMYearDate(LocalDate.parse(s))).toEither
+      case _ => Left(DeserializationException("Wrong YearDate JSON format"))
+   }
 }
