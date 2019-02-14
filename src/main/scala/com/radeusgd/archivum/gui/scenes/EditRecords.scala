@@ -11,6 +11,7 @@ import scalafx.scene.Scene
 import scalafx.scene.control.{Button, Label, ScrollPane, TextField}
 import scalafx.scene.layout.{BorderPane, HBox}
 import scalafx.scene.paint.Paint
+import scalafx.Includes.handle
 
 class EditRecords(val repository: Repository, val parentScene: Scene) extends Scene with Refreshable {
 
@@ -33,12 +34,27 @@ class EditRecords(val repository: Repository, val parentScene: Scene) extends Sc
    private def setModelInstance(rid: Rid): Unit = {
       if (editableView.errors.isEmpty || utils.ask("Some changes have not been saved due to errors, do you want to continue?", "These changes will be lost."))
       editableView.setModelInstance(rid)
-      ridTextField.text = ridSet.getTemporaryIndex(rid).toString
+      indexTextField.text = ridSet.getTemporaryIndex(rid).toString
       countLabel.text = "/" + ridSet.count()
+      countLabel.requestFocus()
    }
 
-   private val ridTextField = new TextField {
+   private val indexTextField = new TextField {
       prefWidth = 60
+      onAction = handle {
+         try {
+            val ind = text.value.toInt
+            val ridOpt = repository.ridSet.findRidForIndex(ind)
+            val rid = ridOpt.getOrElse(throw new RuntimeException("No record with such id found"))
+
+            setModelInstance(rid)
+         } catch {
+            case e: NumberFormatException =>
+               utils.showError("Record id has to be a number")
+            case e: RuntimeException =>
+               utils.showError(e.getMessage)
+         }
+      }
    }
    private val countLabel = new Label("/0") {
       alignment = Pos.CenterRight // TODO vertical alignment
@@ -71,7 +87,7 @@ class EditRecords(val repository: Repository, val parentScene: Scene) extends Sc
       bottom = new HBox(LayoutDefaults.defaultSpacing,
          utils.mkButton("<--", () => ridSet.getFirstRid().foreach(setModelInstance)),
          utils.mkButton("<-", () => ridSet.getPreviousRid(currentRid).foreach(setModelInstance)),
-         new HBox(ridTextField, countLabel),
+         new HBox(indexTextField, countLabel),
          utils.mkButton("->", () => ridSet.getNextRid(currentRid).foreach(setModelInstance)),
          utils.mkButton("-->", () => ridSet.getLastRid().foreach(setModelInstance)),
          utils.mkButton("Delete", deleteCurrent),

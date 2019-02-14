@@ -14,6 +14,11 @@ trait RidSetHelper {
    def getTemporaryIndex(rid: Rid): Long
 
    /*
+   Reverse to getTemporaryIndex
+    */
+   def findRidForIndex(index: Int): Option[Rid]
+
+   /*
    Intended to be used after delete to find record to display.
    It returns the closest rid before the given one or if there's no such rid, the closest rid after it.
    It returns None only if the Repository is empty or the provided rid is the only element in it.

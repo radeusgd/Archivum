@@ -56,4 +56,15 @@ class RidSetHelperImpl(val db: DB, val table: SQLSyntax) extends RidSetHelper {
          sql"SELECT _rid FROM $table WHERE _rid < $rid ORDER BY _rid DESC LIMIT 1"
             .map(rs => rs.long("_rid")).single.apply()
       })
+
+   override def findRidForIndex(index: Int): Option[Rid] = {
+      if (index <= 0) None
+      else {
+         // TODO optimize me FIXME
+         val rids = fetchAllIds().toArray
+         val ind = index - 1
+         if (ind >= rids.length) None
+         else Some(rids(ind))
+      }
+   }
 }
