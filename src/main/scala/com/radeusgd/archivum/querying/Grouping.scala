@@ -123,7 +123,18 @@ case class GroupByPredicates(predicates: (String, DMValue => Boolean)*) extends 
 
 object CustomGroupBy {
    private val monthNames = Array(
-      "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII"
+      "styczeń",
+      "luty",
+      "marzec",
+      "kwiecień",
+      "maj",
+      "czerwiec",
+      "lipiec",
+      "sierpień",
+      "wrzesień",
+      "październik",
+      "listopad",
+      "grudzień"
    )
 
    def groupByMonth(path: String, appendColumnMode: AppendColumnMode = Default): CustomGroupBy[Int] = {
@@ -140,6 +151,34 @@ object CustomGroupBy {
          orderMapping = {
             case DMDate(date) => date.getMonthValue
             case DMYearDate(Right(date)) => date.getMonthValue
+         }
+      )
+   }
+
+   private val weekdayNames = Array(
+      "poniedziałek",
+      "wtorek",
+      "środa",
+      "czwartek",
+      "piątek",
+      "sobota",
+      "niedziela"
+   )
+
+   def groupByWeekday(path: String, appendColumnMode: AppendColumnMode = Default): CustomGroupBy[Int] = {
+      CustomGroupBy(path,
+         filter = {
+            case _: DMDate => true
+            case DMYearDate(Right(_)) => true
+            case _ => false
+         },
+         mapping = {
+            case DMDate(date) => DMString(weekdayNames(date.getDayOfWeek.getValue - 1))
+            case DMYearDate(Right(date)) => DMString(weekdayNames(date.getDayOfWeek.getValue - 1))
+         },
+         orderMapping = {
+            case DMDate(date) => date.getDayOfWeek.getValue
+            case DMYearDate(Right(date)) => date.getDayOfWeek.getValue
          }
       )
    }

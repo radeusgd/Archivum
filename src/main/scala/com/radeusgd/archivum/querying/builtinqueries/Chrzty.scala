@@ -164,7 +164,8 @@ class Chrzty(years: Int = 5) extends BuiltinQuery(years, Seq("Parafia", "Miejsco
       "pierwsze_imiona_K" -> Query(DataUrodzenia, pierwszeImiona("K")),
       "pierwsze_imiona_miesiącami_M" -> Query(NoYearGrouping, grupujMiesiącamiV("Data urodzenia") |> pierwszeImiona("M")),
       "pierwsze_imiona_miesiącami_K" -> Query(NoYearGrouping, grupujMiesiącamiV("Data urodzenia") |> pierwszeImiona("K")),
-      "liczba_chrzestnych" -> Query(DataChrztu, rs => rs.countWithPercentages(GroupBy("Chrzestni.length")))
+      "liczba_chrzestnych" -> Query(DataChrztu, rs => rs.countWithPercentages(GroupBy("Chrzestni.length"))),
+      "sezonowość_tygodniowa_chrztów" -> Query(DataChrztu, ((rs: ResultSet) => rs.groupByHorizontal(groupByWeekday("Data chrztu"))) |> podsumujPłcie)
    ))
 
    override val manualQueries: Map[String, ResultSet => Seq[ResultRow]] = Map(
