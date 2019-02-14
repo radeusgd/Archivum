@@ -63,25 +63,38 @@ object XLSExport {
       HeaderAccumulator(
          rows = (Cell(name, style = headerStyle) :: emptyCells(width - 1)) :: Nil,
          mergedRegions = Nil,
-         topMergedRegions = CellRange((0, 0), (0, 0)) :: Nil,
+         topMergedRegions = CellRange(0 -> 0, offset -> (offset + width - 1)) :: Nil,
          width = width
       )
    }
 
+   private def moveRangesDown(ranges: List[CellRange], amount: Int = 1): List[CellRange] =
+      ranges.map {
+         case CellRange((r1, r2), c) => CellRange((r1 + amount, r2 + amount), c)
+      }
+
    private def extendHeader(name: String, header: HeaderAccumulator, offset: Int): HeaderAccumulator = {
       println("Extend " + name + " : " + header.width + ", " + offset)
+      println(header.topMergedRegions)
+      println(header.mergedRegions)
       HeaderAccumulator(
          rows = (Cell(name, style = headerStyle) :: emptyCells(header.width - 1)) :: header.rows,
-         mergedRegions = Nil, // TODO
-         topMergedRegions = Nil,
+         mergedRegions = moveRangesDown(header.topMergedRegions ++ header.mergedRegions),
+         topMergedRegions = CellRange(0 -> 0, offset -> (offset + header.width - 1)) :: Nil,
          width = header.width
       )
    }
 
-   private def padRowsToHeight(height: Int)(header: HeaderAccumulator): HeaderAccumulator =
+   private def padRowsToHeight(height: Int)(header: HeaderAccumulator): HeaderAccumulator = {
+      val padding = height - header.height
       header.copy(
-         rows = header.rows ++ List.fill(height - header.height)(emptyCells(header.width))
+         rows = header.rows ++ List.fill(padding)(emptyCells(header.width)),
+         mergedRegions = moveRangesDown(header.mergedRegions, padding),
+         topMergedRegions = header.topMergedRegions.map({
+            case CellRange((r1, r2), c) => CellRange((r1, r2 + padding), c)
+         })
       )
+   }
 
    private def mergeRows(rows: List[List[List[Cell]]]): List[List[Cell]] = {
       if (rows.head.isEmpty) {
@@ -101,7 +114,7 @@ object XLSExport {
       HeaderAccumulator(
          rows = mergeRows(hs.map(_.rows)),
          mergedRegions = hs.flatMap(_.mergedRegions),
-         topMergedRegions = Nil, // TODO
+         topMergedRegions = hs.flatMap(_.topMergedRegions),
          width = hs.map(_.width).sum
       )
    }
@@ -113,7 +126,7 @@ object XLSExport {
                case NestedMapElement(value) =>
                   makeHeader(key, value, noffset)
                case m: NestedMap[String, Int] =>
-                  extendHeader(key, makeHeader(m, noffset), offset)
+                  extendHeader(key, makeHeader(m, noffset), noffset)
             }
             (noffset + ha.width, ha :: l)
       })
@@ -142,6 +155,11 @@ object XLSExport {
       (ha.rows.map(Row(_)), ha.mergedRegions ++ ha.topMergedRegions)
    }
 
+   def filterEmptyMerges(l: List[CellRange]): List[CellRange] =
+      l.filter({
+         case CellRange((r1, r2), (c1, c2)) => r1 < r2 || c1 < c2
+      })
+
    def makeSheet(results: Seq[ResultRow]): Sheet = {
       if (results.nonEmpty) {
          val (headerRows, headerMerges) = makeHeader(results)
@@ -149,10 +167,12 @@ object XLSExport {
             Row(row.flatten.map(makeCell))
          )
 
+         println(headerMerges)
+
          val sheet = Sheet(
             name = "Results", // TODO better naming?
             rows = headerRows ++ rows,
-            mergedRegions = headerMerges,
+            mergedRegions = filterEmptyMerges(headerMerges),
             repeatingColumns = ColumnRange("A" -> "A"),
             repeatingRows = RowRange(1 -> headerRows.length),
             paneAction = FreezePane(1, headerRows.length)
