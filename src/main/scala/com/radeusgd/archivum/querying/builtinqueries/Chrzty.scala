@@ -2,18 +2,17 @@ package com.radeusgd.archivum.querying.builtinqueries
 
 import java.time.temporal.ChronoUnit
 
+import cats.implicits._
+import com.radeusgd.archivum.datamodel.LiftDMValue._
 import com.radeusgd.archivum.datamodel._
 import com.radeusgd.archivum.querying._
-import com.radeusgd.archivum.querying.CustomGroupBy._
-import com.radeusgd.archivum.datamodel.LiftDMValue._
 import com.radeusgd.archivum.utils.Pipe._
-import cats.implicits._
 
 class Chrzty(years: Int = 5) extends BuiltinQuery(years, Seq("Parafia", "Miejscowość")) {
    override def toString: String = "Chrzty"
 
-   private def podsumujPłcie(rs: ResultSet): Seq[ResultRow] =
-      rs.countWithPercentages(GroupByWithSummary("Płeć"))
+   private def podsumujPłcie: ResultSet => Seq[ResultRow] =
+      rs => rs.countWithPercentages(GroupByWithSummary("Płeć"))
 
    private def podsumujCzySlubne(rs: ResultSet): Seq[ResultRow] =
       rs.aggregateClassic(
@@ -88,6 +87,34 @@ class Chrzty(years: Int = 5) extends BuiltinQuery(years, Seq("Parafia", "Miejsco
          .groupByHorizontal(GroupBy("Imiona.0", appendColumnMode = CustomAppendColumn("Imię")))
          .countAfterGrouping()
 
+   private def grupujPoRodzajachUrodzeń: ResultSet => ResultSet =
+      (rs: ResultSet) =>
+      rs.groupByHorizontal(GroupByPredicates(
+         "ogółem" -> (_ => true),
+         "ślubne" ->
+            (d => path"Urodzenie ślubne"(d).taknieasBool.contains(true)),
+         "nieślubne" ->
+            (d => path"Urodzenie ślubne"(d).taknieasBool.contains(false)),
+         "bliźnięta" ->
+            (d => bliźniętaEnum.contains(path"Ciąża mnoga"(d))),
+         "urodzenia wielorakie" ->
+            (d => urodzeniaWielokrotneEnum.contains(path"Ciąża mnoga"(d))),
+         "żywe" ->
+            (d => path"Urodzenie żywe"(d).taknieasBool.contains(true)),
+         "martwe" ->
+            (d => path"Urodzenie żywe"(d).taknieasBool.contains(false))
+      ))
+
+   private def grupujPoOsobie(path: String): ResultSet => ResultSet =
+      (rs: ResultSet) => rs.groupBy(ComputedGroupBy(
+         getter = (d: DMValue) => (for {
+            imię <- path"$path.Imię" (d).asString
+            nazwisko <- path"$path.Nazwisko" (d).asString
+         } yield DMString(imię + " " + nazwisko)).getOrElse(DMNull),
+         orderMapping = _.asString.getOrElse(""),
+         appendColumnMode = CustomAppendColumn(path)
+      ))
+
    private val bliźniętaEnum: Seq[DMString] = Seq("M+M", "M+K", "K+K").map(DMString)
    private val urodzeniaWielokrotneEnum: Seq[DMString] = Seq("M+M+M",
                 "M+M+K",
@@ -116,12 +143,11 @@ class Chrzty(years: Int = 5) extends BuiltinQuery(years, Seq("Parafia", "Miejsco
          ))
       }
 
-
    override val groupedQueries: Map[String, Query] = Map(
       "test_nazwiska" -> Query(DataUrodzenia, _.countGroups("Nazwisko", "Liczba osób")),
       "ślubne_rocznie" -> Query(DataUrodzenia, podsumujCzySlubne),
    ).merged(makeAlternativesForSpecialGroups(
-      "urodzenia_rocznie" -> Query(DataUrodzenia, podsumujPłcie),
+      /*"urodzenia_rocznie" -> Query(DataUrodzenia, podsumujPłcie),
       "urodzenia_miesięcznie" -> Query(DataUrodzenia,
          rs => rs.groupByHorizontal(groupByMonth("Data urodzenia")) |> podsumujPłcie),
       "dni_od_urodzenia_do_chrztu" -> Query(DataChrztu, liczbaDniOdUrodzeniaDoChrztu),
@@ -129,7 +155,9 @@ class Chrzty(years: Int = 5) extends BuiltinQuery(years, Seq("Parafia", "Miejsco
       "pierwsze_imiona_pionowo_M" -> Query(DataUrodzenia, pierwszeImionaPion("M")),
       "pierwsze_imiona_pionowo_K" -> Query(DataUrodzenia, pierwszeImionaPion("K")),
       "pierwsze_imiona_M" -> Query(DataUrodzenia, pierwszeImiona("M")),
-      "pierwsze_imiona_K" -> Query(DataUrodzenia, pierwszeImiona("K"))
+      "pierwsze_imiona_K" -> Query(DataUrodzenia, pierwszeImiona("K"))*/
+      "księża" -> Query(DataChrztu, grupujPoOsobie("Udzielający chrztu") |> grupujPoRodzajachUrodzeń |> podsumujPłcie),
+      "akuszerki" -> Query(DataChrztu, grupujPoOsobie("Akuszerka") |> grupujPoRodzajachUrodzeń |> podsumujPłcie)
    ))
 
    override val manualQueries: Map[String, ResultSet => Seq[ResultRow]] = Map(

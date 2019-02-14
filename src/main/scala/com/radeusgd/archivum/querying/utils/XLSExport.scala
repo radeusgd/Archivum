@@ -152,7 +152,10 @@ object XLSExport {
          val sheet = Sheet(
             name = "Results", // TODO better naming?
             rows = headerRows ++ rows,
-            mergedRegions = headerMerges
+            mergedRegions = headerMerges,
+            repeatingColumns = ColumnRange("A" -> "A"),
+            repeatingRows = RowRange(1 -> headerRows.length),
+            paneAction = FreezePane(1, headerRows.length)
          )
 
          sheet

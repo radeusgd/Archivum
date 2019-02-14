@@ -1,7 +1,7 @@
 package com.radeusgd.archivum.utils
 
 object Pipe {
-   implicit class Pipe[A](val a: A) extends AnyVal {
-      def |>[B](f: A => B): B = f(a)
+   implicit class Pipe[A, B](val f: A => B) extends AnyVal {
+      def |>[C](g: B => C): A => C = a => g(f(a))
    }
 }

@@ -1,12 +1,9 @@
 package com.radeusgd.archivum.gui.scenes
 
-import java.io.{File, PrintWriter}
-
 import com.radeusgd.archivum.gui.utils
 import com.radeusgd.archivum.persistence.Repository
 import com.radeusgd.archivum.querying.builtinqueries.{BuiltinQuery, Chrzty}
 import javafx.concurrent.WorkerStateEvent
-import javafx.event.EventHandler
 import scalafx.Includes.handle
 import scalafx.geometry.Insets
 import scalafx.scene.Scene
@@ -48,7 +45,8 @@ class RunQueries(val repository: Repository, parentScene: Scene) extends Scene {
             }
          }
       ),
-      new HBox(progressBar, statusText)
+      progressBar,
+      statusText
    ) {
       spacing = 5
       padding = Insets(15.0)

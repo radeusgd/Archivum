@@ -1,6 +1,6 @@
 package com.radeusgd.archivum.querying.builtinqueries
 
-import java.nio.file.{Path, Paths}
+import java.nio.file.Paths
 
 import com.radeusgd.archivum.datamodel.{DMUtils, DMValue}
 import com.radeusgd.archivum.persistence.{Equal, Repository, SearchCriteria, Truth}
@@ -41,6 +41,7 @@ abstract class BuiltinQuery(years: Int, folderGroupings: Seq[String]) {
             XLSExport.export(resultPath + qname + fileExt, res)
             println(s"Query $qname written ${res.length} rows in total")
             updateProgress(index + 1, workToDo)
+            if (isCancelled) throw new RuntimeException("Cancelled")
          }
       }
 
@@ -59,6 +60,7 @@ abstract class BuiltinQuery(years: Int, folderGroupings: Seq[String]) {
                XLSExport.export(resultPath + qname + fileExt, res)
                println(s"Query $qname written ${res.length} rows in total")
                updateProgress(manualQueries.size + index + 1, workToDo)
+               if (isCancelled) throw new RuntimeException("Cancelled")
             }
 
             updateMessage("Done")
@@ -95,6 +97,7 @@ abstract class BuiltinQuery(years: Int, folderGroupings: Seq[String]) {
                   runQuery(Equal(firstLevelGroupPath, firstLevelGroupValue), firstLevelGroupValue.toString)
                   progress += 1
                   updateProgress(progress, workToDo)
+                  if (isCancelled) throw new RuntimeException("Cancelled")
                }
 
                updateMessage("Running " + qname + ", ALL")
