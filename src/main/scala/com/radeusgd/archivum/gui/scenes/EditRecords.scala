@@ -12,6 +12,7 @@ import scalafx.scene.control.{Button, Label, ScrollPane, TextField}
 import scalafx.scene.layout.{BorderPane, HBox}
 import scalafx.scene.paint.Paint
 import scalafx.Includes.handle
+import scalafx.scene.input.KeyCode
 
 class EditRecords(val repository: Repository, val parentScene: Scene) extends Scene with Refreshable {
 
@@ -116,6 +117,15 @@ class EditRecords(val repository: Repository, val parentScene: Scene) extends Sc
          val texts = editableView.unhandledErrors.map(e => e.getPath.mkString(".") + ": " + e.getMessage)
          errorsLabel.text = if (texts.isEmpty) "There are errors" else texts.mkString("\n")
          errorsLabel.textFill.set(Paint.valueOf("red"))
+      }
+   }
+
+   onKeyPressed = e => {
+      if (e.isControlDown && e.getCode == KeyCode.R.delegate) {
+         val hotswap = new EditRecords(repository, parentScene)
+         ApplicationMain.switchScene(hotswap)
+         hotswap.modifiedLabel.text = "View has been reloaded"
+         hotswap.refresh()
       }
    }
 }
