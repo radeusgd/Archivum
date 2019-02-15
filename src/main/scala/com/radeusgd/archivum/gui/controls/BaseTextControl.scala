@@ -4,7 +4,7 @@ import com.radeusgd.archivum.datamodel._
 import com.radeusgd.archivum.gui.EditableView
 import com.radeusgd.archivum.gui.controls.commonproperties.{CommonProperties, DefaultValueOnCreation, HasCommonProperties, PreviosValueOnCreation}
 import com.radeusgd.archivum.gui.controls.dmbridges.StringDMBridge
-import scalafx.geometry.Pos
+import scalafx.geometry.{Insets, Pos}
 import scalafx.scene.control._
 import scalafx.scene.layout.HBox
 
@@ -18,6 +18,8 @@ class BaseTextControl(bridge: StringDMBridge,
 
    protected val rows: Int = properties.rows.getOrElse(1)
    protected val tfieldWidth: Double = properties.width.getOrElse(200).toDouble
+
+   commonProperties.paddingLeft.foreach(p => padding = Insets(0, 0, 0, p))
 
    protected val textField: TextInputControl =
       if (rows == 1)

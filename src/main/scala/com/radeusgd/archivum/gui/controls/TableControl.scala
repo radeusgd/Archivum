@@ -19,8 +19,11 @@ import scala.xml.Node
 class TableControl(/* TODO some params */
                    childrenxml: Seq[Node],
                    path: List[String],
-                   protected val editableView: EditableView)
+                   protected val editableView: EditableView,
+                   paddingLeft: Option[Double] = None)
    extends VBox with BoundControl {
+
+   paddingLeft.foreach(p => padding = Insets(0, 0, 0, p))
 
    private def makeMyColumns(): Seq[Column] = {
       type EitherLayout[A] = Either[LayoutParseError, A]
@@ -137,10 +140,11 @@ class TableControl(/* TODO some params */
 
 object TableControlFactory extends LayoutFactory {
    override def fromXML(xmlnode: Node, ev: EditableView): Either[LayoutParseError, ParsedLayout] = {
+      val paddingLeft: Option[Double] = xmlnode.attribute(ViewLanguage.PaddingLeft).map(_.text).map(_.toDouble)
       for {
          path <- XMLUtils.extractPath(xmlnode)
          table <- try {
-            Right(new TableControl(XMLUtils.properChildren(xmlnode), path, ev))
+            Right(new TableControl(XMLUtils.properChildren(xmlnode), path, ev, paddingLeft))
          } catch {
             case e: LayoutParseError => Left(e)
          }

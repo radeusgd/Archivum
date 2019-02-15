@@ -1,13 +1,12 @@
 package com.radeusgd.archivum.gui.controls.tablecolumns
-import cats.implicits._
+
 import com.radeusgd.archivum.gui.EditableView
-import com.radeusgd.archivum.gui.controls.{BoundControl, TableControl}
-import com.radeusgd.archivum.gui.layout.{LayoutParseError, ParsedLayout}
+import com.radeusgd.archivum.gui.controls.BoundControl
+import com.radeusgd.archivum.gui.layout.LayoutParseError
 import com.radeusgd.archivum.gui.utils.XMLUtils
 import com.radeusgd.archivum.languages.ViewLanguage
 import scalafx.scene
 
-import scala.util.Try
 import scala.xml.Node
 
 case class ParsedColumnLayout(node: scene.Node, boundControls: Seq[BoundControl])

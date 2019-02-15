@@ -30,6 +30,7 @@ object ViewLanguage {
    val FontSize = "size"
    val Width = "width"
    val Rows = "rows"
+   val PaddingLeft = "paddingLeft"
 
    val Default = "default"
    val Sticky = "sticky"
