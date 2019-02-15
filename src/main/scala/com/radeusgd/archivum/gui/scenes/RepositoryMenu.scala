@@ -9,7 +9,7 @@ import scalafx.scene.Scene
 import scalafx.scene.control.{Button, Label}
 import scalafx.scene.layout.VBox
 
-class RepositoryMenu(val repository: Repository) extends Scene {
+class RepositoryMenu(val repository: Repository, private val parent: Scene) extends Scene {
    lazy val editRecords: EditRecords = new EditRecords(repository, this)
    lazy val exporter: ExportRepository = new ExportRepository(repository, this)
    lazy val importer: ImportRepository = new ImportRepository(repository, this)
@@ -19,15 +19,16 @@ class RepositoryMenu(val repository: Repository) extends Scene {
       new Label(repository.model.name) {
          font = scalafx.scene.text.Font(font.name, 25)
       },
-      utils.makeGoToButtonRefreshable("Edit records", editRecords),
+      utils.makeGoToButtonRefreshable("Przeglądanie / edycja rekordów", editRecords),
       new Button("Search") {
          onAction = handle {
             utils.notImplemented()
          }
       },
-      utils.makeGoToButton("Queries", queries),
-      utils.makeGoToButton("Export", exporter),
-      utils.makeGoToButton("Import", importer)
+      utils.makeGoToButton("Kwerendy", queries),
+      utils.makeGoToButton("Eksport", exporter),
+      utils.makeGoToButton("Import", importer),
+      utils.makeGoToButton("Wróć do wyboru bazy", parent)
    ) {
       spacing = 5
       padding = Insets(15.0)

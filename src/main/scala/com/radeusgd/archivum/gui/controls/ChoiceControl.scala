@@ -6,9 +6,8 @@ import com.radeusgd.archivum.gui.EditableView
 import com.radeusgd.archivum.gui.controls.commonproperties.{CommonControlFactory, CommonProperties, DefaultValueOnCreation, PreviosValueOnCreation}
 import com.radeusgd.archivum.languages.ViewLanguage
 import scalafx.Includes._
-import scalafx.geometry.Pos
+import scalafx.geometry.{Insets, Pos}
 import scalafx.scene.control.{ComboBox, Label}
-import scalafx.scene.input.KeyEvent
 import scalafx.scene.layout.HBox
 
 // TODO add CommonProperties
@@ -16,6 +15,8 @@ class ChoiceControl(val properties: CommonProperties, path: List[String], protec
    extends HBox with BoundControl
    with DefaultValueOnCreation with PreviosValueOnCreation
 {
+
+   commonProperties.paddingLeft.foreach(p => padding = Insets(0, 0, 0, p))
 
    val allowedValues: Seq[String] =
       editableView.model.roottype.getType(path).asInstanceOf[EnumField].values

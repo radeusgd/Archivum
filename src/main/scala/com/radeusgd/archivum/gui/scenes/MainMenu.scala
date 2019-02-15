@@ -37,6 +37,8 @@ class MainMenu extends Scene {
       }
    }
 
+   private def self: Scene = this
+
    content = new VBox {
       spacing = 10
       padding = Insets(15.0)
@@ -66,7 +68,7 @@ class MainMenu extends Scene {
             new Button("Open") {
                onAction = handle {
                   db.openRepository(repositoryChoice.value.value) match {
-                     case Some(repo) => ApplicationMain.switchScene(new RepositoryMenu(repo))
+                     case Some(repo) => ApplicationMain.switchScene(new RepositoryMenu(repo, self))
                      case None => utils.showError("Cannot open repository")
                   }
                }
