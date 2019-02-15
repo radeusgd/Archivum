@@ -84,28 +84,53 @@ abstract class BuiltinQuery(years: Int, folderGroupings: Seq[String], charakter:
 
             for ((qname, Query(yg, query)) <- groupedQueries) {
 
-               def runQuery(filter: SearchCriteria, subName: String): Unit = {
-                  val groupings =
-                     folderGroupings.tail.map(path => GroupByWithSummary(path)) ++ prepareYearGrouping(yg)
-                  val all = repo.fetchAllGrouped(
-                     And(filter, charakterFilter),
-                     groupings:_*
-                  )
-                  val res = query(all)
-                  XLSExport.exportToSubFolders(Paths.get(resultPath).resolve(subName), qname + fileExt, folderGroupings.tail.length, res)
-                  println(s"Query $qname @ $subName written ${res.length} rows in total")
+               def runQuery(filter: SearchCriteria, subName: String, restGroupings: Seq[String]): Unit = {
+                  if (restGroupings.isEmpty) {
+                     val all = repo.fetchAllGrouped(
+                        filter,
+                        prepareYearGrouping(yg):_*
+                     )
+                     val res = query(all)
+                     val path = Paths.get(resultPath).resolve(subName).resolve(qname + ".xlsx").toString
+                     XLSExport.export(path, res)
+                     println(s"Written ${res.length} rows to $path")
+                  } else {
+                     val groupPath = DMUtils.parsePath(restGroupings.head)
+                     val groupings = repo.getAllDistinctValues(groupPath, filter)
+                     for (groupValue <- groupings) {
+                        runQuery(
+                           And(
+                              filter,
+                              Equal(groupPath, groupValue)
+                           ),
+                           subName + "/" + groupValue,
+                           restGroupings.tail
+                        )
+                     }
+                     runQuery(
+                        filter,
+                        subName + "/" + "Razem",
+                        Nil
+                     )
+                  }
                }
 
                for (firstLevelGroupValue <- firstLevelGroupings) {
                   updateMessage("Running " + qname + ", " + firstLevelGroupValue)
-                  runQuery(Equal(firstLevelGroupPath, firstLevelGroupValue), firstLevelGroupValue.toString)
+                  runQuery(
+                     And(
+                        Equal(firstLevelGroupPath, firstLevelGroupValue),
+                        charakterFilter
+                     ),
+                     firstLevelGroupValue.toString, folderGroupings.tail
+                  )
                   progress += 1
                   updateProgress(progress, workToDo)
                   if (isCancelled) throw new RuntimeException("Cancelled")
                }
 
                updateMessage("Running " + qname + ", ALL")
-               runQuery(Truth, "ALL")
+               runQuery(Truth, "Razem", Nil)
                progress += 1
                updateProgress(progress, workToDo)
             }
