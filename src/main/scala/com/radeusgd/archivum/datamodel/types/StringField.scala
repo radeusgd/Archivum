@@ -20,10 +20,14 @@ object StringField extends FieldType {
 
    override def tableFetch(path: Seq[String], table: Fetch): DMValue = DMString(table.getString(path))
 
+   private def strip(str: String): String = {
+      str.trim
+   }
+
    override def tableInsert(path: Seq[String], table: Insert, value: DMValue): Unit = {
       //noinspection ScalaStyle
       value match {
-         case DMString(str) => table.setValue(path, str)
+         case DMString(str) => table.setValue(path, strip(str))
          case DMNull => table.setValue(path, null)
          case _ => assert(false)
       }
