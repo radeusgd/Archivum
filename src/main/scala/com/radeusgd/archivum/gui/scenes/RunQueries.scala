@@ -1,6 +1,6 @@
 package com.radeusgd.archivum.gui.scenes
 
-import com.radeusgd.archivum.gui.utils
+import com.radeusgd.archivum.gui.{ApplicationMain, utils}
 import com.radeusgd.archivum.persistence.Repository
 import com.radeusgd.archivum.querying.builtinqueries.{BuiltinQuery, Chrzty}
 import javafx.concurrent.WorkerStateEvent
@@ -30,7 +30,7 @@ class RunQueries(val repository: Repository, parentScene: Scene) extends Scene {
 
    val periodChooser: TextField = new TextField()
    periodChooser.text = "5"
-   periodChooser.text.onChange((a, b, c) => {
+   periodChooser.text.onChange((_, _, _) => {
       val num = raw"\d*".r
       val notnum = raw"[^\d]".r
       periodChooser.text match {
@@ -72,6 +72,38 @@ class RunQueries(val repository: Repository, parentScene: Scene) extends Scene {
    val charakterChooser = new ComboBox[String](charaktery)
    charakterChooser.value = charaktery.head
 
+   val startTaskButton = new Button("Run") {
+      onAction = handle {
+
+         val period: Int = periodChooser.text.value.toInt
+         val grouping: Seq[String] = groupingChooser.value.value.value
+         val charakter: Option[String] = charakterChooser.value.value match {
+            case ALLcharkatery => None
+            case other: String => Some(other)
+         }
+
+         val query = builtinChooser.value.value.recipe(period, grouping, charakter)
+         val task = query.prepareTask("queryres/", repository)
+
+         progressBar.progress.unbind()
+         progressBar.progress.bind(task.progressProperty())
+         statusText.text.unbind()
+         statusText.text.bind(task.messageProperty())
+
+         task.setOnFailed((event: WorkerStateEvent) => {
+            utils.reportException("Task failed", task.getException)
+            statusText.text.unbind()
+            statusText.text = "Failed: " + task.getException.toString
+         })
+
+         this.delegate.disableProperty().bind(task.runningProperty())
+
+         ApplicationMain.registerLongRunningTask(task)
+         val t = new Thread(task)
+         t.start()
+      }
+   }
+
    content = new VBox(
       utils.makeGoToButton("< Back", parentScene),
       new HBox(
@@ -90,34 +122,7 @@ class RunQueries(val repository: Repository, parentScene: Scene) extends Scene {
       new HBox(
          new Label("Builtin querysets"),
          builtinChooser,
-         new Button("Run") {
-            onAction = handle {
-
-               val period: Int = periodChooser.text.value.toInt
-               val grouping: Seq[String] = groupingChooser.value.value.value
-               val charakter: Option[String] = charakterChooser.value.value match {
-                  case ALLcharkatery => None
-                  case other: String => Some(other)
-               }
-
-               val query = builtinChooser.value.value.recipe(period, grouping, charakter)
-               val task = query.prepareTask("queryres/", repository)
-
-               progressBar.progress.unbind()
-               progressBar.progress.bind(task.progressProperty())
-               statusText.text.unbind()
-               statusText.text.bind(task.messageProperty())
-
-               task.setOnFailed((event: WorkerStateEvent) => {
-                  utils.reportException("Task failed", task.getException)
-                  statusText.text.unbind()
-                  statusText.text = "Failed: " + task.getException.toString
-               })
-
-               val t = new Thread(task)
-               t.start()
-            }
-         }
+         startTaskButton
       ),
       progressBar,
       statusText

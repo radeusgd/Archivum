@@ -123,7 +123,10 @@ class RepositoryImpl(private val _model: Model,
    }
 
    def makeRSP: ReadOnlySessionProvider = new ReadOnlySessionProvider {
-      override def readOnlySession[T](execution: DBSession => T): T = readOnly(execution)
+      override def readOnlySession[T](execution: DBSession => T): T =
+         suppressLogging { // we don't want too much logging in nested queries
+            readOnly(execution)
+         }
    }
 
    private def localTx[T](execution: DBSession => T): T = synchronized {
@@ -133,8 +136,6 @@ class RepositoryImpl(private val _model: Model,
    private lazy val ridSetHelper = new RidSetHelperImpl(db, table)
 
    override def ridSet: RidSetHelper = ridSetHelper
-
-   //override def searchRecords(criteria: SearchCriteria): Seq[(Rid, DMStruct)] = ???
 
    override def model: Model = _model
 
