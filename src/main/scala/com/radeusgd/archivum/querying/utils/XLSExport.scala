@@ -59,7 +59,6 @@ object XLSExport {
       List.fill(width)(Cell(null, style = headerStyle))
 
    private def makeHeader(name: String, width: Int, offset: Int): HeaderAccumulator = {
-      println("Make leaf " + name + ", " + offset)
       HeaderAccumulator(
          rows = (Cell(name, style = headerStyle) :: emptyCells(width - 1)) :: Nil,
          mergedRegions = Nil,
@@ -74,9 +73,6 @@ object XLSExport {
       }
 
    private def extendHeader(name: String, header: HeaderAccumulator, offset: Int): HeaderAccumulator = {
-      println("Extend " + name + " : " + header.width + ", " + offset)
-      println(header.topMergedRegions)
-      println(header.mergedRegions)
       HeaderAccumulator(
          rows = (Cell(name, style = headerStyle) :: emptyCells(header.width - 1)) :: header.rows,
          mergedRegions = moveRangesDown(header.topMergedRegions ++ header.mergedRegions),
@@ -109,8 +105,6 @@ object XLSExport {
    }
 
    private def mergeHeaders(hs: List[HeaderAccumulator]): HeaderAccumulator = {
-      println("Rows: " + hs.map(_.rows))
-      println("Merged: " + mergeRows(hs.map(_.rows)))
       HeaderAccumulator(
          rows = mergeRows(hs.map(_.rows)),
          mergedRegions = hs.flatMap(_.mergedRegions),
@@ -150,7 +144,7 @@ object XLSExport {
          println(headerStructures.map(_.toString).mkString("\n"))
          throw new RuntimeException("Row headers are not the same for all rows!")
       }
-      println(headerStruct1)
+
       val ha = makeHeader(headerStruct1, 0)
       (ha.rows.map(Row(_)), ha.mergedRegions ++ ha.topMergedRegions)
    }
@@ -166,8 +160,6 @@ object XLSExport {
          val rows = results.map((row: ResultRow) =>
             Row(row.flatten.map(makeCell))
          )
-
-         println(headerMerges)
 
          val sheet = Sheet(
             name = "Results", // TODO better naming?

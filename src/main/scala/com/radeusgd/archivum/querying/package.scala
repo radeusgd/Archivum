@@ -69,9 +69,12 @@ package object querying {
    def percentage(part: Int, whole: Int): DMValue =
       DMStruct(Map("part" -> DMInteger(part), "whole" -> DMInteger(whole))) // this is a special encoding which XLS exporter understands
 
+   //noinspection ScalaStyle
    implicit class PredicateHelper[T](val pred: T => Boolean) extends AnyVal {
-      //noinspection ScalaStyle
       def &&(p2: T => Boolean): T => Boolean =
          (t: T) => pred(t) && p2(t)
+
+      def ||(p2: T => Boolean): T => Boolean =
+         (t: T) => pred(t) || p2(t)
    }
 }

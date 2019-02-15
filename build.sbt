@@ -22,8 +22,6 @@ libraryDependencies ++= Seq(
 // https://mvnrepository.com/artifact/org.controlsfx/controlsfx
 libraryDependencies += "org.controlsfx" % "controlsfx" % "8.40.14"
 
-libraryDependencies += "org.typelevel" %% "cats-core" % "1.0.1"
-
 libraryDependencies += "org.parboiled" %% "parboiled" % "2.1.5"
 
 libraryDependencies ++= Seq(
@@ -33,4 +31,4 @@ libraryDependencies ++= Seq(
 // TODO assembly setup
 mainClass in assembly := Some("com.radeusgd.archivum.gui.ApplicationMain")
 
-libraryDependencies += "org.scala-lang" % "scala-compiler" % "2.12.4"
+//libraryDependencies += "org.scala-lang" % "scala-compiler" % "2.12.4" // this will be needed for runtime compilation

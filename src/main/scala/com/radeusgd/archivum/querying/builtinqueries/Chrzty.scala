@@ -121,6 +121,47 @@ class Chrzty(years: Int = 5, folderGroupings: Seq[String] = Seq("Parafia", "Miej
    private def grupujMiesiącamiV(path: String): ResultSet => ResultSet =
       rs => rs.groupBy(groupByMonth("Data urodzenia"))
 
+   private def jakRodzic(rodzic: String): DMValue => Boolean =
+      d => path"$rodzic.Imiona.length"(d).asType[DMInteger].exists(_ >= 1) && path"Imiona.0"(d) == path"$rodzic.Imiona.0"(d)
+
+   private def jakDziadek(rodzic: String, dziadek: String): DMValue => Boolean =
+      d => path"Imiona.0"(d) == path"$rodzic.$dziadek.Imię"(d)
+
+   private def jakKtóryśDziadek(dziadek: String): DMValue => Boolean =
+      jakDziadek("Ojciec", dziadek) || jakDziadek("Matka", dziadek)
+
+   private def jakChrzestny: DMValue => Boolean =
+      d => {
+         val imię = path"Imiona.0"(d)
+         val płeć = path"Płeć"(d)
+         path"Chrzestni"(d).asInstanceOf[DMArray].values.exists(
+            ch => path"Imię"(ch) == imię && path"Płeć"(ch) == płeć
+         )
+      }
+
+   private def imionaTakieSameJakM(rs: ResultSet): Seq[ResultRow] =
+      rs
+         .filter(path"Płeć"(_) == DMString("M"))
+         .filter(path"Imiona.length"(_).asType[DMInteger].exists(_ >= 1))
+         .countWithPercentages(GroupByPredicates(
+         "Imię takie samo jak ojca" -> jakRodzic("Ojciec"),
+         "Imię takie samo jak ojca i dziadka ze strony ojca" -> (jakRodzic("Ojciec") && jakDziadek("Ojciec", "Ojciec")),
+         "Imię takie samo jak dziadka" -> jakKtóryśDziadek("Ojciec"),
+         "Imię takie samo jak ojca chrzestnego" -> jakChrzestny
+            //"Ogólna liczba nadanych imion" -> ??? // TODO
+      ))
+
+   private def imionaTakieSameJakK(rs: ResultSet): Seq[ResultRow] =
+      rs
+         .filter(path"Płeć"(_) == DMString("K"))
+         .filter(path"Imiona.length"(_).asType[DMInteger].exists(_ >= 1))
+         .countWithPercentages(GroupByPredicates(
+         "Imię takie samo jak matki" -> jakRodzic("Matka"),
+         "Imię takie samo jak matki i babki ze strony matki" -> (jakRodzic("Matka") && jakDziadek("Matka", "Matka")),
+         "Imię takie samo jak babki" -> jakKtóryśDziadek("Matka"),
+         "Imię takie samo jak matki chrzestnej" -> jakChrzestny // TODO
+      ))
+
    private val bliźniętaEnum: Seq[DMString] = Seq("M+M", "M+K", "K+K").map(DMString)
    private val urodzeniaWielokrotneEnum: Seq[DMString] = Seq("M+M+M",
                 "M+M+K",
@@ -167,7 +208,9 @@ class Chrzty(years: Int = 5, folderGroupings: Seq[String] = Seq("Parafia", "Miej
       "pierwsze_imiona_miesiącami_M" -> Query(NoYearGrouping, grupujMiesiącamiV("Data urodzenia") |> pierwszeImiona("M")),
       "pierwsze_imiona_miesiącami_K" -> Query(NoYearGrouping, grupujMiesiącamiV("Data urodzenia") |> pierwszeImiona("K")),
       "liczba_chrzestnych" -> Query(DataChrztu, rs => rs.countWithPercentages(GroupBy("Chrzestni.length"))),
-      "sezonowość_tygodniowa_chrztów" -> Query(DataChrztu, ((rs: ResultSet) => rs.groupByHorizontal(groupByWeekday("Data chrztu"))) |> podsumujPłcie)
+      "sezonowość_tygodniowa_chrztów" -> Query(DataChrztu, ((rs: ResultSet) => rs.groupByHorizontal(groupByWeekday("Data chrztu"))) |> podsumujPłcie),
+      "imiona_takie_jak_M" -> Query(DataUrodzenia, imionaTakieSameJakM),
+      "imiona_takie_jak_K" -> Query(DataUrodzenia, imionaTakieSameJakK)
    ))
 
    override val manualQueries: Map[String, ResultSet => Seq[ResultRow]] = Map(
