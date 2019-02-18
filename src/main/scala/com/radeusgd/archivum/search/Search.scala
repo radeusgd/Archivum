@@ -13,7 +13,8 @@ import scalafx.scene.control._
 import scalafx.scene.input.MouseEvent
 import scalafx.scene.layout._
 
-class Search(val repository: Repository, val parentEV: EditRecords) extends Scene {
+class Search(val repository: Repository, parentEVF: => EditRecords) extends Scene {
+   lazy val parentEV: EditRecords = parentEVF
 
    private val layoutXml = IO.readFileString("search/" + repository.model.name + ".xml")
 
@@ -63,7 +64,7 @@ class Search(val repository: Repository, val parentEV: EditRecords) extends Scen
                case None => repository.searchRecords(filter)
             }
 
-            val maxResLen = 500
+            val maxResLen = 1500
 
             val resultsTruncated = if (results.length > maxResLen) {
                setTextInfo(s"Znaleziono ${results.length} wyników. Wyświetlam pierwsze $maxResLen")

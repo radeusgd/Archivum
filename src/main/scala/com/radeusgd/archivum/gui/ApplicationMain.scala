@@ -23,6 +23,10 @@ object ApplicationMain extends JFXApp {
       scene = MainMenu.instance
    }
 
+   def setPrimaryStageVisibility(visible: Boolean): Unit =
+      if (visible) stage.show()
+      else stage.hide()
+
    Thread.setDefaultUncaughtExceptionHandler((th, ex) => utils.reportException("There was an unhandled error", ex))
 
    private var longRunningTasks: mutable.MutableList[Task[_]] = mutable.MutableList.empty

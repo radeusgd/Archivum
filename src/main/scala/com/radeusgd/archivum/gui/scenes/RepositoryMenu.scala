@@ -1,13 +1,14 @@
 package com.radeusgd.archivum.gui.scenes
 
-import com.radeusgd.archivum.gui.utils
+import com.radeusgd.archivum.gui.{ApplicationMain, utils}
 import com.radeusgd.archivum.persistence.Repository
-
+import com.radeusgd.archivum.search.Search
 import scalafx.Includes._
 import scalafx.geometry.Insets
 import scalafx.scene.Scene
 import scalafx.scene.control.{Button, Label}
 import scalafx.scene.layout.VBox
+import scalafx.stage.Stage
 
 class RepositoryMenu(val repository: Repository, private val parent: Scene) extends Scene {
    lazy val editRecords: EditRecords = new EditRecords(repository, this)
@@ -22,7 +23,18 @@ class RepositoryMenu(val repository: Repository, private val parent: Scene) exte
       utils.makeGoToButtonRefreshable("Przeglądanie / edycja rekordów", editRecords),
       new Button("Search") {
          onAction = handle {
-            utils.notImplemented()
+            // TODO this is quite hacky but personally I'd just get rid of this menu option
+            def showER(): EditRecords = {
+               ApplicationMain.switchScene(editRecords)
+               ApplicationMain.setPrimaryStageVisibility(true)
+               editRecords
+            }
+            val searchScene = new Search(repository, showER())
+            val stage2 = new Stage()
+            stage2.setTitle("Wyszukiwanie")
+            stage2.setScene(searchScene)
+            ApplicationMain.setPrimaryStageVisibility(false)
+            stage2.show()
          }
       },
       utils.makeGoToButton("Kwerendy", queries),

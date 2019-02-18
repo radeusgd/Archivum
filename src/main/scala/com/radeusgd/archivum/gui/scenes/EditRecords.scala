@@ -52,7 +52,7 @@ class EditRecords(val repository: Repository, val parentScene: Scene) extends Sc
 
             setModelInstance(rid)
          } catch {
-            case e: NumberFormatException =>
+            case _: NumberFormatException =>
                utils.showError("Record id has to be a number")
             case e: RuntimeException =>
                utils.showError(e.getMessage)

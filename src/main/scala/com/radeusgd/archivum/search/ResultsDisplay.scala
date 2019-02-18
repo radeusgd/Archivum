@@ -12,7 +12,7 @@ class ResultsDisplay(val columns: Seq[ResultColumn]) {
 
    private def makeIdColumn: TableColumn[SearchRow, String] =
       new TableColumn[SearchRow, String]() {
-            prefWidth = 100
+            prefWidth = 50
             text = "Id"
             cellValueFactory = row => ReadOnlyStringWrapper(row.value.humanId.toString)
          }
