@@ -74,8 +74,8 @@ object SearchDefinition {
 
    private def parseCriteriaNodeFX(node: xml.Node): (Node, Seq[ConditionGiver]) =
       node.label.toLowerCase match {
-         case "vbox" => parseAggregate(new VBox(_:_*), XMLUtils.properChildren(node))
-         case "hbox" => parseAggregate(new HBox(_:_*), XMLUtils.properChildren(node))
+         case "vbox" => parseAggregate(new VBox(7, _:_*), XMLUtils.properChildren(node))
+         case "hbox" => parseAggregate(new HBox(9, _:_*), XMLUtils.properChildren(node))
          case "field" =>
             val path: String = node.attribute("path").map(_.text).getOrElse(throw new RuntimeException("No path provided for exact search field"))
             val label: String = node.attribute("label").map(_.text).getOrElse(path)

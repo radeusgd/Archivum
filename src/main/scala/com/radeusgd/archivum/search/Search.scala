@@ -5,8 +5,10 @@ import com.radeusgd.archivum.gui.scenes.EditRecords
 import com.radeusgd.archivum.persistence._
 import com.radeusgd.archivum.utils.IO
 import scalafx.Includes._
+import javafx.concurrent.Task
+import scalafx.application.Platform
 import scalafx.geometry.Insets
-import scalafx.scene.Scene
+import scalafx.scene.{Cursor, Scene}
 import scalafx.scene.control._
 import scalafx.scene.input.MouseEvent
 import scalafx.scene.layout._
@@ -33,23 +35,27 @@ class Search(val repository: Repository, val parentEV: EditRecords) extends Scen
 
    private val foundLabel = new Label()
 
-   private val doSearchButton = new Button("Wyszukaj") {
-      onAction = handle {
-         foundLabel.text = "Wyszukiwanie w toku..."
+   private def setTextInfo(str: String): Unit = Platform.runLater {
+      foundLabel.text = str
+   }
+
+   private def makeSearchTask(): Task[Unit] = new Task[Unit]() {
+      override def call(): Unit = {
+         setTextInfo("Wyszukiwanie w toku...")
          // TODO make it run in background!
          val conditions: Seq[SearchCondition] =
             searchDefinition.conditions.flatMap(_.getCurrentCondition())
          if (conditions.isEmpty) {
-            foundLabel.text = "Nie podano żadnych kryteriów"
+            setTextInfo("Nie podano żadnych kryteriów")
          } else {
             val (fulltext: Option[String], filter: SearchCriteria) = conditions.foldLeft[(Option[String], SearchCriteria)]((None, Truth)) {
                case ((_, sca), FulltextMatch(txt)) => (Some(txt), sca)  // I assume only one fulltext node is present
                case ((fta, sca), ExactMatch(path, value)) =>
                   (fta, And(sca, Equal(DMUtils.parsePath(path), DMString(value)))) // TODO I assume equality is on string types only!!!
-                  // TODO to fix this we need to inspect model type using repository.model.rootType
+               // TODO to fix this we need to inspect model type using repository.model.rootType
                case ((fta, sca), YearDateMatch(path, year)) =>
                   (fta, And(sca, HasPrefix(DMUtils.parsePath(path), f"$year%04d")))
-                  // this is an awful reliance on implementation details from other module, but types and database are already tightly coupled
+               // this is an awful reliance on implementation details from other module, but types and database are already tightly coupled
             }
 
             val results: Seq[(repository.Rid, DMStruct)] = fulltext match {
@@ -60,10 +66,10 @@ class Search(val repository: Repository, val parentEV: EditRecords) extends Scen
             val maxResLen = 500
 
             val resultsTruncated = if (results.length > maxResLen) {
-               foundLabel.text = s"Znaleziono ${results.length} wyników. Wyświetlam pierwsze $maxResLen"
+               setTextInfo(s"Znaleziono ${results.length} wyników. Wyświetlam pierwsze $maxResLen")
                results.take(maxResLen)
             } else {
-               foundLabel.text = s"Znaleziono ${results.length} wyników."
+               setTextInfo(s"Znaleziono ${results.length} wyników.")
                results
             }
 
@@ -71,8 +77,28 @@ class Search(val repository: Repository, val parentEV: EditRecords) extends Scen
                (rid, dms) <- resultsTruncated
             } yield new SearchRow(rid, () => repository.ridSet.getTemporaryIndex(rid).toInt, dms)
 
-            searchResults.items.get().setAll(newTableContent:_*)
+            Platform.runLater {
+               searchResults.items.get().setAll(newTableContent:_*)
+            }
          }
+      }
+   }
+
+   private def setComputeInProgress(isComputing: Boolean): Unit = Platform.runLater {
+      this.setCursor(if (isComputing) Cursor.Wait else Cursor.Default)
+   }
+
+   private val doSearchButton = new Button("Wyszukaj") {
+      onAction = handle {
+         val task = makeSearchTask()
+         task.onSucceeded = _ => {
+            setComputeInProgress(false)
+         }
+         task.onFailed = _ => {
+            setComputeInProgress(false)
+         }
+         setComputeInProgress(true)
+         new Thread(task).start()
       }
    }
 
@@ -89,6 +115,7 @@ class Search(val repository: Repository, val parentEV: EditRecords) extends Scen
 
    searchResults.hgrow = Priority.Always
    searchResults.vgrow = Priority.Always
+   rootPane.vgrow = Priority.Always
 
    root = rootPane
 

@@ -1,5 +1,7 @@
 package com.radeusgd.archivum.persistence
 
+import java.util.Locale
+
 import com.radeusgd.archivum.datamodel._
 import com.radeusgd.archivum.querying.{Grouping, MultipleResultRow, ResultSet}
 import com.radeusgd.archivum.utils.BetterTuples._
@@ -60,7 +62,8 @@ trait Repository {
    def fullTextSearch(text: String, filter: SearchCriteria): Seq[(Rid, DMStruct)] = {
       println("Warning, using a slow fulltext implementation")
 
-      val frags = text.split(' ').filter(s => !s.isEmpty)
+      val pllocale = new Locale("pl", "PL")
+      val frags = text.split(' ').filter(s => !s.isEmpty).map(_.toLowerCase(pllocale))
 
       def areAllFragsPresentSomewhere(strings: Seq[String]): Boolean =
          frags.forall(frag =>
@@ -72,7 +75,7 @@ trait Repository {
       searchRecords(filter).filter({
          case (rid, dmroot) =>
             val strings = model.roottype.extractAllStrings(dmroot)
-            areAllFragsPresentSomewhere(strings)
+            areAllFragsPresentSomewhere(strings.map(_.toLowerCase(pllocale)))
       })
    }
 
