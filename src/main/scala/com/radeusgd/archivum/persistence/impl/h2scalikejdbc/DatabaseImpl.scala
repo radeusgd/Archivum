@@ -12,7 +12,7 @@ import scalikejdbc._
  */
 class DatabaseImpl(val db: DB) extends Database {
    GlobalSettings.loggingSQLAndTime = LoggingSQLAndTimeSettings(
-      enabled = true,
+      enabled = false,
       singleLineMode = true,
       printUnprocessedStackTrace = false,
       stackTraceDepth= 0,

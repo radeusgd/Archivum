@@ -8,7 +8,8 @@ import scalafx.Includes._
 import scalafx.geometry.Insets
 import scalafx.scene.Scene
 import scalafx.scene.control._
-import scalafx.scene.layout.{BorderPane, HBox, Pane, VBox}
+import scalafx.scene.input.MouseEvent
+import scalafx.scene.layout._
 
 class Search(val repository: Repository, val parentEV: EditRecords) extends Scene {
 
@@ -18,12 +19,23 @@ class Search(val repository: Repository, val parentEV: EditRecords) extends Scen
 
    private val searchResults: TableView[SearchRow] = new TableView[SearchRow]() {
       columns ++= new ResultsDisplay(searchDefinition.columns).makeColumns.map(TableColumn.sfxTableColumn2jfx)
+      rowFactory = _ => {
+         val row = new TableRow[SearchRow]()
+         row.onMouseClicked = (me: MouseEvent) => {
+            if (!row.isEmpty && me.clickCount == 2) {
+               val clickedRid = row.item.value.rid
+               parentEV.setModelInstance(clickedRid)
+            }
+         }
+         row
+      }
    }
 
    private val foundLabel = new Label()
 
    private val doSearchButton = new Button("Wyszukaj") {
       onAction = handle {
+         foundLabel.text = "Wyszukiwanie w toku..."
          // TODO make it run in background!
          val conditions: Seq[SearchCondition] =
             searchDefinition.conditions.flatMap(_.getCurrentCondition())
@@ -71,9 +83,12 @@ class Search(val repository: Repository, val parentEV: EditRecords) extends Scen
 
    rootPane.content = new VBox(10,
       searchCriteria,
-      new HBox(doSearchButton, foundLabel),
+      new HBox(10, doSearchButton, foundLabel),
       searchResults
    )
+
+   searchResults.hgrow = Priority.Always
+   searchResults.vgrow = Priority.Always
 
    root = rootPane
 

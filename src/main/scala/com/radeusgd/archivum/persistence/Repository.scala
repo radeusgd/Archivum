@@ -52,12 +52,29 @@ trait Repository {
       ResultSet(Seq(MultipleResultRow(searchRecords(criteria).extractSeconds)))
 
    def searchIds(criteria: SearchCriteria): Seq[Rid] = {
-      println("Warning using a very slow implementation of searchIds!!!")
+      println("Warning! using a very slow implementation of searchIds!!!")
       searchRecords(criteria).extractFirsts
    }
 
    // TODO  not sure if filter should be handled natively, but for now it makes sense
-   def fullTextSearch(text: String, filter: SearchCriteria): Seq[(Rid, DMStruct)]
+   def fullTextSearch(text: String, filter: SearchCriteria): Seq[(Rid, DMStruct)] = {
+      println("Warning, using a slow fulltext implementation")
+
+      val frags = text.split(' ').filter(s => !s.isEmpty)
+
+      def areAllFragsPresentSomewhere(strings: Seq[String]): Boolean =
+         frags.forall(frag =>
+            strings.exists(str =>
+               str.contains(frag)
+            )
+         )
+
+      searchRecords(filter).filter({
+         case (rid, dmroot) =>
+            val strings = model.roottype.extractAllStrings(dmroot)
+            areAllFragsPresentSomewhere(strings)
+      })
+   }
 
    def fetchIds(ids: Seq[Rid]): Seq[(Rid, DMStruct)] = {
       for {

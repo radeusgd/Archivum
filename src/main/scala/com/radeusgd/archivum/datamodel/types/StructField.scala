@@ -71,4 +71,19 @@ case class StructField(fieldTypes: Map[String, FieldType]) extends FieldType wit
             .map(DMStruct(_))
       case _ => Left(DeserializationException("Expected an object"))
    }
+
+   def extractAllStrings(s: DMStruct): Seq[String] = {
+      fieldTypes.flatMap {
+         case (key, struct: StructField) =>
+            struct.extractAllStrings(s.values(key).asInstanceOf[DMStruct])
+         case (key, ArrayField(arraystruct: StructField)) =>
+            s.values(key).asInstanceOf[DMArray].values.flatMap(d => arraystruct.extractAllStrings(d.asInstanceOf[DMStruct]))
+         case (key, ArrayField(StringField)) =>
+            s.values(key).asInstanceOf[DMArray].values.map(d => d.asInstanceOf[DMString].value)
+         case (key, StringField) =>
+            Seq(s.values(key).asInstanceOf[DMString].value)
+         case _ =>
+            Seq()
+      }.toSeq
+   }
 }

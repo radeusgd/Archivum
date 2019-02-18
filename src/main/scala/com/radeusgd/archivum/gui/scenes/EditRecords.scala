@@ -34,7 +34,7 @@ class EditRecords(val repository: Repository, val parentScene: Scene) extends Sc
       setModelInstance(rid)
    }
 
-   private def setModelInstance(rid: Rid): Unit = {
+   def setModelInstance(rid: Rid): Unit = {
       if (editableView.errors.isEmpty || utils.ask("Some changes have not been saved due to errors, do you want to continue?", "These changes will be lost."))
       editableView.setModelInstance(rid)
       indexTextField.text = ridSet.getTemporaryIndex(rid).toString

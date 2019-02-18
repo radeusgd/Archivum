@@ -109,8 +109,6 @@ class RepositoryImpl(private val _model: Model,
       rids
    }
 
-   override def fullTextSearch(text: String, filter: SearchCriteria): Seq[(Rid, DMStruct)] = ??? // TODO
-
    //override def fetchIds(ids: Seq[Rid]): Seq[(Rid, DMStruct)] = ??? // TODO can this be optimized?
 
    override def getAllDistinctValues(path: List[String], filter: SearchCriteria): List[DMValue] = {
