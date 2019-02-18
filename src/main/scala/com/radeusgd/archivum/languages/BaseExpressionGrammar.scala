@@ -60,7 +60,7 @@ class BaseExpressionGrammar(val input: ParserInput) extends Parser {
    val WhitespaceChar = CharPredicate(" \n\r\t\f")
 }
 
-class TestExtendedGrammar(input: ParserInput) extends BaseExpressionGrammar(input) {
+class SimpleExpressionGrammar(input: ParserInput) extends BaseExpressionGrammar(input) {
    def Statement: Rule1[AST.Expression] = rule {
       zeroOrMore(WhitespaceChar) ~ Expression ~ EOI
    }
@@ -70,7 +70,7 @@ object Test {
 
    def simpleParseTest(input: String): Unit = {
       println(s"Parsing: '$input'")
-      val parser = new TestExtendedGrammar(input)
+      val parser = new SimpleExpressionGrammar(input)
       val result: Try[AST.Expression] = parser.Statement.run()
       result match {
          case Failure(error) => error match {

@@ -195,7 +195,11 @@ class RepositoryImpl(private val _model: Model,
             val fieldName = rawSql(pathToDb(path))
             val pref = prefix + "%"
             sqls"$fieldName LIKE $pref" // FIXME THIS IS UNTESTED AND LIKELY MAY NOT WORK CORRECTLY
-            throw new NotImplementedError("This may work but has to be tested")
+            throw new NotImplementedError("This may work but has to be tested") // FIXME
+//         case Like(path, str) => // TODO this could use H2 full-text search capability
+//            val fieldName = rawSql(pathToDb(path))
+//            val exp = "%" + str + "%"
+//            sqls"$fieldName LIKE $exp" // FIXME THIS IS UNTESTED AND LIKELY MAY NOT WORK CORRECTLY
          case And() => makeCondition(Truth)
          case And(cond) => makeCondition(cond)
          case And(c1, rest @_*) => sqls"(${makeCondition(c1)} AND ${makeCondition(And(rest:_*))})"

@@ -8,4 +8,6 @@ object QueryLanguage {
    val ArrayLength = "length"
    val YDYear = "year"
    val YDFullDate = "date"
+
+   val Join = "join"
 }

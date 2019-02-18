@@ -34,5 +34,9 @@ object Expression {
       QueryLanguage.ArrayLength -> {
          case List(array: DMArray) => DMInteger(array.length)
       },
+      QueryLanguage.Join -> {
+         case List(DMArray(elements)) => DMString(elements.mkString(" "))
+         case List(DMArray(elements), DMString(sep)) => DMString(elements.mkString(sep))
+      }
    )
 }

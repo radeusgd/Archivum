@@ -8,10 +8,20 @@ case class ResultColumn(name: String, getter: DMValue => String)
 
 class ResultsDisplay(val columns: Seq[ResultColumn]) {
    def makeColumns: Seq[TableColumn[SearchRow, String]] =
-      for (column <- columns)
+      makeIdColumn :: makeGeneratedColumns
+
+   private def makeIdColumn: TableColumn[SearchRow, String] =
+      new TableColumn[SearchRow, String]() {
+            prefWidth = 100
+            text = "Id"
+            cellValueFactory = row => ReadOnlyStringWrapper(row.value.humanId.toString)
+         }
+
+   private def makeGeneratedColumns: List[TableColumn[SearchRow, String]] =
+      for (column <- columns.toList)
          yield new TableColumn[SearchRow, String]() {
             prefWidth = 100
             text = column.name
-            cellValueFactory = row => ReadOnlyStringWrapper(column.getter(row.value))
+            cellValueFactory = row => ReadOnlyStringWrapper(column.getter(row.value.record))
          }
 }

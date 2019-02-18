@@ -5,6 +5,7 @@ import com.radeusgd.archivum.gui.controls.LayoutDefaults
 import com.radeusgd.archivum.gui.{ApplicationMain, EditableView, Refreshable, utils}
 import com.radeusgd.archivum.persistence.DBUtils.Rid
 import com.radeusgd.archivum.persistence.{Repository, RidSetHelper}
+import com.radeusgd.archivum.search.Search
 import com.radeusgd.archivum.utils.IO
 import scalafx.geometry.{Insets, Pos}
 import scalafx.scene.Scene
@@ -13,6 +14,7 @@ import scalafx.scene.layout.{BorderPane, HBox}
 import scalafx.scene.paint.Paint
 import scalafx.Includes.handle
 import scalafx.scene.input.KeyCode
+import scalafx.stage.Stage
 
 class EditRecords(val repository: Repository, val parentScene: Scene) extends Scene with Refreshable {
 
@@ -77,22 +79,33 @@ class EditRecords(val repository: Repository, val parentScene: Scene) extends Sc
       setModelInstance(rid)
    }
 
+   private def self: EditRecords = this
+
    root = new BorderPane {
       padding = Insets(10)
       top = new HBox(
-         utils.makeGoToButton("< Back", parentScene)
+         utils.makeGoToButton("< Powrót", parentScene)
       )
       private val scrollPane = new ScrollPane()
       scrollPane.content = editableView
       center = scrollPane
       bottom = new HBox(LayoutDefaults.defaultSpacing,
+         new Button("Wyszukiwanie") {
+            onAction = handle {
+               val searchScene = new Search(repository, self)
+               val stage2 = new Stage()
+               stage2.setTitle("Wyszukiwanie")
+               stage2.setScene(searchScene)
+               stage2.show()
+            }
+         },
          utils.mkButton("<--", () => ridSet.getFirstRid().foreach(setModelInstance)),
          utils.mkButton("<-", () => ridSet.getPreviousRid(currentRid).foreach(setModelInstance)),
          new HBox(indexTextField, countLabel),
          utils.mkButton("->", () => ridSet.getNextRid(currentRid).foreach(setModelInstance)),
          utils.mkButton("-->", () => ridSet.getLastRid().foreach(setModelInstance)),
-         utils.mkButton("Delete", deleteCurrent),
-         utils.mkButton("Create empty", insertEmpty),
+         utils.mkButton("Usuń rekord", deleteCurrent),
+         utils.mkButton("Stwórz nowy", insertEmpty),
          errorsLabel,
          modifiedLabel
       )

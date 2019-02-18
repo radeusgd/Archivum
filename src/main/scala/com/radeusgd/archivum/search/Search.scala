@@ -3,9 +3,11 @@ package com.radeusgd.archivum.search
 import com.radeusgd.archivum.gui.scenes.EditRecords
 import com.radeusgd.archivum.persistence.Repository
 import com.radeusgd.archivum.utils.IO
+import scalafx.Includes._
+import scalafx.geometry.Insets
 import scalafx.scene.Scene
-import scalafx.scene.control.{TableColumn, TableView}
-import scalafx.scene.layout.{HBox, VBox}
+import scalafx.scene.control._
+import scalafx.scene.layout.{BorderPane, HBox, Pane, VBox}
 
 class Search(val repository: Repository, val parentEV: EditRecords) extends Scene {
 
@@ -17,14 +19,28 @@ class Search(val repository: Repository, val parentEV: EditRecords) extends Scen
       columns ++= new ResultsDisplay(searchDefinition.columns).makeColumns.map(TableColumn.sfxTableColumn2jfx)
    }
 
-   private val searchCriteria = HBox(
-      // TODO
-   )
+   private val doSearchButton = new Button("Wyszukaj") {
+      onAction = handle {
+         ???
+      }
+   }
 
-   content += VBox(
+   private val foundLabel = new Label()
+
+   private val searchCriteria = searchDefinition.criteriaNode
+
+   private val rootPane = new ScrollPane()
+   rootPane.padding = Insets(10)
+
+   rootPane.content = new VBox(10,
       searchCriteria,
+      new HBox(doSearchButton, foundLabel),
       searchResults
    )
+
+   root = rootPane
+
+
 
    def refreshSearch(): Unit = {
       // TODO
