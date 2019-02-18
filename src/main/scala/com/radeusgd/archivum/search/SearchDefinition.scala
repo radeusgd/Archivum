@@ -6,6 +6,7 @@ import com.radeusgd.archivum.languages.SimpleExpressionGrammar
 import scalafx.scene.Node
 import scalafx.scene.layout.{HBox, VBox}
 import com.radeusgd.archivum.utils.BetterTuples._
+import org.parboiled2.{ErrorFormatter, ParseError}
 
 import scala.util.Try
 import scala.xml.XML
@@ -33,12 +34,27 @@ object SearchDefinition {
       val expr: String = node.text
       val grammar = new SimpleExpressionGrammar(expr)
       val result: Try[Expression] = grammar.Statement.run()
-      val parsedExpr: Expression = result.get
+      val parsedExpr: Expression = result.recoverWith {
+         case pe: ParseError =>
+            val err = grammar.formatError(pe, new ErrorFormatter(showTraces = false))
+            println(err)
+            com.radeusgd.archivum.gui.utils.showError("Parse error in " + expr, err)
+            throw pe
+      }.get
       val evaluator = new com.radeusgd.archivum.querying.Expression(parsedExpr)
 
       ResultColumn(
          name,
-         d => evaluator.evaluate(d).toString
+         d => {
+            try {
+               evaluator.evaluate(d).toString
+            } catch {
+               case e: Exception =>
+                  println("Error computing " + parsedExpr)
+                  e.printStackTrace()
+                  "!Błąd obliczania wyrażenia!"
+            }
+         }
       )
    }
 
@@ -65,10 +81,10 @@ object SearchDefinition {
             val label: String = node.attribute("label").map(_.text).getOrElse(path)
             val width: Int = getWidthForNode(node)
             wrapCriteriaNode(new EqualConditionField(label, width, path))
-         case "fuzzy" =>
+         case "fulltext" =>
             val label: String = node.attribute("label").map(_.text).getOrElse(throw new RuntimeException("No label provided for fuzzy"))
             val width: Int = getWidthForNode(node)
-            wrapCriteriaNode(new FuzzyConditionField(label, width))
+            wrapCriteriaNode(new FulltextConditionField(label, width))
          case "year" =>
             val path: String = node.attribute("path").map(_.text).getOrElse(throw new RuntimeException("No path provided for exact search field"))
             val label: String = node.attribute("label").map(_.text).getOrElse(path)

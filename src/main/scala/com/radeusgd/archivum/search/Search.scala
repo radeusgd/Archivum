@@ -1,7 +1,8 @@
 package com.radeusgd.archivum.search
 
+import com.radeusgd.archivum.datamodel.{DMString, DMStruct, DMUtils}
 import com.radeusgd.archivum.gui.scenes.EditRecords
-import com.radeusgd.archivum.persistence.Repository
+import com.radeusgd.archivum.persistence._
 import com.radeusgd.archivum.utils.IO
 import scalafx.Includes._
 import scalafx.geometry.Insets
@@ -19,13 +20,49 @@ class Search(val repository: Repository, val parentEV: EditRecords) extends Scen
       columns ++= new ResultsDisplay(searchDefinition.columns).makeColumns.map(TableColumn.sfxTableColumn2jfx)
    }
 
+   private val foundLabel = new Label()
+
    private val doSearchButton = new Button("Wyszukaj") {
       onAction = handle {
-         ???
+         // TODO make it run in background!
+         val conditions: Seq[SearchCondition] =
+            searchDefinition.conditions.flatMap(_.getCurrentCondition())
+         if (conditions.isEmpty) {
+            foundLabel.text = "Nie podano żadnych kryteriów"
+         } else {
+            val (fulltext: Option[String], filter: SearchCriteria) = conditions.foldLeft[(Option[String], SearchCriteria)]((None, Truth)) {
+               case ((_, sca), FulltextMatch(txt)) => (Some(txt), sca)  // I assume only one fulltext node is present
+               case ((fta, sca), ExactMatch(path, value)) =>
+                  (fta, And(sca, Equal(DMUtils.parsePath(path), DMString(value)))) // TODO I assume equality is on string types only!!!
+                  // TODO to fix this we need to inspect model type using repository.model.rootType
+               case ((fta, sca), YearDateMatch(path, year)) =>
+                  (fta, And(sca, HasPrefix(DMUtils.parsePath(path), f"$year%04d")))
+                  // this is an awful reliance on implementation details from other module, but types and database are already tightly coupled
+            }
+
+            val results: Seq[(repository.Rid, DMStruct)] = fulltext match {
+               case Some(ft) => repository.fullTextSearch(ft, filter)
+               case None => repository.searchRecords(filter)
+            }
+
+            val maxResLen = 500
+
+            val resultsTruncated = if (results.length > maxResLen) {
+               foundLabel.text = s"Znaleziono ${results.length} wyników. Wyświetlam pierwsze $maxResLen"
+               results.take(maxResLen)
+            } else {
+               foundLabel.text = s"Znaleziono ${results.length} wyników."
+               results
+            }
+
+            val newTableContent: Seq[SearchRow] = for {
+               (rid, dms) <- resultsTruncated
+            } yield new SearchRow(rid, () => repository.ridSet.getTemporaryIndex(rid).toInt, dms)
+
+            searchResults.items.get().setAll(newTableContent:_*)
+         }
       }
    }
-
-   private val foundLabel = new Label()
 
    private val searchCriteria = searchDefinition.criteriaNode
 

@@ -51,6 +51,22 @@ trait Repository {
    def search(criteria: SearchCriteria): ResultSet =
       ResultSet(Seq(MultipleResultRow(searchRecords(criteria).extractSeconds)))
 
+   def searchIds(criteria: SearchCriteria): Seq[Rid] = {
+      println("Warning using a very slow implementation of searchIds!!!")
+      searchRecords(criteria).extractFirsts
+   }
+
+   // TODO  not sure if filter should be handled natively, but for now it makes sense
+   def fullTextSearch(text: String, filter: SearchCriteria): Seq[(Rid, DMStruct)]
+
+   def fetchIds(ids: Seq[Rid]): Seq[(Rid, DMStruct)] = {
+      for {
+         rid <- ids
+         record <- fetchRecord(rid)
+      } yield (rid, record)
+   }
+
+   @deprecated // TODO not sure if want this function
    def getAllDistinctValues(path: List[String], filter: SearchCriteria = Truth): List[DMValue] = {
       println("WARNING! Using a very slow implementation! (DISTINCT)")
       searchRecords(filter).map(_._2).map(DMUtils.makeGetter(path)).toList.distinct

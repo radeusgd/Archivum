@@ -100,6 +100,19 @@ class RepositoryImpl(private val _model: Model,
       records
    }
 
+   override def searchIds(criteria: SearchCriteria): Seq[Rid] = {
+      val cond: SQLSyntax = makeCondition(criteria)
+      val rids = readOnly({ implicit session =>
+         sql"SELECT * FROM $table WHERE $cond"
+            .map(rs => rs.long("_rid")).list.apply()
+      })
+      rids
+   }
+
+   override def fullTextSearch(text: String, filter: SearchCriteria): Seq[(Rid, DMStruct)] = ??? // TODO
+
+   //override def fetchIds(ids: Seq[Rid]): Seq[(Rid, DMStruct)] = ??? // TODO can this be optimized?
+
    override def getAllDistinctValues(path: List[String], filter: SearchCriteria): List[DMValue] = {
       val table = rawSql(tableName)
       val columnName = rawSql(pathToDb(path))
@@ -195,7 +208,6 @@ class RepositoryImpl(private val _model: Model,
             val fieldName = rawSql(pathToDb(path))
             val pref = prefix + "%"
             sqls"$fieldName LIKE $pref" // FIXME THIS IS UNTESTED AND LIKELY MAY NOT WORK CORRECTLY
-            throw new NotImplementedError("This may work but has to be tested") // FIXME
 //         case Like(path, str) => // TODO this could use H2 full-text search capability
 //            val fieldName = rawSql(pathToDb(path))
 //            val exp = "%" + str + "%"

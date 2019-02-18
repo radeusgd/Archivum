@@ -11,7 +11,7 @@ sealed trait SearchCondition {
 
 case class ExactMatch(path: String, value: String) extends SearchCondition
 case class YearDateMatch(path: String, year: Int) extends SearchCondition
-case class FuzzyMatch(value: String) extends SearchCondition
+case class FulltextMatch(value: String) extends SearchCondition
 
 trait ConditionGiver {
    def getCurrentCondition(): Option[SearchCondition]
@@ -22,7 +22,6 @@ class TextFieldCondition(name: String, textFieldWidth: Int, makeCondition: Strin
    private val textField = new TextField() {
       prefWidth = textFieldWidth
    }
-   println(name + " -> " + textFieldWidth)
 
    fillWidth = false
    children = Seq(
@@ -45,8 +44,8 @@ object TextFieldCondition {
 class EqualConditionField(name: String, width: Int, path: String)
 extends TextFieldCondition(name, width, TextFieldCondition.wrapNonEmptyMake(ExactMatch(path, _)))
 
-class FuzzyConditionField(name: String, width: Int)
-extends TextFieldCondition(name, width, TextFieldCondition.wrapNonEmptyMake(FuzzyMatch))
+class FulltextConditionField(name: String, width: Int)
+extends TextFieldCondition(name, width, TextFieldCondition.wrapNonEmptyMake(FulltextMatch))
 
 class YearConditionField(name: String, width: Int, path: String)
 extends TextFieldCondition(name, width, (s: String) => {
