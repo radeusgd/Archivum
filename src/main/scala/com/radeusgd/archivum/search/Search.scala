@@ -10,7 +10,6 @@ import scalafx.application.Platform
 import scalafx.geometry.Insets
 import scalafx.scene.{Cursor, Scene}
 import scalafx.scene.control._
-import scalafx.scene.input.MouseEvent
 import scalafx.scene.layout._
 
 class Search(val repository: Repository, parentEVF: => EditRecords) extends Scene {
@@ -20,19 +19,8 @@ class Search(val repository: Repository, parentEVF: => EditRecords) extends Scen
 
    private val searchDefinition = SearchDefinition.parseXML(layoutXml)
 
-   private val searchResults: TableView[SearchRow] = new TableView[SearchRow]() {
-      columns ++= new ResultsDisplay(searchDefinition.columns).makeColumns.map(TableColumn.sfxTableColumn2jfx)
-      rowFactory = _ => {
-         val row = new TableRow[SearchRow]()
-         row.onMouseClicked = (me: MouseEvent) => {
-            if (!row.isEmpty && me.clickCount == 2) {
-               val clickedRid = row.item.value.rid
-               parentEV.setModelInstance(clickedRid)
-            }
-         }
-         row
-      }
-   }
+   private val searchResults: TableView[SearchRow] =
+      new SearchResultTable[SearchRow](new ResultsDisplayColumnFactory[SearchRow](searchDefinition.columns).makeColumns, parentEV)
 
    private val foundLabel = new Label()
 
@@ -43,7 +31,6 @@ class Search(val repository: Repository, parentEVF: => EditRecords) extends Scen
    private def makeSearchTask(): Task[Unit] = new Task[Unit]() {
       override def call(): Unit = {
          setTextInfo("Wyszukiwanie w toku...")
-         // TODO make it run in background!
          val conditions: Seq[SearchCondition] =
             searchDefinition.conditions.flatMap(_.getCurrentCondition())
          if (conditions.isEmpty) {

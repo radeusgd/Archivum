@@ -25,5 +25,5 @@ abstract class CommonControlFactory(make: (CommonProperties, List[String], Edita
    private def safeConstruct(path: List[String], props: CommonProperties, ev: EditableView): Either[LayoutParseError, scene.Node with BoundControl] =
       Try(make(props, path, ev))
          .toEither
-         .leftMap((t: Throwable) => LayoutParseError("Error in constructor", Some(t)))
+         .leftMap((t: Throwable) => LayoutParseError("Error in constructor" + path, Some(t)))
 }

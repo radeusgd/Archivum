@@ -6,6 +6,7 @@ import com.radeusgd.archivum.gui.{ApplicationMain, EditableView, Refreshable, ut
 import com.radeusgd.archivum.persistence.DBUtils.Rid
 import com.radeusgd.archivum.persistence.{Repository, RidSetHelper}
 import com.radeusgd.archivum.search.Search
+import com.radeusgd.archivum.search.commonfeatures.CommonFeaturesScene
 import com.radeusgd.archivum.utils.IO
 import scalafx.geometry.{Insets, Pos}
 import scalafx.scene.Scene
@@ -95,6 +96,15 @@ class EditRecords(val repository: Repository, val parentScene: Scene) extends Sc
                val searchScene = new Search(repository, self)
                val stage2 = new Stage()
                stage2.setTitle("Wyszukiwanie")
+               stage2.setScene(searchScene)
+               stage2.show()
+            }
+         },
+         new Button("Punkty wspólne") {
+            onAction = handle {
+               val searchScene = new CommonFeaturesScene(currentRid, repository, self)
+               val stage2 = new Stage()
+               stage2.setTitle("Punkty wspólne")
                stage2.setScene(searchScene)
                stage2.show()
             }

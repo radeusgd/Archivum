@@ -6,20 +6,20 @@ import scalafx.scene.control.TableColumn
 
 case class ResultColumn(name: String, getter: DMValue => String)
 
-class ResultsDisplay(val columns: Seq[ResultColumn]) {
-   def makeColumns: Seq[TableColumn[SearchRow, String]] =
+class ResultsDisplayColumnFactory[T <: SearchRow](val columns: Seq[ResultColumn]) {
+   def makeColumns: List[TableColumn[T, String]] =
       makeIdColumn :: makeGeneratedColumns
 
-   private def makeIdColumn: TableColumn[SearchRow, String] =
-      new TableColumn[SearchRow, String]() {
+   private def makeIdColumn: TableColumn[T, String] =
+      new TableColumn[T, String]() {
             prefWidth = 50
             text = "Id"
             cellValueFactory = row => ReadOnlyStringWrapper(row.value.humanId.toString)
          }
 
-   private def makeGeneratedColumns: List[TableColumn[SearchRow, String]] =
+   private def makeGeneratedColumns: List[TableColumn[T, String]] =
       for (column <- columns.toList)
-         yield new TableColumn[SearchRow, String]() {
+         yield new TableColumn[T, String]() {
             prefWidth = 100
             text = column.name
             cellValueFactory = row => ReadOnlyStringWrapper(column.getter(row.value.record))
