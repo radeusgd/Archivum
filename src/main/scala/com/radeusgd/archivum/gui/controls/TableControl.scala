@@ -121,7 +121,6 @@ class TableControl(/* TODO some params */
    private def removeRow(idx: Int)(root: DMStruct): DMStruct = {
       val oldArray = getter(root).asInstanceOf[DMArray]
       val newArray = oldArray.without(idx)
-      println("Removing " + idx)
       setter(root, newArray).asInstanceOf[DMStruct] // FIXME
    }
 

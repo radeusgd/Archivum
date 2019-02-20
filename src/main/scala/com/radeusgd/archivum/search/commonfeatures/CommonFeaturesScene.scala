@@ -17,7 +17,7 @@ class CommonFeaturesScene(val baseRid: Rid, val repository: Repository, parentEV
 
    lazy val parentEV: EditRecords = parentEVF
 
-   private val layoutXml = IO.readFileString("search/" + repository.model.name + ".xml")
+   private val layoutXml = IO.readFileString("Konfiguracja/search/" + repository.model.name + ".xml")
    private val searchDefinition = SearchDefinition.parseXML(layoutXml)
 
    private val searchResults = new SearchResultTable[CommonFeaturesRow](

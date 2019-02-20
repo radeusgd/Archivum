@@ -2,7 +2,7 @@ package com.radeusgd.archivum.gui.scenes
 
 import com.radeusgd.archivum.gui.{ApplicationMain, utils}
 import com.radeusgd.archivum.persistence.Repository
-import com.radeusgd.archivum.querying.builtinqueries.{BuiltinQuery, Chrzty}
+import com.radeusgd.archivum.querying.builtinqueries.{BuiltinQuery, Małżeństwa, Urodzenia}
 import javafx.concurrent.WorkerStateEvent
 import scalafx.Includes.handle
 import scalafx.geometry.Insets
@@ -17,7 +17,8 @@ class RunQueries(val repository: Repository, parentScene: Scene) extends Scene {
    }
 
    val builtin: Seq[QueryRecipe] = Seq(
-      QueryRecipe(new Chrzty(_, _, _), "Chrzty")
+      QueryRecipe(new Urodzenia(_, _, _), "Urodzenia"),
+      QueryRecipe(new Małżeństwa(_, _, _), "Małżeństwa")
    )
 
    val builtinChooser =
@@ -30,6 +31,7 @@ class RunQueries(val repository: Repository, parentScene: Scene) extends Scene {
 
    val periodChooser: TextField = new TextField()
    periodChooser.text = "5"
+   periodChooser.prefWidth = 50
    periodChooser.text.onChange((_, _, _) => {
       val num = raw"\d*".r
       val notnum = raw"[^\d]".r
@@ -72,7 +74,7 @@ class RunQueries(val repository: Repository, parentScene: Scene) extends Scene {
    val charakterChooser = new ComboBox[String](charaktery)
    charakterChooser.value = charaktery.head
 
-   val startTaskButton = new Button("Run") {
+   val startTaskButton: Button = new Button("Uruchom") {
       onAction = handle {
 
          val period: Int = periodChooser.text.value.toInt
@@ -83,7 +85,7 @@ class RunQueries(val repository: Repository, parentScene: Scene) extends Scene {
          }
 
          val query = builtinChooser.value.value.recipe(period, grouping, charakter)
-         val task = query.prepareTask("queryres/", repository)
+         val task = query.prepareTask("Wyniki kwerend/" + repository.model.name + "/", repository)
 
          progressBar.progress.unbind()
          progressBar.progress.bind(task.progressProperty())
@@ -105,7 +107,7 @@ class RunQueries(val repository: Repository, parentScene: Scene) extends Scene {
    }
 
    content = new VBox(
-      utils.makeGoToButton("< Back", parentScene),
+      utils.makeGoToButton("< Powrót", parentScene),
       new HBox(
          new Label("Okres co "),
          periodChooser,
@@ -120,7 +122,7 @@ class RunQueries(val repository: Repository, parentScene: Scene) extends Scene {
          charakterChooser
       ),
       new HBox(
-         new Label("Builtin querysets"),
+         new Label("Wbudowane zestawy kwerend: "),
          builtinChooser,
          startTaskButton
       ),

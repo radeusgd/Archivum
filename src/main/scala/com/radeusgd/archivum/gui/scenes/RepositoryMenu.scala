@@ -21,7 +21,7 @@ class RepositoryMenu(val repository: Repository, private val parent: Scene) exte
          font = scalafx.scene.text.Font(font.name, 25)
       },
       utils.makeGoToButtonRefreshable("Przeglądanie / edycja rekordów", editRecords),
-      new Button("Search") {
+      new Button("Wyszukiwanie") {
          onAction = handle {
             // TODO this is quite hacky but personally I'd just get rid of this menu option
             def showER(): EditRecords = {

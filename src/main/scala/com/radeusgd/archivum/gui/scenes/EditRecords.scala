@@ -21,7 +21,7 @@ class EditRecords(val repository: Repository, val parentScene: Scene) extends Sc
 
    private def model: Model = repository.model
 
-   private val layoutXml = IO.readFileString("views/" + model.name + ".xml")
+   private val layoutXml = IO.readFileString("Konfiguracja/views/" + model.name + ".xml")
 
    private val editableView: EditableView = EditableView.makeFromDefinition(repository, layoutXml)
 
@@ -91,6 +91,9 @@ class EditRecords(val repository: Repository, val parentScene: Scene) extends Sc
       scrollPane.content = editableView
       center = scrollPane
       bottom = new HBox(LayoutDefaults.defaultSpacing,
+         new Button("Wypis") {
+           disable = true
+         },
          new Button("Wyszukiwanie") {
             onAction = handle {
                val searchScene = new Search(repository, self)
@@ -100,11 +103,11 @@ class EditRecords(val repository: Repository, val parentScene: Scene) extends Sc
                stage2.show()
             }
          },
-         new Button("Punkty wspólne") {
+         new Button("Krewni") {
             onAction = handle {
                val searchScene = new CommonFeaturesScene(currentRid, repository, self)
                val stage2 = new Stage()
-               stage2.setTitle("Punkty wspólne")
+               stage2.setTitle("Krewni")
                stage2.setScene(searchScene)
                stage2.show()
             }

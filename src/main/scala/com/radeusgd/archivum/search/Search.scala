@@ -15,7 +15,7 @@ import scalafx.scene.layout._
 class Search(val repository: Repository, parentEVF: => EditRecords) extends Scene {
    lazy val parentEV: EditRecords = parentEVF
 
-   private val layoutXml = IO.readFileString("search/" + repository.model.name + ".xml")
+   private val layoutXml = IO.readFileString("Konfiguracja/search/" + repository.model.name + ".xml")
 
    private val searchDefinition = SearchDefinition.parseXML(layoutXml)
 

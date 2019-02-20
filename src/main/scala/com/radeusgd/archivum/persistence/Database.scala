@@ -13,7 +13,7 @@ trait Database {
 
 object Database {
    def open(): Database = {
-      ConnectionPool.singleton("jdbc:h2:retry:./database", "", "")
+      ConnectionPool.singleton("jdbc:h2:retry:./database;TRACE_LEVEL_FILE=0", "", "")
       val db = DB(ConnectionPool.borrow())
       db.autoClose(false)
       new DatabaseImpl(db)

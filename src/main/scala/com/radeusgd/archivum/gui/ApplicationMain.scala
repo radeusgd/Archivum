@@ -11,6 +11,8 @@ import scala.collection.mutable
 
 object ApplicationMain extends JFXApp {
 
+   val settingsFilesDirectory = "Konfiguracja"
+
    def switchScene(scene: Scene): Unit = {
       stage.scene = scene
    }

@@ -40,16 +40,16 @@ class ExportRepository(val repository: Repository, parentScene: Scene) extends S
    }
 
    content = new VBox(
-      utils.makeGoToButton("< Back", parentScene),
+      utils.makeGoToButton("< Powrót", parentScene),
       new HBox(
          new Label("Filter: "),
          new TextField {
             disable = true
-            text = "feature not implemented yet"
+            text = "funkcja w budowie"
          }
       ),
       formatChoice,
-      new Button("Export") {
+      new Button("Eksport") {
          onAction = handle {
             formatChoice.value.value match {
                case "JSON" =>

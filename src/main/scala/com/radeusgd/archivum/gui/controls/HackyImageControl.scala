@@ -31,9 +31,11 @@ class HackyImageControl(val label: String, path: List[String],
    protected def toValue(s: String): DMValue = bridge.fromString(s)
 
    private val image: ImageView = new ImageView
-   private val changeImageButton: Button = new Button("E")
+   private val warningLabel = new Label()
+   warningLabel.setStyle("-fx-text-color: red;")
+   private val changeImageButton: Button = new Button("Wybierz obraz")
 
-   children = Seq(image, changeImageButton)
+   children = Seq(image, warningLabel, changeImageButton)
 
    changeImageButton.onAction = handle {
       val fileChooser = new FileChooser {
@@ -63,7 +65,7 @@ class HackyImageControl(val label: String, path: List[String],
 
 
          // ensure directory exists (TODO move to separate function)
-         val directory = new File("images/")
+         val directory = new File("Fotografie/")
          if (!directory.exists()) {
             directory.mkdir()
          }
@@ -76,18 +78,38 @@ class HackyImageControl(val label: String, path: List[String],
    }
 
 
-   private def makeUrl(imagName: String) = "images/" + imagName
+   private def makeUrl(imagName: String) = "Fotografie/" + imagName
 
    private def makeImage(name: String): Image = {
-      if (name != "")
-         new Image(new File(makeUrl(name)).toURI.toString)
-      else null
+      warningLabel.text = ""
+      if (name.isEmpty) {
+         null
+      }
+      else {
+         val f = new File(makeUrl(name))
+         if (!f.isFile) {
+            warningLabel.text = "Plik " + f.toString + " nie istnieje. Upewnij się, że prawidłogo przemigrowałeś folder Fotografie"
+            null
+         } else {
+            val url = f.toURI.toString
+            new Image(url)
+         }
+      }
    }
 
    private def setCurrentImage(name: String): Unit = {
-      image.setImage(makeImage(name))
+      changeImageButton.visible = name.isEmpty
+      val underlyingImg: Image = makeImage(name)
+      image.setImage(underlyingImg)
       image.setPreserveRatio(true)
-      image.setFitWidth(100)
+      val underlyingImgOpt = Option(underlyingImg)
+      for {
+         existingImage <- underlyingImgOpt
+      } {
+         val miniatureWidth: Double = Seq(underlyingImg.width.value, 1200.0).min
+         image.setFitWidth(miniatureWidth)
+      }
+      
       // TODO this could probably be done once but I'm in a hurry :(
       image.onMouseClicked = handle {
          val alert = new Alert(Alert.AlertType.Information)

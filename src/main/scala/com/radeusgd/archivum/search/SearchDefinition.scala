@@ -122,7 +122,6 @@ object SearchDefinition {
          } catch {
             case e: Exception =>
                println("Error computing " + parsedExpr)
-               e.printStackTrace()
                None
          }
       }

@@ -37,6 +37,14 @@ object Expression {
       QueryLanguage.Join -> {
          case List(DMArray(elements)) => DMString(elements.mkString(" "))
          case List(DMArray(elements), DMString(sep)) => DMString(elements.mkString(sep))
+         case List(values@_*) => DMString(values.map(_.toString).mkString)
+      },
+      "get" -> {
+         case List(v: DMValue, DMString(path)) => DMUtils.makeGetter(path)(v)
+      },
+      "find" -> {
+         case List(DMArray(elements), DMString(accessPath), value: DMValue) =>
+            elements.find(e => DMUtils.makeGetter(accessPath)(e) == value).getOrElse(DMNull)
       }
    )
 }

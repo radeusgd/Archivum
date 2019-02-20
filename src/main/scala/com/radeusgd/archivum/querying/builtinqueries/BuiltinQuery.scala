@@ -8,10 +8,21 @@ import com.radeusgd.archivum.querying._
 import com.radeusgd.archivum.querying.utils.XLSExport
 import javafx.concurrent.Task
 
-sealed abstract class YearGrouping
-object DataChrztu extends YearGrouping
-object DataUrodzenia extends YearGrouping
-object NoYearGrouping extends YearGrouping
+sealed abstract class YearGrouping {
+   def prepareGroupings(years: Int): Seq[Grouping]
+}
+class DateBasedGrouping(path: String) extends YearGrouping {
+   override def prepareGroupings(years: Int): Seq[Grouping] =
+      GroupByYears(path, years, CustomAppendColumn("Rok")) :: Nil
+}
+object DataChrztu extends DateBasedGrouping("Data chrztu")
+object DataUrodzenia extends DateBasedGrouping("Data urodzenia")
+object DataŚlubu extends DateBasedGrouping("Data ślubu")
+object DataŚmierci extends DateBasedGrouping("Data śmierci")
+object DataPochówku extends DateBasedGrouping("Data pochówku")
+object NoYearGrouping extends YearGrouping {
+   override def prepareGroupings(years: Int): Seq[Grouping] = Nil
+}
 
 case class Query(yearGrouping: YearGrouping, realization: ResultSet => Seq[ResultRow]) {
    def withFilter(predicate: DMValue => Boolean): Query =
@@ -24,11 +35,8 @@ abstract class BuiltinQuery(years: Int, folderGroupings: Seq[String], charakter:
    val groupedQueries: Map[String, Query]
    val manualQueries: Map[String, ResultSet => Seq[ResultRow]]
 
-   private def prepareYearGrouping(yearGrouping: YearGrouping): Seq[Grouping] = yearGrouping match {
-      case DataChrztu => GroupByYears("Data chrztu", years, CustomAppendColumn("Rok")) :: Nil
-      case DataUrodzenia => GroupByYears("Data urodzenia", years, CustomAppendColumn("Rok")) :: Nil
-      case NoYearGrouping => Nil
-   }
+   private def prepareYearGrouping(yearGrouping: YearGrouping): Seq[Grouping] =
+      yearGrouping.prepareGroupings(years)
 
    private val fileExt: String = ".xlsx"
 

@@ -9,10 +9,8 @@ import com.radeusgd.archivum.querying._
 import com.radeusgd.archivum.utils.Pipe._
 import com.radeusgd.archivum.querying.CustomGroupBy._
 
-class Chrzty(years: Int = 5, folderGroupings: Seq[String] = Seq("Parafia", "Miejscowość"), charakter: Option[String] = None)
+class Urodzenia(years: Int = 5, folderGroupings: Seq[String] = Seq("Parafia", "Miejscowość"), charakter: Option[String] = None)
    extends BuiltinQuery(years, folderGroupings, charakter) {
-
-   override def toString: String = "Chrzty"
 
    private def podsumujPłcie: ResultSet => Seq[ResultRow] =
       rs => rs.countWithPercentages(GroupByWithSummary("Płeć"))
@@ -175,7 +173,7 @@ class Chrzty(years: Int = 5, folderGroupings: Seq[String] = Seq("Parafia", "Miej
       queries.foldLeft[Map[String, Query]](Map.empty){ case (map, (name, query)) =>
          map.merged(Map(
             name -> query,
-            /*"ślubne/" + name ->
+            "ślubne/" + name ->
                query.withFilter(d => path"Urodzenie ślubne"(d).taknieasBool.contains(true)),
             "nieślubne/" + name ->
                query.withFilter(d => path"Urodzenie ślubne"(d).taknieasBool.contains(false)),
@@ -185,7 +183,7 @@ class Chrzty(years: Int = 5, folderGroupings: Seq[String] = Seq("Parafia", "Miej
                query.withFilter(d => path"Ciąża mnoga"(d) == DMString("NIE")),
             "urodzenia_bliźniacze/" + name ->
                query.withFilter(d => bliźniętaEnum.contains(path"Ciąża mnoga"(d))),
-            //FIXME temporarily disable for faster testing*/"urodzenia_wielorakie/" + name ->
+            "urodzenia_wielorakie/" + name ->
                query.withFilter(d => urodzeniaWielokrotneEnum.contains(path"Ciąża mnoga"(d)))
          ))
       }
@@ -196,14 +194,14 @@ class Chrzty(years: Int = 5, folderGroupings: Seq[String] = Seq("Parafia", "Miej
       "księża" -> Query(DataChrztu, grupujPoOsobie("Udzielający chrztu") |> grupujPoRodzajachUrodzeń |> podsumujPłcie),
       "akuszerki" -> Query(DataChrztu, grupujPoOsobie("Akuszerka") |> grupujPoRodzajachUrodzeń |> podsumujPłcie),
    ).merged(makeAlternativesForSpecialGroups(
-      /*"urodzenia_rocznie" -> Query(DataUrodzenia, podsumujPłcie),
+      "urodzenia_rocznie" -> Query(DataUrodzenia, podsumujPłcie),
       "urodzenia_miesięcznie" -> Query(DataUrodzenia,
-         rs => rs.groupByHorizontal(groupByMonth("Data urodzenia")) |> podsumujPłcie),
+         ((rs: ResultSet) => rs.groupByHorizontal(groupByMonth("Data urodzenia"))) |> podsumujPłcie),
       "dni_od_urodzenia_do_chrztu" -> Query(DataChrztu, liczbaDniOdUrodzeniaDoChrztu),
       "liczba_imion" -> Query(DataUrodzenia, liczbaImion),
       "pierwsze_imiona_pionowo_M" -> Query(DataUrodzenia, pierwszeImionaPion("M")),
       "pierwsze_imiona_pionowo_K" -> Query(DataUrodzenia, pierwszeImionaPion("K")),
-      "pierwsze_imiona_M" -> Query(DataUrodzenia, pierwszeImiona("M")),*/
+      "pierwsze_imiona_M" -> Query(DataUrodzenia, pierwszeImiona("M")),
       "pierwsze_imiona_K" -> Query(DataUrodzenia, pierwszeImiona("K")),
       "pierwsze_imiona_miesiącami_M" -> Query(NoYearGrouping, grupujMiesiącamiV("Data urodzenia") |> pierwszeImiona("M")),
       "pierwsze_imiona_miesiącami_K" -> Query(NoYearGrouping, grupujMiesiącamiV("Data urodzenia") |> pierwszeImiona("K")),

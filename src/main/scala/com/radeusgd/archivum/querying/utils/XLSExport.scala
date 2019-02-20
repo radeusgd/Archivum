@@ -72,14 +72,14 @@ object XLSExport {
          case CellRange((r1, r2), c) => CellRange((r1 + amount, r2 + amount), c)
       }
 
-   private def extendHeader(name: String, header: HeaderAccumulator, offset: Int): HeaderAccumulator = {
-      HeaderAccumulator(
+   private def extendHeader(name: String, header: HeaderAccumulator, offset: Int): HeaderAccumulator =
+      if (header.width <= 0) header
+      else HeaderAccumulator(
          rows = (Cell(name, style = headerStyle) :: emptyCells(header.width - 1)) :: header.rows,
          mergedRegions = moveRangesDown(header.topMergedRegions ++ header.mergedRegions),
          topMergedRegions = CellRange(0 -> 0, offset -> (offset + header.width - 1)) :: Nil,
          width = header.width
       )
-   }
 
    private def padRowsToHeight(height: Int)(header: HeaderAccumulator): HeaderAccumulator = {
       val padding = height - header.height

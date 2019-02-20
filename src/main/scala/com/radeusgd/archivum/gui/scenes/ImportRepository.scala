@@ -48,9 +48,9 @@ class ImportRepository(val repository: Repository, parentScene: Scene) extends S
    }
 
    content = new VBox(
-      utils.makeGoToButton("< Back", parentScene),
-      new Label("Imported records will be appended (old records, if any, will be preserved)."),
-      new Label("Only JSON is supported for importing."),
+      utils.makeGoToButton("< Powrót", parentScene),
+      new Label("Zaimporotwane rekordy zostaną dopisane do bazy (rekordy już znajdujące się w bazie pozostaną niezmienione)"),
+      new Label("Wspierane jest tylko importowanie z formatu JSON"),
       new Button("Import") {
          onAction = handle {
             chooseOpenFile() match {

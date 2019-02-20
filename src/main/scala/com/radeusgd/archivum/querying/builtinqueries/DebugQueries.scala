@@ -14,7 +14,7 @@ object DebugQueries extends JFXApp {
    private var currentTask: Option[Task[Unit]] = None
 
    Platform.runLater {
-      val query = new Chrzty(5)
+      val query = new Urodzenia(5)
       val task: Task[Unit] = query.prepareTask("queryres/", repo)
 
       val progressBar = qscene.progressBar

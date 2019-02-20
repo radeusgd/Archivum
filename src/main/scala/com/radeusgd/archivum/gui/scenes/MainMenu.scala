@@ -43,9 +43,12 @@ class MainMenu extends Scene {
       spacing = 10
       padding = Insets(15.0)
       children = Seq(
-         new Button("Create repository") {
+         new Label("Galicyjskie księgi metrykalne") {
+            font = scalafx.scene.text.Font(font.name, 26)
+         },
+         new Button("Utwórz bazę ze schematu") {
             onAction = handle {
-               val d = new File("models")
+               val d = new File("Konfiguracja/Baza danych")
                if (!d.exists || !d.isDirectory) {
                   throw new RuntimeException("Models directory doesn't exist")
                }
@@ -65,7 +68,7 @@ class MainMenu extends Scene {
          },
          new HBox(
             repositoryChoice,
-            new Button("Open") {
+            new Button("Otwórz") {
                onAction = handle {
                   db.openRepository(repositoryChoice.value.value) match {
                      case Some(repo) => ApplicationMain.switchScene(new RepositoryMenu(repo, self))
