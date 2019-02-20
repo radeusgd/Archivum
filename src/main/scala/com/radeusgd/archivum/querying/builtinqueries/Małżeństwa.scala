@@ -1,6 +1,5 @@
 package com.radeusgd.archivum.querying.builtinqueries
 
-import java.time.temporal.ChronoUnit
 
 import cats.implicits._
 import com.radeusgd.archivum.datamodel.LiftDMValue._
@@ -42,7 +41,7 @@ class Małżeństwa(years: Int, folderGroupings: Seq[String], charakter: Option[
       ))
 
    override val groupedQueries: Map[String, Query] = Map(
-      // TODO
+      "Sezonowość tygodniowa ślubów" -> Query(DataŚlubu, (rs: ResultSet) => rs.countWithPercentages(groupByWeekday("Data ślubu")))
    )
 
    override val manualQueries: Map[String, ResultSet => Seq[ResultRow]] = Map(

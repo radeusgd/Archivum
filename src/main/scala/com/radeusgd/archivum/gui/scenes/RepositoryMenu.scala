@@ -4,7 +4,7 @@ import com.radeusgd.archivum.gui.{ApplicationMain, utils}
 import com.radeusgd.archivum.persistence.Repository
 import com.radeusgd.archivum.search.Search
 import scalafx.Includes._
-import scalafx.geometry.Insets
+import scalafx.geometry.{Insets, Pos}
 import scalafx.scene.Scene
 import scalafx.scene.control.{Button, Label}
 import scalafx.scene.layout.VBox
@@ -44,5 +44,6 @@ class RepositoryMenu(val repository: Repository, private val parent: Scene) exte
    ) {
       spacing = 5
       padding = Insets(15.0)
+      alignment = Pos.Center
    }
 }

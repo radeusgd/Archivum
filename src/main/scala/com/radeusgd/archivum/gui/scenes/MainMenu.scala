@@ -5,15 +5,13 @@ import java.io.File
 import com.radeusgd.archivum.gui.{ApplicationMain, utils}
 import com.radeusgd.archivum.persistence.Database
 import com.radeusgd.archivum.utils.IO
-
-import scala.util.control.NonFatal
 import scalafx.Includes._
-import scalafx.collections.ObservableBuffer
 import scalafx.geometry.Insets
 import scalafx.scene.Scene
-import scalafx.scene.control.Alert.AlertType
 import scalafx.scene.control._
 import scalafx.scene.layout.{HBox, VBox}
+
+import scala.util.control.NonFatal
 
 class MainMenu extends Scene {
 
@@ -23,7 +21,7 @@ class MainMenu extends Scene {
 
    def refreshRepos(): Unit = {
       val repos: Seq[String] = db.listRepositories()
-      repositoryChoice.items.value.setAll(repos:_*)
+      repositoryChoice.items.value.setAll(repos: _*)
       repos.headOption.foreach(firstOne => repositoryChoice.value = firstOne)
    }
 

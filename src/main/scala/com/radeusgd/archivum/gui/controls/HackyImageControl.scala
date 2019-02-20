@@ -109,7 +109,7 @@ class HackyImageControl(val label: String, path: List[String],
          val miniatureWidth: Double = Seq(underlyingImg.width.value, 1200.0).min
          image.setFitWidth(miniatureWidth)
       }
-      
+
       // TODO this could probably be done once but I'm in a hurry :(
       image.onMouseClicked = handle {
          val alert = new Alert(Alert.AlertType.Information)

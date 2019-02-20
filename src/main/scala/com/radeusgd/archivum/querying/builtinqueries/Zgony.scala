@@ -3,6 +3,7 @@ package com.radeusgd.archivum.querying.builtinqueries
 import cats.implicits._
 import com.radeusgd.archivum.datamodel.LiftDMValue._
 import com.radeusgd.archivum.datamodel._
+import com.radeusgd.archivum.querying.CustomGroupBy._
 import com.radeusgd.archivum.querying._
 
 class Zgony(years: Int, folderGroupings: Seq[String], charakter: Option[String] = None)
@@ -37,8 +38,12 @@ class Zgony(years: Int, folderGroupings: Seq[String], charakter: Option[String] 
          appendColumnMode = CustomAppendColumn(path)
       ))
 
+   private def przyczynyZgonów(rs: ResultSet): Seq[ResultRow] =
+      rs.groupBy(GroupBy("Przyczyna zgonu")).aggregateClassic("Liczba" -> ClassicAggregations.count)
+
    override val groupedQueries: Map[String, Query] = Map(
-      // TODO
+      "Sezonowość tygodniowa pogrzebów" -> Query(DataPochówku, (rs: ResultSet) => rs.countWithPercentages(groupByWeekday("Data pochówku"))),
+      "Najczęstsze przyczyny zgonów" -> Query(DataŚmierci, przyczynyZgonów)
    )
 
    override val manualQueries: Map[String, ResultSet => Seq[ResultRow]] = Map(

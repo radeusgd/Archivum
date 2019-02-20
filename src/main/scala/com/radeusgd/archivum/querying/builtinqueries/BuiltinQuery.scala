@@ -117,7 +117,7 @@ abstract class BuiltinQuery(years: Int, folderGroupings: Seq[String], charakter:
                      }
                      runQuery(
                         filter,
-                        subName + "/" + "Razem",
+                        subName + "/" + "!Razem",
                         Nil
                      )
                   }
@@ -138,7 +138,7 @@ abstract class BuiltinQuery(years: Int, folderGroupings: Seq[String], charakter:
                }
 
                updateMessage("Running " + qname + ", ALL")
-               runQuery(Truth, "Razem", Nil)
+               runQuery(Truth, "!Razem", Nil)
                progress += 1
                updateProgress(progress, workToDo)
             }

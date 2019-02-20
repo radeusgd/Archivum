@@ -2,7 +2,7 @@ package com.radeusgd.archivum.gui.scenes
 
 import com.radeusgd.archivum.gui.{ApplicationMain, utils}
 import com.radeusgd.archivum.persistence.Repository
-import com.radeusgd.archivum.querying.builtinqueries.{BuiltinQuery, Małżeństwa, Urodzenia}
+import com.radeusgd.archivum.querying.builtinqueries.{BuiltinQuery, Małżeństwa, Urodzenia, Zgony}
 import javafx.concurrent.WorkerStateEvent
 import scalafx.Includes.handle
 import scalafx.geometry.Insets
@@ -18,7 +18,8 @@ class RunQueries(val repository: Repository, parentScene: Scene) extends Scene {
 
    val builtin: Seq[QueryRecipe] = Seq(
       QueryRecipe(new Urodzenia(_, _, _), "Urodzenia"),
-      QueryRecipe(new Małżeństwa(_, _, _), "Małżeństwa")
+      QueryRecipe(new Małżeństwa(_, _, _), "Małżeństwa"),
+      QueryRecipe(new Zgony(_, _, _), "Zgony")
    )
 
    val builtinChooser =
