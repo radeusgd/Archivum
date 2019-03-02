@@ -13,7 +13,7 @@ class Urodzenia(years: Int = 5, folderGroupings: Seq[String] = Seq("Parafia", "M
    extends BuiltinQuery(years, folderGroupings, charakter) {
 
    private def podsumujPłcie: ResultSet => Seq[ResultRow] =
-      rs => rs.countWithPercentages(GroupByWithSummary("Płeć"))
+      rs => rs.countHorizontal(GroupByWithSummary("Płeć"))
 
    private def podsumujCzySlubne(rs: ResultSet): Seq[ResultRow] =
       rs.aggregateClassic(
@@ -44,7 +44,7 @@ class Urodzenia(years: Int = 5, folderGroupings: Seq[String] = Seq("Parafia", "M
       DMUtils.makeGetter(path)(dMValue).asType[DMYearDate].exists(_.fullDate.isDefined)
 
    private def liczbaDniOdUrodzeniaDoChrztu(rs: ResultSet): Seq[ResultRow] = {
-      rs.filter(hasDate("Data urodzenia") _ && hasDate("Data chrztu")).countWithPercentages(ComputedGroupBy(
+      rs.filter(hasDate("Data urodzenia") _ && hasDate("Data chrztu")).countHorizontal(ComputedGroupBy(
          getter = (dmv: DMValue) => {
             val diff: Option[Int] = for {
                bdatefield <- path"Data urodzenia"(dmv).asType[DMYearDate]
@@ -141,7 +141,7 @@ class Urodzenia(years: Int = 5, folderGroupings: Seq[String] = Seq("Parafia", "M
       rs
          .filter(path"Płeć"(_) == DMString("M"))
          .filter(path"Imiona.length"(_).asType[DMInteger].exists(_ >= 1))
-         .countWithPercentages(GroupByPredicates(
+         .countHorizontal(GroupByPredicates(
          "Imię takie samo jak ojca" -> jakRodzic("Ojciec"),
          "Imię takie samo jak ojca i dziadka ze strony ojca" -> (jakRodzic("Ojciec") && jakDziadek("Ojciec", "Ojciec")),
          "Imię takie samo jak dziadka" -> jakKtóryśDziadek("Ojciec"),
@@ -153,7 +153,7 @@ class Urodzenia(years: Int = 5, folderGroupings: Seq[String] = Seq("Parafia", "M
       rs
          .filter(path"Płeć"(_) == DMString("K"))
          .filter(path"Imiona.length"(_).asType[DMInteger].exists(_ >= 1))
-         .countWithPercentages(GroupByPredicates(
+         .countHorizontal(GroupByPredicates(
          "Imię takie samo jak matki" -> jakRodzic("Matka"),
          "Imię takie samo jak matki i babki ze strony matki" -> (jakRodzic("Matka") && jakDziadek("Matka", "Matka")),
          "Imię takie samo jak babki" -> jakKtóryśDziadek("Matka"),
@@ -205,7 +205,7 @@ class Urodzenia(years: Int = 5, folderGroupings: Seq[String] = Seq("Parafia", "M
       "Nadawane imiona żeńskie" -> Query(DataUrodzenia, pierwszeImiona("K")),
       "Imiona męskie i miesiąc w którym odbył się chrzest" -> Query(NoYearGrouping, grupujMiesiącamiV("Data chrztu") |> pierwszeImiona("M")), // TODO FIXME
       "Imiona żeńskie i miesiąc w którym odbył się chrzest" -> Query(NoYearGrouping, grupujMiesiącamiV("Data chrztu") |> pierwszeImiona("K")),
-      "Liczba chrzestnych asystujących przy chrzcie" -> Query(DataChrztu, rs => rs.countWithPercentages(GroupBy("Chrzestni.length"))),
+      "Liczba chrzestnych asystujących przy chrzcie" -> Query(DataChrztu, rs => rs.countHorizontal(GroupBy("Chrzestni.length"))),
       "Sezonowość tygodniowa chrztów" -> Query(DataChrztu, ((rs: ResultSet) => rs.groupByHorizontal(groupByWeekday("Data chrztu"))) |> podsumujPłcie),
       "Dziedziczenie imion męskich po rodzicach, dziadkach i chrzestnych" -> Query(DataUrodzenia, imionaTakieSameJakM),
       "Dziedziczenie imion żeńskich po rodzicach, dziadkach i chrzestnych" -> Query(DataUrodzenia, imionaTakieSameJakK)

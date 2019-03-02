@@ -40,11 +40,22 @@ class Małżeństwa(years: Int, folderGroupings: Seq[String], charakter: Option[
          appendColumnMode = CustomAppendColumn(path)
       ))
 
+   private def stanCywilny(rs: ResultSet): Seq[ResultRow] = {
+      val stanCywilnyPana = path"Pan młody.Stan cywilny"
+      val stanCywilnyPanny = path"Panna młoda.Stan cywilny"
+      rs.countHorizontal(ComputedGroupBy(
+         getter = (d: DMValue) => {
+            stanCywilnyPana(d).toString + " i " + stanCywilnyPanny(d)
+         },
+         orderMapping = _.toString
+      ))
+   }
+
    override val groupedQueries: Map[String, Query] = Map(
-      "Sezonowość tygodniowa ślubów" -> Query(DataŚlubu, (rs: ResultSet) => rs.countWithPercentages(groupByWeekday("Data ślubu"))),
-      "Sezonowość miesięczna ślubów" -> ???,
-      "Śluby rocznie" -> ???
-      //"Stan cywilny nupturientów" -> ???
+      "Sezonowość tygodniowa ślubów" -> Query(DataŚlubu, (rs: ResultSet) => rs.countHorizontal(groupByWeekday("Data ślubu"))),
+      "Sezonowość miesięczna ślubów" -> Query(DataŚlubu, (rs: ResultSet) => rs.countHorizontal(groupByMonth("Data ślubu"))),
+      "Śluby rocznie" -> Query(DataŚlubu, (rs: ResultSet) => rs.aggregateClassic("Liczba" -> ClassicAggregations.count)),
+      "Stan cywilny nupturientów" -> Query(DataŚlubu, stanCywilny)
    )
 
    override val manualQueries: Map[String, ResultSet => Seq[ResultRow]] = Map(

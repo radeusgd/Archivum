@@ -57,7 +57,7 @@ case class MultipleResultRow(prefix: ResultRow, objects: NestedMapADT[String, Se
          }))
    }
 
-   def countWithPercentages(grouping: Grouping, presetGroupings: Seq[String]): ResultRow = {
+   def countHorizontal(grouping: Grouping, presetGroupings: Seq[String], includePercentages: Boolean): ResultRow = {
       prefix.append(objects.flatMap(
          (objs: Seq[DMValue]) => {
             val allCount = objs.length
@@ -69,12 +69,20 @@ case class MultipleResultRow(prefix: ResultRow, objects: NestedMapADT[String, Se
                case (nm, key) => nm.updated(key, grouped(key))
             })
 
-            reordered.flatMap((objs: Seq[DMValue]) =>
-               ResultRow(
-                  "l.b." -> DMInteger(objs.length),
-                  "%" -> percentage(objs.length, allCount)
+
+            if (includePercentages)
+               reordered.flatMap((objs: Seq[DMValue]) =>
+                  ResultRow(
+                     "l.b." -> DMInteger(objs.length),
+                     "%" -> percentage(objs.length, allCount)
+                  )
                )
-            )
+            else
+               reordered.flatMap((objs: Seq[DMValue]) =>
+                  ResultRow(
+                     "l.b." -> DMInteger(objs.length)
+                  )
+               )
          }))
    }
 

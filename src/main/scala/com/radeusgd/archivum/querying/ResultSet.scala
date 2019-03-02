@@ -57,9 +57,9 @@ case class ResultSet(rows: Seq[MultipleResultRow]) {
    def countTransposed(path: String, traits: Seq[(String, DMValue)], default: Option[String]): Seq[ResultRow] =
       aggregateClassic(ClassicAggregations.countTransposed(path, traits, default):_*)
 
-   def countWithPercentages(grouping: Grouping): Seq[ResultRow] = {
+   def countHorizontal(grouping: Grouping, includePercentages: Boolean = false): Seq[ResultRow] = {
       val preset = computeHorizontalGroupingPreset(grouping)
-      rows.map(_.countWithPercentages(grouping, preset))
+      rows.map(_.countHorizontal(grouping, preset, includePercentages))
    }
 
    def countAfterGrouping(): Seq[ResultRow] = {

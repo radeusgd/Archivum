@@ -32,7 +32,7 @@ class Zgony(years: Int, folderGroupings: Seq[String], charakter: Option[String] 
 
    //noinspection ScalaStyle
    private def liczbaDniOdŚmierciDoPochówku(rs: ResultSet): Seq[ResultRow] = {
-      rs.filter(hasDate("Data śmierci") _ && hasDate("Data pochówku")).countWithPercentages(ComputedGroupBy(
+      rs.filter(hasDate("Data śmierci") _ && hasDate("Data pochówku")).countHorizontal(ComputedGroupBy(
          getter = (dmv: DMValue) => {
             val diff: Option[Int] = for {
                bdatefield <- path"Data śmierci"(dmv).asType[DMYearDate]
@@ -65,15 +65,19 @@ class Zgony(years: Int, folderGroupings: Seq[String], charakter: Option[String] 
          appendColumnMode = CustomAppendColumn(path)
       ))
 
-   private def przyczynyZgonów(rs: ResultSet): Seq[ResultRow] =
-      rs.groupBy(GroupBy("Przyczyna zgonu")).aggregateClassic("Liczba" -> ClassicAggregations.count)
+   private def przyczynyZgonówPoziomo(rs: ResultSet): Seq[ResultRow] =
+      rs.countHorizontal(GroupBy("Przyczyna zgonu"))
+
+   private def przyczynyZgonówPionowo(rs: ResultSet): Seq[ResultRow] =
+      rs.groupBy(GroupBy("Przyczyna zgonu", PopularitySorted(Descending))).aggregateClassic("Liczba" -> ClassicAggregations.count)
 
    override val groupedQueries: Map[String, Query] = Map(
-      "Sezonowość tygodniowa pogrzebów" -> Query(DataPochówku, (rs: ResultSet) => rs.countWithPercentages(groupByWeekday("Data pochówku"))),
-      "Najczęstsze przyczyny zgonów" -> Query(DataŚmierci, przyczynyZgonów),
+      "Sezonowość tygodniowa pogrzebów" -> Query(DataPochówku, (rs: ResultSet) => rs.countHorizontal(groupByWeekday("Data pochówku"))),
+      "Najczęstsze przyczyny zgonów" -> Query(DataŚmierci, przyczynyZgonówPionowo),
+      "Przyczyny zgonów" -> Query(DataŚmierci, przyczynyZgonówPoziomo),
       "Liczba dni od zgonu do pochówku" -> Query(DataPochówku, liczbaDniOdŚmierciDoPochówku),
-      "Sezonowość miesięczna zgonów" -> ???,
-      "Zgony rocznie" -> ???
+      "Sezonowość miesięczna zgonów" -> Query(DataŚmierci, (rs: ResultSet) => rs.countHorizontal(groupByMonth("Data śmierci"))),
+      "Zgony rocznie" -> Query(DataŚmierci, (rs: ResultSet) => rs.aggregateClassic("Liczba" -> ClassicAggregations.count))
    )
 
    override val manualQueries: Map[String, ResultSet => Seq[ResultRow]] = Map(

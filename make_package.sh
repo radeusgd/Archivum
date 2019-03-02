@@ -6,8 +6,7 @@ arch="${filename%.*}"
 echo "Packaging $arch"
 mkdir tmppkg
 cp "$jar" tmppkg/ -v
-cp -r models/ tmppkg/
-cp -r views/ tmppkg/
+cp -r Konfiguracja/ tmppkg/
 cd tmppkg
 rm -f "../${arch}.zip"
 zip -r "../${arch}.zip" *
