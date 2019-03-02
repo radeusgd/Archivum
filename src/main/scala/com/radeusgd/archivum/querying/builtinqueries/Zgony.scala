@@ -1,5 +1,7 @@
 package com.radeusgd.archivum.querying.builtinqueries
 
+import java.time.temporal.ChronoUnit
+
 import cats.implicits._
 import com.radeusgd.archivum.datamodel.LiftDMValue._
 import com.radeusgd.archivum.datamodel._
@@ -28,6 +30,31 @@ class Zgony(years: Int, folderGroupings: Seq[String], charakter: Option[String] 
    private def hasDate(path: String)(dMValue: DMValue): Boolean =
       DMUtils.makeGetter(path)(dMValue).asType[DMYearDate].exists(_.fullDate.isDefined)
 
+   //noinspection ScalaStyle
+   private def liczbaDniOdŚmierciDoPochówku(rs: ResultSet): Seq[ResultRow] = {
+      rs.filter(hasDate("Data śmierci") _ && hasDate("Data pochówku")).countWithPercentages(ComputedGroupBy(
+         getter = (dmv: DMValue) => {
+            val diff: Option[Int] = for {
+               bdatefield <- path"Data śmierci"(dmv).asType[DMYearDate]
+               bdate <- bdatefield.fullDate
+               cdatefield <- path"Data pochówku"(dmv).asType[DMYearDate]
+               cdate <- cdatefield.fullDate
+            } yield ChronoUnit.DAYS.between(bdate, cdate).toInt
+
+            val d = diff.get // we know this will exist because of earlier filter
+            if (d < 0) DMString("błąd")
+            else if (d >= 15) DMString("15>")
+            else DMInteger(d)
+         },
+         orderMapping = {
+            case DMInteger(v) => v
+            case DMString(s) =>
+               if (s == "15>") 15
+               else -1
+         }
+      ))
+   }
+
    private def grupujPoOsobie(path: String): ResultSet => ResultSet =
       (rs: ResultSet) => rs.groupBy(ComputedGroupBy(
          getter = (d: DMValue) => (for {
@@ -43,7 +70,10 @@ class Zgony(years: Int, folderGroupings: Seq[String], charakter: Option[String] 
 
    override val groupedQueries: Map[String, Query] = Map(
       "Sezonowość tygodniowa pogrzebów" -> Query(DataPochówku, (rs: ResultSet) => rs.countWithPercentages(groupByWeekday("Data pochówku"))),
-      "Najczęstsze przyczyny zgonów" -> Query(DataŚmierci, przyczynyZgonów)
+      "Najczęstsze przyczyny zgonów" -> Query(DataŚmierci, przyczynyZgonów),
+      "Liczba dni od zgonu do pochówku" -> Query(DataPochówku, liczbaDniOdŚmierciDoPochówku),
+      "Sezonowość miesięczna zgonów" -> ???,
+      "Zgony rocznie" -> ???
    )
 
    override val manualQueries: Map[String, ResultSet => Seq[ResultRow]] = Map(

@@ -41,7 +41,10 @@ class Małżeństwa(years: Int, folderGroupings: Seq[String], charakter: Option[
       ))
 
    override val groupedQueries: Map[String, Query] = Map(
-      "Sezonowość tygodniowa ślubów" -> Query(DataŚlubu, (rs: ResultSet) => rs.countWithPercentages(groupByWeekday("Data ślubu")))
+      "Sezonowość tygodniowa ślubów" -> Query(DataŚlubu, (rs: ResultSet) => rs.countWithPercentages(groupByWeekday("Data ślubu"))),
+      "Sezonowość miesięczna ślubów" -> ???,
+      "Śluby rocznie" -> ???
+      //"Stan cywilny nupturientów" -> ???
    )
 
    override val manualQueries: Map[String, ResultSet => Seq[ResultRow]] = Map(
