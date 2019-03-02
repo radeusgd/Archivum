@@ -189,29 +189,29 @@ class Urodzenia(years: Int = 5, folderGroupings: Seq[String] = Seq("Parafia", "M
       }
 
    override val groupedQueries: Map[String, Query] = Map(
-      "test_nazwiska" -> Query(DataUrodzenia, _.countGroups("Nazwisko", "Liczba osób")),
-      "ślubne_rocznie" -> Query(DataUrodzenia, podsumujCzySlubne),
-      "księża" -> Query(DataChrztu, grupujPoOsobie("Udzielający chrztu") |> grupujPoRodzajachUrodzeń |> podsumujPłcie),
-      "akuszerki" -> Query(DataChrztu, grupujPoOsobie("Akuszerka") |> grupujPoRodzajachUrodzeń |> podsumujPłcie),
+      //"test_nazwiska" -> Query(DataUrodzenia, _.countGroups("Nazwisko", "Liczba osób")),
+      "Urodzenia ślubne i nieślubne" -> Query(DataUrodzenia, podsumujCzySlubne),
+      "Liczba chrztów udzielonych przez poszczególnych księży" -> Query(DataChrztu, grupujPoOsobie("Udzielający chrztu") |> grupujPoRodzajachUrodzeń |> podsumujPłcie),
+      "Liczba porodów przyjętych przez poszczególne akuszerki" -> Query(DataChrztu, grupujPoOsobie("Akuszerka") |> grupujPoRodzajachUrodzeń |> podsumujPłcie),
    ).merged(makeAlternativesForSpecialGroups(
-      "urodzenia_rocznie" -> Query(DataUrodzenia, podsumujPłcie),
-      "urodzenia_miesięcznie" -> Query(DataUrodzenia,
+      "Urodzenia roczne" -> Query(DataUrodzenia, podsumujPłcie),
+      "Sezonowość miesięczna urodzeń" -> Query(DataUrodzenia,
          ((rs: ResultSet) => rs.groupByHorizontal(groupByMonth("Data urodzenia"))) |> podsumujPłcie),
-      "dni_od_urodzenia_do_chrztu" -> Query(DataChrztu, liczbaDniOdUrodzeniaDoChrztu),
-      "liczba_imion" -> Query(DataUrodzenia, liczbaImion),
-      "pierwsze_imiona_pionowo_M" -> Query(DataUrodzenia, pierwszeImionaPion("M")),
-      "pierwsze_imiona_pionowo_K" -> Query(DataUrodzenia, pierwszeImionaPion("K")),
-      "pierwsze_imiona_M" -> Query(DataUrodzenia, pierwszeImiona("M")),
-      "pierwsze_imiona_K" -> Query(DataUrodzenia, pierwszeImiona("K")),
-      "pierwsze_imiona_miesiącami_M" -> Query(NoYearGrouping, grupujMiesiącamiV("Data urodzenia") |> pierwszeImiona("M")),
-      "pierwsze_imiona_miesiącami_K" -> Query(NoYearGrouping, grupujMiesiącamiV("Data urodzenia") |> pierwszeImiona("K")),
-      "liczba_chrzestnych" -> Query(DataChrztu, rs => rs.countWithPercentages(GroupBy("Chrzestni.length"))),
-      "sezonowość_tygodniowa_chrztów" -> Query(DataChrztu, ((rs: ResultSet) => rs.groupByHorizontal(groupByWeekday("Data chrztu"))) |> podsumujPłcie),
-      "imiona_takie_jak_M" -> Query(DataUrodzenia, imionaTakieSameJakM),
-      "imiona_takie_jak_K" -> Query(DataUrodzenia, imionaTakieSameJakK)
+      "Odstęp między narodzinami a chrztem dzieci" -> Query(DataChrztu, liczbaDniOdUrodzeniaDoChrztu),
+      "Liczby nadawanych imion pojedynczych i wielokrotnych" -> Query(DataUrodzenia, liczbaImion), // TODO make sure this is correct
+      "Najczęściej nadawane imiona męskie" -> Query(DataUrodzenia, pierwszeImionaPion("M")),
+      "Najczęściej nadawane imiona żeńskie" -> Query(DataUrodzenia, pierwszeImionaPion("K")),
+      "Nadawane imiona męskie" -> Query(DataUrodzenia, pierwszeImiona("M")),
+      "Nadawane imiona żeńskie" -> Query(DataUrodzenia, pierwszeImiona("K")),
+      "Imiona męskie i miesiąc w którym odbył się chrzest" -> Query(NoYearGrouping, grupujMiesiącamiV("Data chrztu") |> pierwszeImiona("M")), // TODO FIXME
+      "Imiona żeńskie i miesiąc w którym odbył się chrzest" -> Query(NoYearGrouping, grupujMiesiącamiV("Data chrztu") |> pierwszeImiona("K")),
+      "Liczba chrzestnych asystujących przy chrzcie" -> Query(DataChrztu, rs => rs.countWithPercentages(GroupBy("Chrzestni.length"))),
+      "Sezonowość tygodniowa chrztów" -> Query(DataChrztu, ((rs: ResultSet) => rs.groupByHorizontal(groupByWeekday("Data chrztu"))) |> podsumujPłcie),
+      "Dziedziczenie imion męskich po rodzicach, dziadkach i chrzestnych" -> Query(DataUrodzenia, imionaTakieSameJakM),
+      "Dziedziczenie imion żeńskich po rodzicach, dziadkach i chrzestnych" -> Query(DataUrodzenia, imionaTakieSameJakK)
    ))
 
    override val manualQueries: Map[String, ResultSet => Seq[ResultRow]] = Map(
-      "daty" -> zakresDat
+      "Zakres dat w miejscowościach" -> zakresDat
    )
 }
