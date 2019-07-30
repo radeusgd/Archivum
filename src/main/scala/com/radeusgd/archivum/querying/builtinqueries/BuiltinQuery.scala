@@ -124,14 +124,18 @@ abstract class BuiltinQuery(years: Int, folderGroupings: Seq[String], charakter:
                }
 
                for (firstLevelGroupValue <- firstLevelGroupings) {
-                  updateMessage("Running " + qname + ", " + firstLevelGroupValue)
-                  runQuery(
-                     And(
-                        Equal(firstLevelGroupPath, firstLevelGroupValue),
-                        charakterFilter
-                     ),
-                     firstLevelGroupValue.toString, folderGroupings.tail
-                  )
+                   if (firstLevelGroupValue.toString.isEmpty) {
+                     println(s"Skipping some records because their ${firstLevelGroupPath.toString()} is empty")
+                   } else {
+                     updateMessage("Running " + qname + ", " + firstLevelGroupValue)
+                     runQuery(
+                       And(
+                         Equal(firstLevelGroupPath, firstLevelGroupValue),
+                         charakterFilter
+                       ),
+                       firstLevelGroupValue.toString, folderGroupings.tail
+                     )
+                   }
                   progress += 1
                   updateProgress(progress, workToDo)
                   if (isCancelled) throw new RuntimeException("Cancelled")

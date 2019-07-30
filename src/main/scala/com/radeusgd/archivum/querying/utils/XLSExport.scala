@@ -200,7 +200,9 @@ object XLSExport {
             val cut = results.map(cutFirstCell)
             val rowsMap: Map[String, Seq[ResultRow]] = cut.groupBy(_._1).mapValues(_.map(_._2))
             rowsMap.foreach({ case (name, rows) =>
-               exportHelper(path.resolve(name), columns - 1, rows)
+               if (name.isEmpty) {
+                 println(s"Skipping ${results.length} results because their group field is empty")
+               } else exportHelper(path.resolve(name), columns - 1, rows)
             })
          }
       }
