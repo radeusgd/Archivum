@@ -1,20 +1,33 @@
 package com.radeusgd.archivum.datamodel
 
+import java.util.NoSuchElementException
+
 object DMUtils {
    def parsePath(path: String): List[String] = path.split('.').toList
 
    def makeGetter(path: String): (DMValue) => DMValue = makeGetter(parsePath(path))
 
-   def makeGetter(path: List[String]): (DMValue) => DMValue =
-      path match {
+   def makeGetter(path: List[String]): (DMValue) => DMValue = {
+     def makeGetterPrim(path: List[String]): (DMValue) => DMValue =
+       path match {
          case Nil => identity
          case part :: rest =>
-            val nestedGetter: (DMValue) => DMValue = makeGetter(rest)
-            (v: DMValue) => {
-               //println(part + " of " + v) // TODO remove me (debug)
-               nestedGetter(v.asInstanceOf[DMAggregate](part))
-            }
-      }
+           val nestedGetter: (DMValue) => DMValue = makeGetter(rest)
+           (v: DMValue) => {
+             //println(part + " of " + v) // TODO remove me (debug)
+             nestedGetter(v.asInstanceOf[DMAggregate](part))
+           }
+       }
+     val getter = makeGetterPrim(path)
+     v: DMValue => {
+        try {
+          getter(v)
+        } catch {
+          case e: NoSuchElementException =>
+            throw new NoSuchElementException("Key not found: " + path.mkString("."))
+        }
+     }
+   }
 
    def makeSetter(path: List[String]): (DMValue, DMValue) => DMValue =
       path match {

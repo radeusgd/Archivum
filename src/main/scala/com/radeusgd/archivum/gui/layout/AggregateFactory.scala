@@ -7,13 +7,13 @@ import cats.implicits._
 import com.radeusgd.archivum.gui.utils.XMLUtils
 
 abstract class AggregateFactory(make: (Seq[scene.Node]) => scene.Node) extends LayoutFactory {
-   override def fromXML(xmlnode: xml.Node, ev: EditableView): Either[LayoutParseError, ParsedLayout] =
+   override def fromXML(xmlnode: xml.Node, ev: EditableView, prefix: List[String]): Either[LayoutParseError, ParsedLayout] =
       if (xmlnode.attributes.nonEmpty) Left(LayoutParseError("Unrecognized attributes"))
       else {
-         val childrenResults = XMLUtils.properChildren(xmlnode).map(EditableView.parseViewTree(_, ev))
+         val childrenResults = XMLUtils.properChildren(xmlnode).map(EditableView.parseViewTree(_, ev, prefix))
          type ParsingEither[A] = Either[LayoutParseError, A]
          val children: Either[LayoutParseError, Seq[ParsedLayout]] =
-            childrenResults.toList.sequence[ParsingEither, ParsedLayout]
+           eitherSequence(childrenResults.toList)
          children.map(buildAggregate)
       }
 
@@ -23,7 +23,6 @@ abstract class AggregateFactory(make: (Seq[scene.Node]) => scene.Node) extends L
       ParsedLayout(make(nodes), boundeds)
    }
 
-   // TODO use scalaz or Cats ???
    private def eitherSequence[A, B](seq: Seq[Either[A, B]]): Either[A, Seq[B]] =
       seq.collectFirst({ case Left(l) => Left(l) }).getOrElse(
          Right(seq.collect({ case Right(r) => r }))

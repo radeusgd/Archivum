@@ -138,12 +138,12 @@ class TableControl(/* TODO some params */
 }
 
 object TableControlFactory extends LayoutFactory {
-   override def fromXML(xmlnode: Node, ev: EditableView): Either[LayoutParseError, ParsedLayout] = {
+   override def fromXML(xmlnode: Node, ev: EditableView, prefix: List[String]): Either[LayoutParseError, ParsedLayout] = {
       val paddingLeft: Option[Double] = xmlnode.attribute(ViewLanguage.PaddingLeft).map(_.text).map(_.toDouble)
       for {
          path <- XMLUtils.extractPath(xmlnode)
          table <- try {
-            Right(new TableControl(XMLUtils.properChildren(xmlnode), path, ev, paddingLeft))
+            Right(new TableControl(XMLUtils.properChildren(xmlnode), prefix ++ path, ev, paddingLeft))
          } catch {
             case e: LayoutParseError => Left(e)
          }

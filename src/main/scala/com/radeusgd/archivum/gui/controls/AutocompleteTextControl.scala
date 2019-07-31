@@ -49,11 +49,12 @@ class AutocompleteTextControl(properties: CommonProperties,
 }
 
 object AutocompleteTextControlFactory extends LayoutFactory {
-   override def fromXML(xmlnode: xml.Node, ev: EditableView): Either[LayoutParseError, ParsedLayout] = {
+   override def fromXML(xmlnode: xml.Node, ev: EditableView, prefix: List[String]): Either[LayoutParseError, ParsedLayout] = {
       if (xmlnode.child != Nil) Left(LayoutParseError("This node shouldn't have any children"))
       else {
          for {
-            path <- XMLUtils.extractPath(xmlnode)
+            pathPrim <- XMLUtils.extractPath(xmlnode)
+            path = prefix ++ pathPrim
             sourcesText = xmlnode.attribute(ViewLanguage.AutocompletionSources).map(_.text)
                .getOrElse(path.mkString(".")) // suggest itself by default
             sources = sourcesText.split(';').toList

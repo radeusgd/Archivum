@@ -10,13 +10,13 @@ import scalafx.scene
 import scala.util.Try
 // TODO
 abstract class CommonControlFactory(make: (CommonProperties, List[String], EditableView) => scene.Node with BoundControl) extends LayoutFactory {
-   override def fromXML(xmlnode: xml.Node, ev: EditableView): Either[LayoutParseError, ParsedLayout] = {
+   override def fromXML(xmlnode: xml.Node, ev: EditableView, prefix: List[String]): Either[LayoutParseError, ParsedLayout] = {
       if (xmlnode.child != Nil) Left(LayoutParseError("This node shouldn't have any children"))
       else {
          for {
             path <- XMLUtils.extractPath(xmlnode)
             properties <- CommonProperties.parseXML(xmlnode)
-            node <- safeConstruct(path, properties, ev)
+            node <- safeConstruct(prefix ++ path, properties, ev)
          } yield ParsedLayout(node, Seq(node))
       }
    }

@@ -35,6 +35,7 @@ object ViewLanguage {
    val Default = "default"
    val Sticky = "sticky"
    val AutocompletionSources = "sources"
+   val Field = "field"
 
    val True = "true"
    val False = "false"
