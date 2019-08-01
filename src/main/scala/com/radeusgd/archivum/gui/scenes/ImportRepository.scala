@@ -52,7 +52,6 @@ class ImportRepository(val repository: Repository, parentScene: Scene) extends S
          val added =
             if (diff.added.isEmpty) ""
             else "Nowe pola, zostaną ustawione na puste wartości:\n" ++ diff.added.map(pathToStr).mkString("\n")
-
          val comment =
             if (removed.isEmpty && added.isEmpty) "Brak potrzeby konwersji bazy"
             else removed + "\n\n" + added + "\n\nJeśli mimo to chcesz kontynuować naciśnij OK."
@@ -65,10 +64,15 @@ class ImportRepository(val repository: Repository, parentScene: Scene) extends S
                val fixed = fixer(json)
                repository.model.roottype.fromHumanJson(fixed)
             })
-
-            val valid: Seq[DMStruct] = records.map(er => er.fold(throw _, identity))
-            valid.foreach(repository.createRecord)
-            utils.showInfo("" + valid.length + " rekordów zostało pomyślnie dodanych do bazy")
+            val errors = records.count(_.isLeft)
+            if (errors > 0) {
+               utils.showError("Import nie powiódł się", "W " + errors + " rekordach wystąpił błąd importu, pierwszy z nich zostanie zaraz wyświetlony")
+               records.foreach(er => er.fold(throw _, identity))
+            } else {
+               val valid: Seq[DMStruct] = records.map(er => er.fold(throw _, identity))
+               valid.foreach(repository.createRecord)
+               utils.showInfo("" + valid.length + " rekordów zostało pomyślnie dodanych do bazy")
+            }
          } else {
             utils.showInfo("Import anulowany")
          }

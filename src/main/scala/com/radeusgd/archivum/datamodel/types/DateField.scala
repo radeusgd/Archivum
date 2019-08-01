@@ -49,6 +49,7 @@ object DateField extends FieldType {
 
    override def fromHumanJson(j: JsValue): Either[Throwable, DMValue] = j match {
       case JsString(s) => Right(DMDate(LocalDate.parse(s)))
+      case JsNull => Right(DMNull)
       case _ => Left(DeserializationException("Expected a date string"))
    }
 

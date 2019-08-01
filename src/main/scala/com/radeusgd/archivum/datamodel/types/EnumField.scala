@@ -41,7 +41,7 @@ class EnumField(val values: IndexedSeq[String]) extends FieldType {
 
    override def fromHumanJson(j: JsValue): Either[Throwable, DMValue] = j match {
       case JsString(s) => val v = DMString(s)
-         if (validate(v).isEmpty) Right(v) else Left(DeserializationException("Invalid enum value"))
+         if (validate(v).isEmpty) Right(v) else Left(DeserializationException("Invalid enum value: " + s))
       case _ => Left(DeserializationException("Expected a string"))
    }
 }
