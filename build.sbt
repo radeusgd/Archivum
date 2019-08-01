@@ -1,6 +1,6 @@
 name := "Archivum"
 
-version := "1.1.0"
+version := "1.2.0"
 
 scalaVersion := "2.12.4"
 

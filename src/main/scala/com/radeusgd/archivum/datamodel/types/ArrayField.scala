@@ -22,7 +22,8 @@ case class ArrayField(elementsType: FieldType) extends FieldType with TypedAggre
 
    private def getElementType(key: String): FieldType = key match {
       case AsInt(_) => elementsType
-      case _ => throw new RuntimeException("Key not found") // TODO exception type
+      case "*" => elementsType
+      case _ => throw new RuntimeException("Key " + key + " not found") // TODO exception type
    }
 
    def getType(path: List[String]): FieldType =
