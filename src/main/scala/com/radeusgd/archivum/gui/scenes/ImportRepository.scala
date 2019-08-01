@@ -3,10 +3,13 @@ package com.radeusgd.archivum.gui.scenes
 import java.io.File
 
 import com.radeusgd.archivum.conversion.{JsonStructure, ModelStructure, Structure}
-import com.radeusgd.archivum.datamodel.DMStruct
+import com.radeusgd.archivum.datamodel.{DMStruct, DMUtils}
 import com.radeusgd.archivum.gui.utils
 import com.radeusgd.archivum.persistence.Repository
 import com.radeusgd.archivum.utils.IO
+
+import scala.tools.nsc.interpreter.IMain
+import scala.tools.nsc.Settings
 import spray.json._
 
 import scala.util.control.NonFatal
@@ -32,11 +35,14 @@ class ImportRepository(val repository: Repository, parentScene: Scene) extends S
       Option(fileChooser.showOpenDialog(delegate.getWindow))
    }
 
+   //noinspection ScalaStyle
    private def importJson(file: File): Unit = {
       val source = io.Source.fromFile(file)
       try {
          val lines = source.getLines()
-         val jsons = lines.map(_.parseJson).toSeq
+
+         val preprocessor = preparePreprocessingFunction()
+         val jsons = lines.map(l => preprocessor(l.parseJson)).toSeq
 
          val newStructure = ModelStructure.extract(repository.model)
          val oldStructure = JsonStructure.unify(jsons)
@@ -83,7 +89,50 @@ class ImportRepository(val repository: Repository, parentScene: Scene) extends S
       }
    }
 
-  val preprocessCode = new TextArea()
+   val preprocessCode = new TextArea()
+   val defaultCode: String =
+      """
+        |// JsString, JsNull, JsObject, JsArray, JsNumber
+        |// Js.Type == JsValue.type
+        |// object u {
+        |// def getNested(path: String, object: JsValue): JsValue
+        |// def setNested(path: String, object: JsValue, value: JsValue): JsValue
+        |// def mapNested(path: String, object: JsValue, mapper: JsValue => JsValue): JsValue
+        |// def mapArray(array: JsValue, mapper: JsValue => JsValue): JsValue
+        |// }
+        |(js: Js.Type) => {
+        |   js
+        |}
+      """.stripMargin
+   preprocessCode.text = defaultCode
+   preprocessCode.editable = true
+
+   def preparePreprocessingFunction(): JsValue => JsValue = {
+      val code: String = preprocessCode.text.value
+      if (code == defaultCode) identity
+      else {
+         val settings = new Settings
+         settings.usejavacp.value = true
+         settings.deprecation.value = true
+
+         val eval = new IMain(settings)
+         //val evaluated = eval.beSilentDuring(eval.interpret(clazz))
+         //eval.directBind("Helper", Helper) // TODO bind
+         eval.directBind("JsObject", JsObject)
+         eval.directBind("JsString", JsString)
+         eval.directBind("JsNumber", JsNumber)
+         eval.directBind("JsNull", JsNull)
+         eval.directBind("JsArray", JsArray)
+         eval.bind("Js", JsUtils.Js)
+         eval.bind("u", JsUtils)
+
+         val evaluated = eval.interpret(code)
+         val res = eval.valueOfTerm("res0")
+            .getOrElse(throw new RuntimeException("Błąd kompilacji kodu preprocesora, więcej informacji w konsoli"))
+            .asInstanceOf[JsValue => JsValue]
+         res
+      }
+   }
 
    content = new VBox(
       utils.makeGoToButton("< Powrót", parentScene),
@@ -104,3 +153,33 @@ class ImportRepository(val repository: Repository, parentScene: Scene) extends S
    }
 }
 
+object JsUtils {
+   def getNested(path: String, obj: JsValue): JsValue = {
+      val p = DMUtils.parsePath(path)
+      def getn(obj: JsValue, p: List[String]): JsValue = p match {
+         case Nil => obj
+         case f :: rest => getn(obj.asJsObject.fields(f), rest)
+      }
+      getn(obj, p)
+   }
+   def setNested(path: String, obj: JsValue, value: JsValue): JsValue =
+      mapNested(path, obj, _ => value)
+   def mapNested(path: String, obj: JsValue, mapper: JsValue => JsValue): JsValue = {
+      val p = DMUtils.parsePath(path)
+      def setn(obj: JsValue, p: List[String]): JsValue = p match {
+         case Nil => mapper(obj)
+         case f :: rest =>
+            val fields = obj.asJsObject.fields
+            val inner = fields.getOrElse(f, JsObject.empty)
+            JsObject(fields.updated(f, setn(inner, rest)))
+      }
+      setn(obj, p)
+   }
+   def mapArray(array: JsValue, mapper: JsValue => JsValue): JsValue = array match {
+      case JsArray(elems) => JsArray(elems.map(mapper))
+      case _ => throw new RuntimeException("Expected an array")
+   }
+   object Js {
+      type Type = JsValue
+   }
+}

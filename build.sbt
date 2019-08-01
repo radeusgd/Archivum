@@ -31,4 +31,4 @@ libraryDependencies ++= Seq(
 // TODO assembly setup
 mainClass in assembly := Some("com.radeusgd.archivum.gui.ApplicationMain")
 
-//libraryDependencies += "org.scala-lang" % "scala-compiler" % "2.12.4" // this will be needed for runtime compilation
+libraryDependencies += "org.scala-lang" % "scala-compiler" % "2.12.4" // this will be needed for runtime compilation

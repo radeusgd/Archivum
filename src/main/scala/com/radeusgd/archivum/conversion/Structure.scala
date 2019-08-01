@@ -5,6 +5,7 @@ case object Leaf extends Structure
 case class Struct(fields: Map[String, Structure]) extends Structure
 case class Array(inside: Structure) extends Structure
 
+// TODO unifying Leaf with everything sometimes leads to accepting a completely wrong DB format as ok for conversion (it's caught later on, but is misleading)
 object Structure {
    type Path = List[String]
    def merge(a: Structure, b: Structure): Structure = (a, b) match {
@@ -33,6 +34,7 @@ object Structure {
       def merge(diffs: Seq[Differences]): Differences =
          Differences(diffs.flatMap(_.missing), diffs.flatMap(_.added))
    }
+
    def diff(old: Structure, news: Structure): Differences = (old, news) match {
       case (Leaf, _) => Differences.empty
       case (_, Leaf) => Differences.empty
