@@ -32,7 +32,8 @@ class Zgony(years: Int, folderGroupings: Seq[String], charakter: Option[String] 
 
    //noinspection ScalaStyle
    private def liczbaDniOdŚmierciDoPochówku(rs: ResultSet): Seq[ResultRow] = {
-      rs.filter(hasDate("Data śmierci") _ && hasDate("Data pochówku")).countHorizontal(ComputedGroupBy(
+      rs.filter(hasDate("Data śmierci") _ && hasDate("Data pochówku"))
+         .countHorizontal(OldComputedGroupBy(
          getter = (dmv: DMValue) => {
             val diff: Option[Int] = for {
                bdatefield <- path"Data śmierci"(dmv).asType[DMYearDate]
@@ -56,7 +57,7 @@ class Zgony(years: Int, folderGroupings: Seq[String], charakter: Option[String] 
    }
 
    private def grupujPoOsobie(path: String): ResultSet => ResultSet =
-      (rs: ResultSet) => rs.groupBy(ComputedGroupBy(
+      (rs: ResultSet) => rs.groupBy(OldComputedGroupBy(
          getter = (d: DMValue) => (for {
             imię <- path"$path.Imię" (d).asString
             nazwisko <- path"$path.Nazwisko" (d).asString

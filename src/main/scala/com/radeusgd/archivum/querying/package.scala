@@ -29,8 +29,13 @@ package object querying {
    type ResultRow = NestedMap[String, DMValue]
 
    object ResultRow {
+      def empty: ResultRow = NestedMap.empty
+
       def apply(values: (String, DMValue)*): ResultRow =
          NestedMap.fromList(values.toList)
+
+      def addHeader(rr: ResultRow, header: String): ResultRow =
+         NestedMap.empty.updated(header, rr)
    }
 
    implicit class DMValueHelper(val dmv: DMValue) extends AnyVal {

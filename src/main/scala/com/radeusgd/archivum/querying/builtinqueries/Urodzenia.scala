@@ -44,7 +44,8 @@ class Urodzenia(years: Int = 5, folderGroupings: Seq[String] = Seq("Parafia", "M
       DMUtils.makeGetter(path)(dMValue).asType[DMYearDate].exists(_.fullDate.isDefined)
 
    private def liczbaDniOdUrodzeniaDoChrztu(rs: ResultSet): Seq[ResultRow] = {
-      rs.filter(hasDate("Data urodzenia") _ && hasDate("Data chrztu")).countHorizontal(ComputedGroupBy(
+      rs.filter(hasDate("Data urodzenia") _ && hasDate("Data chrztu"))
+         .countHorizontal(OldComputedGroupBy(
          getter = (dmv: DMValue) => {
             val diff: Option[Int] = for {
                bdatefield <- path"Data urodzenia"(dmv).asType[DMYearDate]
@@ -107,7 +108,7 @@ class Urodzenia(years: Int = 5, folderGroupings: Seq[String] = Seq("Parafia", "M
       ))
 
    private def grupujPoOsobie(path: String): ResultSet => ResultSet =
-      (rs: ResultSet) => rs.groupBy(ComputedGroupBy(
+      (rs: ResultSet) => rs.groupBy(OldComputedGroupBy(
          getter = (d: DMValue) => (for {
             imię <- path"$path.Imię" (d).asString
             nazwisko <- path"$path.Nazwisko" (d).asString

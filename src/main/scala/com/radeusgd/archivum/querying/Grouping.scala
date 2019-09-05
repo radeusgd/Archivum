@@ -49,7 +49,7 @@ sealed abstract class Grouping(val appendColumnMode: AppendColumnMode) {
             val getter = DMUtils.makeGetter(path)
             val filtered = objects.filter(v => filter(getter(v)))
             filtered.groupBy(v => mapping(getter(v))).toList
-         case ComputedGroupBy(getter, _, filter, _) =>
+         case ComputedGroupBy(getter, _, filter, _, _) =>
             val filtered = objects.filter(v => filter(getter(v)))
             filtered.groupBy(v => getter(v)).toList
          case GroupByPredicates(predicates @ _*) =>
@@ -76,7 +76,7 @@ sealed abstract class Grouping(val appendColumnMode: AppendColumnMode) {
             groups.sortBy(t => customGroupBy.orderMapping(getter(t._2.head)))(customGroupBy.ord)
          case computedGroupBy: ComputedGroupBy[Any] =>
             val getter = computedGroupBy.getter
-            groups.sortBy(t => computedGroupBy.orderMapping(getter(t._2.head)))(computedGroupBy.ord)
+            groups.sortBy(t => computedGroupBy.orderMapping.tupled(t))(computedGroupBy.ord)
          case _: GroupByPredicates => groups
       }
 
@@ -110,11 +110,23 @@ case class CustomGroupBy[A](path: String,
    def ord: Ordering[A] = ordering
 }
 case class ComputedGroupBy[A](getter: DMValue => DMValue,
-                              orderMapping: DMValue => A,
+                              orderMapping: (DMValue, Seq[DMValue]) => A,
                               filter: DMValue => Boolean = _ => true,
-                              override val appendColumnMode: AppendColumnMode = Default)(implicit ordering: Ordering[A]) extends Grouping(appendColumnMode) {
-   override def defaultColumnName: String = ??? // TODO not sure if want to leave that
+                              override val appendColumnMode: AppendColumnMode = Default,
+                              override val defaultColumnName: String = "missing column name")
+                             (implicit ordering: Ordering[A]) extends Grouping(appendColumnMode) {
    def ord: Ordering[A] = ordering
+}
+
+object OldComputedGroupBy {
+   // for compatibility reasons
+   def apply[A](getter: DMValue => DMValue,
+                orderMapping: DMValue => A,
+                filter: DMValue => Boolean = _ => true,
+                appendColumnMode: AppendColumnMode = Default,
+                defaultColumnName: String = "missing column name")
+               (implicit ordering: Ordering[A]): ComputedGroupBy[A] =
+      ComputedGroupBy(getter, (_, s) => orderMapping(getter(s.head)), filter, appendColumnMode, defaultColumnName)
 }
 
 case class GroupByPredicates(predicates: (String, DMValue => Boolean)*) extends Grouping(Default) {

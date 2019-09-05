@@ -78,10 +78,8 @@ case class MultipleResultRow(prefix: ResultRow, objects: NestedMapADT[String, Se
                   )
                )
             else
-               reordered.flatMap((objs: Seq[DMValue]) =>
-                  ResultRow(
-                     "l.b." -> DMInteger(objs.length)
-                  )
+               reordered.flatMap1((objs: Seq[DMValue]) =>
+                  NestedMapADT.singleton(DMInteger(objs.length))
                )
          }))
    }
