@@ -82,4 +82,28 @@ package object querying {
       def ||(p2: T => Boolean): T => Boolean =
          (t: T) => pred(t) || p2(t)
    }
+
+   implicit class ResultsHelper(val result: Seq[ResultRow]) extends AnyVal {
+      def addHeader(text: String): Seq[ResultRow] =
+         result.map(ResultRow.addHeader(_, text))
+   }
+
+   def crossGrouping(path1: String, path2: String): Grouping = {
+      val p1 = DMUtils.makeGetter(path1)
+      val p2 = DMUtils.makeGetter(path2)
+      OldComputedGroupBy(
+         (v: DMValue) => {
+            val a1 = p1(v).asString.get
+            val a2 = p2(v).asString.get
+            DMString(a1 + " - " + a2)
+         },
+         _.asString.get
+      )
+   }
+
+   implicit class PathGetterHelper(val getter: DMValue => DMValue) extends AnyVal {
+      def ===(other: DMValue): DMValue => Boolean =
+         v => getter(v) == other
+   }
+
 }

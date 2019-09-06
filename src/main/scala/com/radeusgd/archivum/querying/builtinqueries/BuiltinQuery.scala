@@ -32,8 +32,10 @@ case class Query(yearGrouping: YearGrouping, realization: ResultSet => Seq[Resul
 //noinspection ScalaStyle
 abstract class BuiltinQuery(years: Int, folderGroupings: Seq[String], charakter: Option[String]) {
 
+   type ClassicQuery = ResultSet => Seq[ResultRow]
    val groupedQueries: Map[String, Query]
-   val manualQueries: Map[String, ResultSet => Seq[ResultRow]]
+   val ungroupedQueries: Map[String, ClassicQuery]
+   val manualQueries: Map[String, ClassicQuery]
 
    private def prepareYearGrouping(yearGrouping: YearGrouping): Seq[Grouping] =
       yearGrouping.prepareGroupings(years)
@@ -58,17 +60,26 @@ abstract class BuiltinQuery(years: Int, folderGroupings: Seq[String], charakter:
       }
 
       override def call(): Unit = {
+         val classicQueries: Map[String, Either[ClassicQuery, Query]] =
+            ungroupedQueries.mapValues(Left(_)) ++ groupedQueries.mapValues(Right(_))
+
          if (folderGroupings.isEmpty) {
-            val workToDo = groupedQueries.size + manualQueries.size
+            val workToDo = classicQueries.size + manualQueries.size
 
             updateProgress(0, workToDo)
 
             runManualQueries(workToDo)
 
-            for (((qname, Query(yg, query)), index) <- groupedQueries.zipWithIndex) {
+            for (((qname, queryDesc), index) <- classicQueries.zipWithIndex) {
                updateMessage("Running " + qname)
-               val all = repo.fetchAllGrouped(charakterFilter, prepareYearGrouping(yg) : _*)
-               val res = query(all)
+               val res: Seq[ResultRow] = queryDesc match {
+                  case Right(Query(yg, query)) =>
+                     val all = repo.fetchAllGrouped(charakterFilter, prepareYearGrouping(yg) : _*)
+                     query(all)
+                  case Left(query) =>
+                     val all = repo.search(charakterFilter)
+                     query(all)
+               }
                XLSExport.export(resultPath + qname + fileExt, res)
                println(s"Query $qname written ${res.length} rows in total")
                updateProgress(manualQueries.size + index + 1, workToDo)
@@ -81,7 +92,7 @@ abstract class BuiltinQuery(years: Int, folderGroupings: Seq[String], charakter:
             val firstLevelGroupPath = DMUtils.parsePath(folderGroupings.head)
             val firstLevelGroupings = repo.getAllDistinctValues(firstLevelGroupPath, filter = charakterFilter)
             val flgLen = firstLevelGroupings.length
-            val workToDo = groupedQueries.size * (flgLen + 1) + 1 + manualQueries.size
+            val workToDo = classicQueries.size * (flgLen + 1) + 1 + manualQueries.size
             updateProgress(1, workToDo)
 
             runManualQueries(workToDo)
@@ -90,15 +101,25 @@ abstract class BuiltinQuery(years: Int, folderGroupings: Seq[String], charakter:
             updateProgress(progress, workToDo)
             println("Will run for " + firstLevelGroupings)
 
-            for ((qname, Query(yg, query)) <- groupedQueries) {
+            for ((qname, queryDesc) <- classicQueries) {
 
                def runQuery(filter: SearchCriteria, subName: String, restGroupings: Seq[String]): Unit = {
                   if (restGroupings.isEmpty) {
-                     val all = repo.fetchAllGrouped(
-                        filter,
-                        prepareYearGrouping(yg):_*
-                     )
-                     val res = query(all)
+                     val res = {
+                        queryDesc match {
+                           case Right(Query(yg, query)) =>
+                              val all = repo.fetchAllGrouped(
+                                 filter,
+                                 prepareYearGrouping(yg):_*
+                              )
+                              query(all)
+                           case Left(query) =>
+                              val all = repo.search(
+                                 filter
+                              )
+                              query(all)
+                        }
+                     }
                      val path = Paths.get(resultPath).resolve(subName).resolve(qname + ".xlsx").toString
                      XLSExport.export(path, res)
                      println(s"Written ${res.length} rows to $path")

@@ -81,6 +81,8 @@ class Zgony(years: Int, folderGroupings: Seq[String], charakter: Option[String] 
       "Zgony rocznie" -> Query(DataŚmierci, (rs: ResultSet) => rs.aggregateClassic("Liczba" -> ClassicAggregations.count))
    )
 
+   override val ungroupedQueries: Map[String, ResultSet => Seq[ResultRow]] = Map()
+
    override val manualQueries: Map[String, ResultSet => Seq[ResultRow]] = Map(
       "daty" -> zakresDat
    )

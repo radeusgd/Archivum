@@ -212,6 +212,8 @@ class Urodzenia(years: Int = 5, folderGroupings: Seq[String] = Seq("Parafia", "M
       "Dziedziczenie imion żeńskich po rodzicach, dziadkach i chrzestnych" -> Query(DataUrodzenia, imionaTakieSameJakK)
    ))
 
+   override val ungroupedQueries: Map[String, ResultSet => Seq[ResultRow]] = Map()
+
    override val manualQueries: Map[String, ResultSet => Seq[ResultRow]] = Map(
       "Zakres dat w miejscowościach" -> zakresDat
    )

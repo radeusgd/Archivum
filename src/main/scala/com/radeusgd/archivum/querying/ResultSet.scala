@@ -84,8 +84,8 @@ case class ResultSet(rows: Seq[MultipleResultRow]) {
       rows.map(row => row.countHorizontal(grouping, preset, includePercentages))
    }
 
-   def countAfterGrouping(): Seq[ResultRow] = {
-      rows.map(_.aggregate(objs => ResultRow("l.b." -> DMInteger(objs.length))))
+   def countAfterGrouping(columnName: String = "l.b."): Seq[ResultRow] = {
+      rows.map(_.aggregate(objs => ResultRow(columnName -> DMInteger(objs.length))))
    }
 
    def filterTop(howmany: Int): ResultSet = {
