@@ -47,7 +47,7 @@ class Search(val repository: Repository, parentEVF: => EditRecords) extends Scen
             }
 
             val results: Seq[(repository.Rid, DMStruct)] = fulltext match {
-               case Some(ft) => repository.fullTextSearch(ft, filter)
+               case Some(ft) => repository.fullTextSearch(ft, filter, caseSensitivityCheckBox.selected.value)
                case None => repository.searchRecords(filter)
             }
 
@@ -76,6 +76,10 @@ class Search(val repository: Repository, parentEVF: => EditRecords) extends Scen
       this.setCursor(if (isComputing) Cursor.Wait else Cursor.Default)
    }
 
+   private val caseSensitivityCheckBox = new CheckBox("Rozróżniaj małe i wielkie litery w ogólnym wyszukiwaniu")
+   caseSensitivityCheckBox.indeterminate = false
+   caseSensitivityCheckBox.selected = true
+
    private val doSearchButton = new Button("Wyszukaj") {
       onAction = handle {
          val task = makeSearchTask()
@@ -97,6 +101,7 @@ class Search(val repository: Repository, parentEVF: => EditRecords) extends Scen
 
    rootPane.content = new VBox(10,
       searchCriteria,
+      caseSensitivityCheckBox,
       new HBox(10, doSearchButton, foundLabel),
       searchResults
    )
@@ -106,10 +111,4 @@ class Search(val repository: Repository, parentEVF: => EditRecords) extends Scen
    rootPane.vgrow = Priority.Always
 
    root = rootPane
-
-
-
-   def refreshSearch(): Unit = {
-      // TODO
-   }
 }

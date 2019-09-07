@@ -6,7 +6,7 @@ import java.util.Locale
 
 import com.radeusgd.archivum.datamodel.types.DateField
 import com.radeusgd.archivum.languages.QueryLanguage
-import com.radeusgd.archivum.utils.{AsInt, StringOrderHelper}
+import com.radeusgd.archivum.utils.{AsInt, StringHelper}
 
 sealed abstract class DMValue {
    // TODO not sure if they'll be useful
@@ -58,7 +58,7 @@ case class DMString(value: String) extends DMValue with DMOrdered {
 
    override def compare(that: DMOrdered): Int =
       that match {
-         case DMString(thatvalue) => StringOrderHelper.collator.compare(value, thatvalue)
+         case DMString(thatvalue) => StringHelper.collator.compare(value, thatvalue)
          case _ => throw new IncompatibleTypeComparison
       }
 }

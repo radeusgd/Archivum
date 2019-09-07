@@ -3,6 +3,7 @@ package com.radeusgd.archivum.persistence
 import com.radeusgd.archivum.datamodel._
 import com.radeusgd.archivum.querying.{Grouping, MultipleResultRow, ResultSet}
 import com.radeusgd.archivum.utils.BetterTuples._
+import com.radeusgd.archivum.utils.StringHelper
 
 trait Repository {
    type Rid = Long
@@ -57,7 +58,7 @@ trait Repository {
    }
 
    // TODO  not sure if filter should be handled natively, but for now it makes sense
-   def fullTextSearch(text: String, filter: SearchCriteria): Seq[(Rid, DMStruct)] = {
+   def fullTextSearch(text: String, filter: SearchCriteria, caseSensitive: Boolean = true): Seq[(Rid, DMStruct)] = {
       println("Warning, using a slow fulltext implementation")
 
       val frags = text.split(' ').filter(s => !s.isEmpty)
@@ -65,7 +66,8 @@ trait Repository {
       def areAllFragsPresentSomewhere(strings: Seq[String]): Boolean =
          frags.forall(frag =>
             strings.exists(str =>
-               str.contains(frag)
+               if (caseSensitive) str.contains(frag)
+               else str.toLowerCase(StringHelper.locale).contains(frag.toLowerCase(StringHelper.locale))
             )
          )
 
