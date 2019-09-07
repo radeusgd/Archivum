@@ -2,12 +2,9 @@ package com.radeusgd.archivum.gui
 
 import java.io.{File, PrintWriter, StringWriter}
 
-import ch.qos.logback.classic.Logger
 import com.radeusgd.archivum.gui.ApplicationMain.stage
-import com.radeusgd.archivum.querying.builtinqueries.DebugQueries.{currentTask, qscene}
-import javafx.concurrent.{Task, WorkerStateEvent}
+import javafx.concurrent.Task
 import javafx.scene.control.Dialog
-import org.controlsfx.dialog.ProgressDialog
 import org.slf4j.LoggerFactory
 import scalafx.Includes.handle
 import scalafx.application.Platform
@@ -16,11 +13,11 @@ import scalafx.scene.control.Alert.AlertType
 import scalafx.scene.control.ButtonBar.ButtonData
 import scalafx.scene.control._
 import scalafx.scene.layout.VBox
-import scalafx.stage.{DirectoryChooser, Modality, Window}
+import scalafx.stage.{DirectoryChooser, Modality}
 
 package object utils {
 
-  def makeGoToButton(name: String, targetScene: => Scene): Button =
+   def makeGoToButton(name: String, targetScene: => Scene): Button =
       new Button(name) {
          onAction = handle {
             ApplicationMain.switchScene(targetScene)
@@ -99,7 +96,7 @@ package object utils {
       val result = alert.showAndWait()
       result match {
          case Some(ButtonType.OK) => true
-         case _                   => false
+         case _ => false
       }
    }
 
@@ -116,16 +113,16 @@ package object utils {
 
       val dialog = new Dialog[Void]
       dialog.initModality(Modality.None)
-      dialog.setWidth(300)
+      dialog.setWidth(500)
       dialog.setHeight(80)
 
       val pane = new DialogPane()
       dialog.setDialogPane(pane)
       val progressBar = new ProgressBar()
-      progressBar.setPrefWidth(270)
+      progressBar.setPrefWidth(470)
       val statusText = new Label()
 
-      pane.content = new VBox(statusText, progressBar)
+      pane.content = new VBox(7, statusText, progressBar)
       dialog.setTitle(dialogTitle)
 
       progressBar.progress.unbind()

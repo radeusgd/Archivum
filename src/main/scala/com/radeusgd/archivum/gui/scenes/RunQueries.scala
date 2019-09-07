@@ -28,10 +28,6 @@ class RunQueries(val repository: Repository, parentScene: Scene) extends Scene {
       new ComboBox[QueryRecipe](builtin)
    builtin.find(_.name == repository.model.name).foreach(builtinChooser.value = _)
 
-   val progressBar = new ProgressBar()
-   progressBar.setPrefWidth(500)
-   val statusText = new Label()
-
    val periodChooser: TextField = new TextField()
    periodChooser.text = "5"
    periodChooser.prefWidth = 50
@@ -93,23 +89,8 @@ class RunQueries(val repository: Repository, parentScene: Scene) extends Scene {
          val path = utils.chooseSaveDirectory("Wyniki kwerend", new File(defaultPath))
             .map(_.toPath.toString).getOrElse(defaultPath)
          val task = query.prepareTask(path, repository)
-
-         progressBar.progress.unbind()
-         progressBar.progress.bind(task.progressProperty())
-         statusText.text.unbind()
-         statusText.text.bind(task.messageProperty())
-
-         task.setOnFailed((event: WorkerStateEvent) => {
-            utils.reportException("Task failed", task.getException)
-            statusText.text.unbind()
-            statusText.text = "Failed: " + task.getException.toString
-         })
-
          this.delegate.disableProperty().bind(task.runningProperty())
-
-         ApplicationMain.registerLongRunningTask(task)
-         val t = new Thread(task)
-         t.start()
+         utils.runTaskWithProgress("Przetwarzanie kwerend", task)
       }
    }
 
@@ -132,9 +113,7 @@ class RunQueries(val repository: Repository, parentScene: Scene) extends Scene {
          new Label("Wbudowane zestawy kwerend: "),
          builtinChooser,
          startTaskButton
-      ),
-      progressBar,
-      statusText
+      )
    ) {
       spacing = 5
       padding = Insets(15.0)
