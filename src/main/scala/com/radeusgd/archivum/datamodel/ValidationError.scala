@@ -6,6 +6,11 @@ sealed abstract class ValidationError {
    def getMessage: String
 }
 
+object ValidationError {
+   def describe(errors: List[ValidationError]): String =
+      errors.map(e => e.getPath.mkString(".") + " - " + e.toString).mkString("\n")
+}
+
 case class TypeError(path: List[String], got: String, expected: String)
    extends ValidationError {
    override def extendPath(s: String): ValidationError =

@@ -12,6 +12,9 @@ trait Repository {
 
    def createRecord(value: DMStruct): Rid
 
+   // inserts multiple records to the database, if possible should be atomic (if any record fails to add, database shouldn't be modified)
+   def createRecords(values: Seq[DMStruct]): Unit
+
    def fetchRecord(rid: Rid): Option[DMStruct]
 
    def updateRecord(rid: Rid, newValue: DMStruct): Unit

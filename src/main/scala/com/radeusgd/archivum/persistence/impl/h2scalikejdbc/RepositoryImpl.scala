@@ -1,6 +1,6 @@
 package com.radeusgd.archivum.persistence.impl.h2scalikejdbc
 
-import com.radeusgd.archivum.datamodel.{DMStruct, DMUtils, DMValue, Model}
+import com.radeusgd.archivum.datamodel._
 import com.radeusgd.archivum.persistence._
 import scalikejdbc._
 import com.radeusgd.archivum.utils.splitList
@@ -19,15 +19,26 @@ class RepositoryImpl(private val _model: Model,
 
    private val table: SQLSyntax = DBUtils.rawSql(tableName)
 
-   override def createRecord(value: DMStruct): Rid = {
+   private def prepareInsert(value: DMStruct) = {
       val errors = rootType.validate(value)
       if (errors.nonEmpty) {
-         val errMsgs = errors.map(err => err.getPath.mkString(".") + ": " + err.getMessage)
-         throw new IllegalArgumentException("Value does not conform to the model\n" + errMsgs.mkString("\n"))
+         throw new IllegalArgumentException("Value does not conform to the model:\n" + ValidationError.describe(errors))
       }
       val ins = new InsertImpl(tableName)
       rootType.tableInsert(Nil, ins, value)
+      ins
+   }
+
+   override def createRecord(value: DMStruct): Rid = {
+      val ins = prepareInsert(value)
       localTx({ implicit session => ins.insert(None) })
+   }
+
+   override def createRecords(values: Seq[DMStruct]): Unit = {
+      val inses = values.map(prepareInsert)
+      localTx({ implicit session =>
+         inses.map(_.insert(None))
+      })
    }
 
    private def rsToDM(rs: WrappedResultSet): DMStruct = {

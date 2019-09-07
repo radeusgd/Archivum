@@ -7,6 +7,7 @@ import com.radeusgd.archivum.datamodel.{DMStruct, DMUtils}
 import com.radeusgd.archivum.gui.utils
 import com.radeusgd.archivum.persistence.Repository
 import com.radeusgd.archivum.utils.IO
+import javafx.concurrent.Task
 
 import scala.tools.nsc.interpreter.IMain
 import scala.tools.nsc.Settings
@@ -14,9 +15,11 @@ import spray.json._
 
 import scala.util.control.NonFatal
 import scalafx.Includes.handle
+import scalafx.application.Platform
 import scalafx.geometry.Insets
 import scalafx.scene.Scene
-import scalafx.scene.control.{Button, Label, TextArea}
+import scalafx.scene.control.Alert.AlertType
+import scalafx.scene.control._
 import scalafx.scene.layout.{HBox, VBox}
 import scalafx.stage.FileChooser
 import scalafx.stage.FileChooser.ExtensionFilter
@@ -37,56 +40,95 @@ class ImportRepository(val repository: Repository, parentScene: Scene) extends S
 
    //noinspection ScalaStyle
    private def importJson(file: File): Unit = {
-      val source = io.Source.fromFile(file)
-      try {
-         val lines = source.getLines()
+      val task = new Task[Unit] {
+         override def call(): Unit = {
+            val source = io.Source.fromFile(file)
+            try {
+               updateMessage("Wczytywanie pliku")
+               val lines = source.getLines().toSeq
 
-         val preprocessor = preparePreprocessingFunction()
-         val jsons = lines.map(l => preprocessor(l.parseJson)).toSeq
+               var progress = 0
+               val todo = 2 * lines.length + 1
+               def bumpProgress(): Unit = {
+                  progress += 1
+                  updateProgress(progress, todo)
+               }
+               updateMessage("Wstępne przetwarzanie")
+               val preprocessor = preparePreprocessingFunction()
+               val jsons = lines.map(l => {
+                  bumpProgress()
+                  preprocessor(l.parseJson)
+               })
 
-         val newStructure = ModelStructure.extract(repository.model)
-         val oldStructure = JsonStructure.unify(jsons)
+               updateMessage("Analiza struktury danych")
+               val newStructure = ModelStructure.extract(repository.model)
+               val oldStructure = JsonStructure.unify(jsons)
 
-         val diff = Structure.diff(oldStructure, newStructure)
+               val diff = Structure.diff(oldStructure, newStructure)
 
-         def pathToStr(p: List[String]): String = p.mkString(".")
+               def pathToStr(p: List[String]): String = p.mkString(".")
 
-         val removed =
-            if (diff.missing.isEmpty) ""
-            else "Pola, które zostaną usunięte:\n" ++ diff.missing.map(pathToStr).mkString("\n")
+               val removed =
+                  if (diff.missing.isEmpty) ""
+                  else "Pola, które zostaną usunięte:\n" ++ diff.missing.map(pathToStr).mkString("\n")
 
-         val added =
-            if (diff.added.isEmpty) ""
-            else "Nowe pola, zostaną ustawione na puste wartości:\n" ++ diff.added.map(pathToStr).mkString("\n")
-         val comment =
-            if (removed.isEmpty && added.isEmpty) "Brak potrzeby konwersji bazy"
-            else removed + "\n\n" + added + "\n\nJeśli mimo to chcesz kontynuować naciśnij OK."
+               val added =
+                  if (diff.added.isEmpty) ""
+                  else "Nowe pola, zostaną ustawione na puste wartości:\n" ++ diff.added.map(pathToStr).mkString("\n")
+               val comment =
+                  if (removed.isEmpty && added.isEmpty) "Brak potrzeby konwersji bazy"
+                  else removed + "\n\n" + added + "\n\nJeśli mimo to chcesz kontynuować naciśnij OK."
 
-         if (utils.ask("Czy napewno chcesz zaimportować " + jsons.length + " rekordów?", comment)) {
-            val fixer =
-               (js: JsValue) => JsonStructure.makeEmptyFields(repository.model, diff.added)(JsonStructure.dropFields(diff.missing)(js))
+               val question = "Czy napewno chcesz zaimportować " + jsons.length + " rekordów?"
 
-            val records = jsons.map(json => {
-               val fixed = fixer(json)
-               repository.model.roottype.fromHumanJson(fixed)
-            })
-            val errors = records.count(_.isLeft)
-            if (errors > 0) {
-               utils.showError("Import nie powiódł się", "W " + errors + " rekordach wystąpił błąd importu, pierwszy z nich zostanie zaraz wyświetlony")
-               records.foreach(er => er.fold(throw _, identity))
-            } else {
-               val valid: Seq[DMStruct] = records.map(er => er.fold(throw _, identity))
-               valid.foreach(repository.createRecord)
-               utils.showInfo("" + valid.length + " rekordów zostało pomyślnie dodanych do bazy")
+               var alert: Alert = null
+               Platform.runLater({
+                  val a = new Alert(AlertType.Confirmation) {
+                     headerText = question
+                     contentText = comment
+                  }
+                  a.showAndWait()
+                  alert = a
+               })
+
+               //noinspection LoopVariableNotUpdated
+               while (alert == null) Thread.`yield`()
+
+               val continue = alert.result.get() == ButtonType.OK.delegate
+
+               if (continue) {
+                  updateMessage("Deserializacja danych")
+                  val fixer =
+                     (js: JsValue) => JsonStructure.makeEmptyFields(repository.model, diff.added)(JsonStructure.dropFields(diff.missing)(js))
+
+                  val records = jsons.map(json => {
+                     bumpProgress()
+                     val fixed = fixer(json)
+                     repository.model.roottype.fromHumanJson(fixed)
+                  })
+                  val errors = records.count(_.isLeft)
+                  if (errors > 0) {
+                     utils.showError("Import nie powiódł się", "W " + errors + " rekordach wystąpił błąd importu, pierwszy z nich zostanie zaraz wyświetlony")
+                     records.foreach(er => er.fold(throw _, identity))
+                  } else {
+                     updateMessage("Zapis danych do bazy")
+                     val valid: Seq[DMStruct] = records.map(er => er.fold(throw _, identity))
+                     repository.createRecords(valid)
+                     bumpProgress()
+                     updateMessage("" + valid.length + " rekordów zostało pomyślnie dodanych do bazy")
+                  }
+               } else {
+                  throw new Exception {
+                     override def toString: String = "Import anulowany"
+                     override def getMessage: String = "Import anulowany"
+                  }
+               }
+            } finally {
+               source.close()
             }
-         } else {
-            utils.showInfo("Import anulowany")
          }
-      } catch {
-         case NonFatal(e) => utils.reportException("Podczas importu nastąpił błąd", e)
-      } finally {
-         source.close()
       }
+      utils.runTaskWithProgress("Import", task)
    }
 
    val preprocessCode = new TextArea()

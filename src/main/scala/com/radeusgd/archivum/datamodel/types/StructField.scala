@@ -69,6 +69,15 @@ case class StructField(fieldTypes: Map[String, FieldType]) extends FieldType wit
          // this is slightly hacky:
          util.Try(values.mapValues(_.fold(throw _, identity))).toEither
             .map(DMStruct(_))
+            .flatMap(v => {
+               val issues = validate(v)
+               if (issues.isEmpty) Right(v)
+               else Left(DeserializationException(
+                  "Validation errors:\n" + ValidationError.describe(issues),
+                  fieldNames = issues.map(_.getPath.mkString("."))
+               ))
+            })
+
       case _ => Left(DeserializationException("Expected an object"))
    }
 
