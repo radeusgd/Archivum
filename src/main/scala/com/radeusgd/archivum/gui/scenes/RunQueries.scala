@@ -1,5 +1,7 @@
 package com.radeusgd.archivum.gui.scenes
 
+import java.io.File
+
 import com.radeusgd.archivum.gui.{ApplicationMain, utils}
 import com.radeusgd.archivum.persistence.Repository
 import com.radeusgd.archivum.querying.builtinqueries.{BuiltinQuery, Małżeństwa, Urodzenia, Zgony}
@@ -86,7 +88,11 @@ class RunQueries(val repository: Repository, parentScene: Scene) extends Scene {
          }
 
          val query = builtinChooser.value.value.recipe(period, grouping, charakter)
-         val task = query.prepareTask("Wyniki kwerend/" + repository.model.name + "/", repository)
+
+         val defaultPath = "Wyniki kwerend/" + repository.model.name + "/"
+         val path = utils.chooseSaveDirectory("Wyniki kwerend", new File(defaultPath))
+            .map(_.toPath.toString).getOrElse(defaultPath)
+         val task = query.prepareTask(path, repository)
 
          progressBar.progress.unbind()
          progressBar.progress.bind(task.progressProperty())

@@ -82,7 +82,7 @@ class Małżeństwa(years: Int, folderGroupings: Seq[String], charakter: Option[
             (v: DMValue) => {
                val pref = path"Imię" (v).asString.getOrElse("") + " " + path"Nazwisko" (v).asString.getOrElse("")
                val spouse = path"Małżonek" (v)
-               if (path"Płeć" (v) == DMString("K") && !spouse.asString.getOrElse("").isBlank) {
+               if (path"Płeć" (v) == DMString("K") && !spouse.asString.getOrElse("").isEmpty) {
                   pref + " (mąż " + spouse + ")"
                } else {
                   pref
@@ -100,7 +100,7 @@ class Małżeństwa(years: Int, folderGroupings: Seq[String], charakter: Option[
             (v: DMValue) => {
                val pref = path"Imię" (v).asString.getOrElse("") + " " + path"Nazwisko" (v).asString.getOrElse("")
                val spouse = path"Małżonek" (v)
-               if (path"Płeć" (v) == DMString("K") && !spouse.asString.getOrElse("").isBlank) {
+               if (path"Płeć" (v) == DMString("K") && !spouse.asString.getOrElse("").isEmpty) {
                   pref + " (mąż " + spouse + ")"
                } else {
                   pref
@@ -245,7 +245,7 @@ class Małżeństwa(years: Int, folderGroupings: Seq[String], charakter: Option[
                case (true, true) =>
                   val miejscowośćPan = path"Pan młody.Miejsce urodzenia"(v).asString.get
                   val miejscowośćPani = path"Panna młoda.Miejsce urodzenia"(v).asString.get
-                  if (miejscowośćPan.isBlank || miejscowośćPani.isBlank) None
+                  if (miejscowośćPan.isEmpty || miejscowośćPani.isEmpty) None
                   else if (miejscowośćPan == miejscowośćPani) Some("Mężczyzna i kobieta z jednej miejscowości parafialnej")
                   else Some("Mężczyzna i kobieta z dwóch miejscowości parafialnych")
                case (true, false) => Some("Mężczyzna spoza parafii")

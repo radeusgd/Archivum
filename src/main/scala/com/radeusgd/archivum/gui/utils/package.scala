@@ -1,15 +1,22 @@
 package com.radeusgd.archivum.gui
 
-import java.io.{PrintWriter, StringWriter}
+import java.io.{File, PrintWriter, StringWriter}
 
 import ch.qos.logback.classic.Logger
 import com.radeusgd.archivum.gui.ApplicationMain.stage
+import com.radeusgd.archivum.querying.builtinqueries.DebugQueries.{currentTask, qscene}
+import javafx.concurrent.{Task, WorkerStateEvent}
+import javafx.scene.control.Dialog
+import org.controlsfx.dialog.ProgressDialog
 import org.slf4j.LoggerFactory
 import scalafx.Includes.handle
 import scalafx.application.Platform
 import scalafx.scene.Scene
 import scalafx.scene.control.Alert.AlertType
-import scalafx.scene.control.{Alert, Button, ButtonType, TextArea}
+import scalafx.scene.control.ButtonBar.ButtonData
+import scalafx.scene.control._
+import scalafx.scene.layout.VBox
+import scalafx.stage.{DirectoryChooser, Modality, Window}
 
 package object utils {
 
@@ -61,13 +68,18 @@ package object utils {
       LoggerFactory.getLogger("Unhandled Exception").error(stackTrace)
       throwable.printStackTrace()
 
+      val systemInfo = System.getProperties.toString
+
+      val alertText =
+         stackTrace + "\n\n" + systemInfo
+
       new Alert(AlertType.Error) {
          initOwner(stage)
          title = "Fatal Error"
          headerText = message
          contentText = throwable.getLocalizedMessage
          dialogPane().expandableContentProperty().setValue(TextArea.sfxTextArea2jfx(new TextArea {
-            text = stackTrace
+            text = alertText
             editable = false
             maxWidth = Double.MaxValue
             maxHeight = Double.MaxValue
@@ -89,5 +101,58 @@ package object utils {
          case Some(ButtonType.OK) => true
          case _                   => false
       }
+   }
+
+   def chooseSaveDirectory(dialogTitle: String, initialPath: File): Option[File] = {
+      val fileChooser = new DirectoryChooser {
+         title = dialogTitle
+         initialDirectory = initialPath
+      }
+
+      Option(fileChooser.showDialog(ApplicationMain.stage.scene.delegate.getValue.getWindow))
+   }
+
+   def runTaskWithProgress[A](dialogTitle: String, task: Task[A]): Unit = {
+
+      val dialog = new Dialog[Void]
+      dialog.initModality(Modality.None)
+      dialog.setWidth(300)
+      dialog.setHeight(80)
+
+      val pane = new DialogPane()
+      dialog.setDialogPane(pane)
+      val progressBar = new ProgressBar()
+      progressBar.setPrefWidth(270)
+      val statusText = new Label()
+
+      pane.content = new VBox(statusText, progressBar)
+      dialog.setTitle(dialogTitle)
+
+      progressBar.progress.unbind()
+      progressBar.progress.bind(task.progressProperty())
+      statusText.text.bind(task.messageProperty())
+
+      def allowClose(): Unit = {
+         dialog.getDialogPane.getButtonTypes.add(new ButtonType("OK", ButtonData.CancelClose))
+      }
+
+      task.setOnFailed(_ => {
+         utils.reportException("Task failed", task.getException)
+         statusText.text.unbind()
+         statusText.text = "Failed: " + task.getException.toString
+
+         allowClose()
+      })
+
+      task.setOnSucceeded(_ => {
+         statusText.text.unbind()
+         statusText.text = "Zakończono"
+         allowClose()
+      })
+
+      ApplicationMain.registerLongRunningTask(task)
+      Platform.runLater(dialog.show())
+      val t = new Thread(task)
+      t.start()
    }
 }
