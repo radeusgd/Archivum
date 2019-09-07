@@ -35,9 +35,11 @@ class RepositoryImpl(private val _model: Model,
    }
 
    override def createRecords(values: Seq[DMStruct]): Unit = {
-      val inses = values.map(prepareInsert)
       localTx({ implicit session =>
-         inses.map(_.insert(None))
+         values.foreach(v => {
+            val ins = prepareInsert(v)
+            ins.insert(None)
+         })
       })
    }
 

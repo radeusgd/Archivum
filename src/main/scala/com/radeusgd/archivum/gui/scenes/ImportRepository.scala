@@ -48,7 +48,7 @@ class ImportRepository(val repository: Repository, parentScene: Scene) extends S
                val lines = source.getLines().toSeq
 
                var progress = 0
-               val todo = 2 * lines.length + 1
+               val todo = 3 * lines.length
                def bumpProgress(): Unit = {
                   progress += 1
                   updateProgress(progress, todo)
@@ -114,7 +114,8 @@ class ImportRepository(val repository: Repository, parentScene: Scene) extends S
                      updateMessage("Zapis danych do bazy")
                      val valid: Seq[DMStruct] = records.map(er => er.fold(throw _, identity))
                      repository.createRecords(valid)
-                     bumpProgress()
+                     progress += lines.length
+                     updateProgress(progress, todo)
                      updateMessage("" + valid.length + " rekordów zostało pomyślnie dodanych do bazy")
                   }
                } else {

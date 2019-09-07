@@ -1,6 +1,7 @@
 package com.radeusgd.archivum.gui
 
 import java.io.{File, PrintWriter, StringWriter}
+import java.nio.file.Files
 
 import com.radeusgd.archivum.gui.ApplicationMain.stage
 import javafx.concurrent.Task
@@ -101,6 +102,7 @@ package object utils {
    }
 
    def chooseSaveDirectory(dialogTitle: String, initialPath: File): Option[File] = {
+      Files.createDirectories(initialPath.toPath)
       val fileChooser = new DirectoryChooser {
          title = dialogTitle
          initialDirectory = initialPath
