@@ -15,6 +15,7 @@ class RepositoryMenu(val repository: Repository, private val parent: Scene) exte
    lazy val exporter: ExportRepository = new ExportRepository(repository, this)
    lazy val importer: ImportRepository = new ImportRepository(repository, this)
    lazy val queries: RunQueries= new RunQueries(repository, this)
+   lazy val repl: Repl = new Repl(repository, this)
 
    content = new VBox(
       new Label(repository.model.name) {
@@ -40,6 +41,7 @@ class RepositoryMenu(val repository: Repository, private val parent: Scene) exte
       utils.makeGoToButton("Kwerendy", queries),
       utils.makeGoToButton("Eksport", exporter),
       utils.makeGoToButton("Import", importer),
+      utils.makeGoToButton("Wiersz poleceń", repl),
       utils.makeGoToButton("Wróć do wyboru bazy", parent)
    ) {
       spacing = 5
