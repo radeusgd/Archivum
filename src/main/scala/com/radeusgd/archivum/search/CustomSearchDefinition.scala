@@ -2,12 +2,14 @@ package com.radeusgd.archivum.search
 
 import com.radeusgd.archivum.datamodel.dmbridges.StringDMBridge
 import com.radeusgd.archivum.datamodel.types.StructField
-import com.radeusgd.archivum.datamodel.{DMUtils, DMValue, Model}
+import com.radeusgd.archivum.datamodel.{DMError, DMUtils, DMValue, Model}
 import javafx.scene.control.{ButtonType, Dialog}
 import scalafx.scene.Node
 import scalafx.scene.control.{Button, DialogPane, Label, ProgressBar, SelectionMode, TextField, TreeItem, TreeView}
 import scalafx.scene.layout.{HBox, VBox}
 import scalafx.Includes.handle
+import scalafx.event.subscriptions.Subscription
+import scalafx.scene.paint.Color
 import scalafx.stage.Modality
 
 import scala.collection.mutable.ListBuffer
@@ -15,7 +17,7 @@ import scala.collection.mutable.ListBuffer
 class CustomSearchDefinition(model: Model) {
    def getConditions: List[SearchCondition] = conditions.toList
 
-   private val conditionsBox = new HBox()
+   private val conditionsBox = new VBox()
    private val conditions = ListBuffer.empty[SearchCondition]
 
    case class TreeElem(name: String, path: List[String]) {
@@ -61,12 +63,14 @@ class CustomSearchDefinition(model: Model) {
 
       val valueTextField = new TextField()
       valueTextField.disable = true
+      var currentSub: Option[Subscription] = None
       val confirmBtn = new Button("Dodaj warunek") {
          onAction = handle {
             (selectedPath, dmvalue) match {
                case (Some(path), Some(v)) =>
                   addCondition(ExactMatch(path.mkString("."), v))
                   dialog.hide()
+               case _ =>
             }
          }
       }
@@ -78,20 +82,40 @@ class CustomSearchDefinition(model: Model) {
       }
       val choiceLabel = new Label("Wybierz pole powyżej")
       val errorLabel = new Label()
-      errorLabel.setStyle("-fx-text-color: red;")
+      errorLabel.setTextFill(Color.Red)
 
       val treeView = makeTreeViewForModel()
       def handlePathSelected(path: List[String]): Unit = {
          errorLabel.text = ""
          selectedPath = Some(path)
+         currentSub.foreach(_.cancel())
          valueTextField.disable = false
          confirmBtn.disable = false
          choiceLabel.text = "Wybrane pole: " + path.mkString(".")
          dmvalue = None
          dmbridge = model.defaultBridgeForField(path)
-         if (dmbridge.isEmpty) {
-            errorLabel.text = "Wybrane pole nie jest przeznaczone do wyszukiwania"
+         dmbridge match {
+            case None =>
+               errorLabel.text = "Wybrane pole nie jest przeznaczone do wyszukiwania"
+               valueTextField.disable = true
+               confirmBtn.disable = true
+            case Some(bridge) =>
+               val sub = valueTextField.text.onChange((_, _, _) => {
+                  val v = bridge.fromString(valueTextField.text.value)
+                  v match {
+                     case DMError(message) =>
+                        dmvalue = None
+                        errorLabel.text = message
+                        confirmBtn.disable = true
+                     case valid =>
+                        dmvalue = Some(valid)
+                        errorLabel.text = ""
+                        confirmBtn.disable = false
+                  }
+               })
+               currentSub = Some(sub)
          }
+         valueTextField.text = ""
       }
       treeView.getSelectionModel.selectionModeProperty().setValue(SelectionMode.Single)
       treeView.getSelectionModel.selectedItemProperty().addListener((_, _, _) => {
@@ -113,7 +137,7 @@ class CustomSearchDefinition(model: Model) {
       dialog.show()
    }
 
-   val displayNode: Node = new HBox(
+   val displayNode: Node = new VBox(
       conditionsBox,
       new Button("Dodaj zaawansowane kryteria") {
          onAction = handle {
@@ -123,7 +147,7 @@ class CustomSearchDefinition(model: Model) {
    )
 
    private def rerenderConditionBox(): Unit = {
-      def makeConditionControl(sc: SearchCondition, index: Int): VBox = {
+      def makeConditionControl(sc: SearchCondition, index: Int): Node = {
          val label = new Label(sc.toHumanText)
          val btn = new Button("X") {
             onAction = handle {
@@ -131,7 +155,7 @@ class CustomSearchDefinition(model: Model) {
                rerenderConditionBox()
             }
          }
-         new VBox(label, btn)
+         new HBox(5, label, btn)
       }
 
       conditionsBox.children = {
