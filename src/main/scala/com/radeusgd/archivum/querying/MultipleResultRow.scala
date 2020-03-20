@@ -96,6 +96,10 @@ case class MultipleResultRow(prefix: ResultRow, objects: NestedMapADT[String, Se
    def aggregate(f: Seq[DMValue] => ResultRow): ResultRow = {
       prefix.append(objects.flatMap(f))
    }
+
+   override def toString: String = "MultipleResultRow(" + prefix + ", ...)"
+
+   def objectsShape: NestedMapADT[String, Unit] = objects.map(_ => ())
 }
 
 object MultipleResultRow {

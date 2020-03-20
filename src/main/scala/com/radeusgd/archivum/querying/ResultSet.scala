@@ -45,6 +45,9 @@ case class ResultSet(rows: Seq[MultipleResultRow]) {
       flatMap(_.groupBy(grouping))
    }
 
+   def groupBy(path: String): ResultSet =
+      groupBy(GroupBy(path))
+
    private def computeHorizontalGroupingPreset(grouping: Grouping): Seq[String] = {
       // TODO this can be optimized to not do the grouping twice
       val ALLTHERESULTS: Seq[DMValue] = rows.flatMap(_.objects.flatten).flatten
@@ -105,5 +108,9 @@ case class ResultSet(rows: Seq[MultipleResultRow]) {
       val merged = objs.reduce(NestedMapADT.merge(_,_)((x: Seq[DMValue], y: Seq[DMValue]) => x ++ y))
       ResultSet(Seq(MultipleResultRow(ResultRow.empty, merged)))
    }
+
+   override def toString: String = "ResultSet(with " + rows.length + " MultiRows)"
+
+   def head: MultipleResultRow = rows.head
 
 }
