@@ -1,28 +1,28 @@
 package com.radeusgd.archivum.search
 
-import com.radeusgd.archivum.datamodel.{DMString, DMUtils}
+import com.radeusgd.archivum.datamodel.{DMString, DMUtils, DMValue}
 import com.radeusgd.archivum.utils.AsInt
 import scalafx.scene.control.{Label, TextField}
 import scalafx.scene.layout.{HBox, VBox}
 
 sealed trait SearchCondition {
-   // TODO
+   def toHumanText: String
 }
 
-case class ExactMatch(path: String, value: String) extends SearchCondition
-case class YearDateMatch(path: String, year: Int) extends SearchCondition
-case class FulltextMatch(value: String) extends SearchCondition
+case class ExactMatch(path: String, value: DMValue) extends SearchCondition {
+   override def toHumanText: String = path + " = " + value.toString
+}
+case class YearDateMatch(path: String, year: Int) extends SearchCondition {
+   override def toHumanText: String = path + ".rok = " + year
+}
+case class FulltextMatch(value: String) extends SearchCondition {
+   override def toHumanText: String = "'" + value + "' występuje gdziekolwiek w rekordzie"
+}
 // TODO possibly add prefix match ?
 
-object SearchCondition {
-   def toHumanText(sc: SearchCondition): String = {
-      // TODO
-      "TODO"
-   }
-}
 
 trait ConditionGiver {
-   def getCurrentCondition(): Option[SearchCondition]
+   def getCurrentCondition: Option[SearchCondition]
 }
 
 class TextFieldCondition(name: String, textFieldWidth: Int, makeCondition: String => Option[SearchCondition]) extends VBox with ConditionGiver {
@@ -48,9 +48,9 @@ object TextFieldCondition {
       }
 }
 
-// TODO add support for types other than string!
+// TODO this could use Model.defaultBridgeForField to support all types
 class EqualConditionField(name: String, width: Int, path: String)
-extends TextFieldCondition(name, width, TextFieldCondition.wrapNonEmptyMake(ExactMatch(path, _)))
+extends TextFieldCondition(name, width, TextFieldCondition.wrapNonEmptyMake(str => ExactMatch(path, DMString(str))))
 
 class FulltextConditionField(name: String, width: Int)
 extends TextFieldCondition(name, width, TextFieldCondition.wrapNonEmptyMake(FulltextMatch))

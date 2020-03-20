@@ -18,7 +18,7 @@ class Search(val repository: Repository, parentEVF: => EditRecords) extends Scen
    private val layoutXml = IO.readFileString("Konfiguracja/search/" + repository.model.name + ".xml")
 
    private val searchDefinition = SearchDefinition.parseXML(layoutXml)
-   private val advancedSearch = new AdvancedSearchDefinition
+   private val advancedSearch = new CustomSearchDefinition(repository.model)
 
    private val searchResults: TableView[SearchRow] =
       new SearchResultTable[SearchRow](new ResultsDisplayColumnFactory[SearchRow](searchDefinition.columns).makeColumns, parentEV)
@@ -33,16 +33,14 @@ class Search(val repository: Repository, parentEVF: => EditRecords) extends Scen
       override def call(): Unit = {
          setTextInfo("Wyszukiwanie w toku...")
          val conditions: Seq[SearchCondition] =
-            searchDefinition.conditions.flatMap(_.getCurrentCondition()) ++ advancedSearch.getConditions
+            searchDefinition.conditions.flatMap(_.getCurrentCondition) ++ advancedSearch.getConditions
          if (conditions.isEmpty) {
             setTextInfo("Nie podano żadnych kryteriów")
          } else {
             val (fulltext: Option[String], filter: SearchCriteria) = conditions.foldLeft[(Option[String], SearchCriteria)]((None, Truth)) {
                case ((_, sca), FulltextMatch(txt)) => (Some(txt), sca)  // I assume only one fulltext node is present
                case ((fta, sca), ExactMatch(path, value)) =>
-                  repository.model
-                  (fta, And(sca, Equal(DMUtils.parsePath(path), DMString(value)))) // TODO I assume equality is on string types only!!!
-               // TODO to fix this we need to inspect model type using repository.model.rootType
+                  (fta, And(sca, Equal(DMUtils.parsePath(path), value)))
                case ((fta, sca), YearDateMatch(path, year)) =>
                   (fta, And(sca, HasPrefix(DMUtils.parsePath(path), f"$year%04d")))
                // this is an awful reliance on implementation details from other module, but types and database are already tightly coupled
@@ -104,6 +102,7 @@ class Search(val repository: Repository, parentEVF: => EditRecords) extends Scen
    rootPane.content = new VBox(10,
       searchCriteria,
       caseSensitivityCheckBox,
+      advancedSearch.displayNode,
       new HBox(10, doSearchButton, foundLabel),
       searchResults
    )
