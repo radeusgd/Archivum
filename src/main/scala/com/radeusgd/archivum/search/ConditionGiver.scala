@@ -12,6 +12,14 @@ sealed trait SearchCondition {
 case class ExactMatch(path: String, value: String) extends SearchCondition
 case class YearDateMatch(path: String, year: Int) extends SearchCondition
 case class FulltextMatch(value: String) extends SearchCondition
+// TODO possibly add prefix match ?
+
+object SearchCondition {
+   def toHumanText(sc: SearchCondition): String = {
+      // TODO
+      "TODO"
+   }
+}
 
 trait ConditionGiver {
    def getCurrentCondition(): Option[SearchCondition]

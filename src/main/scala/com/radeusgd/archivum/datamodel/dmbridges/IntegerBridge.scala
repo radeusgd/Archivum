@@ -1,4 +1,4 @@
-package com.radeusgd.archivum.gui.controls.dmbridges
+package com.radeusgd.archivum.datamodel.dmbridges
 import com.radeusgd.archivum.datamodel.{DMError, DMInteger, DMNull, DMValue}
 import com.radeusgd.archivum.utils.AsInt
 

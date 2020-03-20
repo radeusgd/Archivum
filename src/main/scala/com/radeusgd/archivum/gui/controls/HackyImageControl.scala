@@ -5,11 +5,11 @@ import java.nio.file.{Files, Path, Paths, StandardCopyOption}
 
 import com.radeusgd.archivum.datamodel._
 import com.radeusgd.archivum.gui.EditableView
-import com.radeusgd.archivum.gui.controls.dmbridges.StringDMBridge
+import com.radeusgd.archivum.datamodel.dmbridges.StringDMBridge
 import scalafx.Includes._
 import scalafx.scene.control._
 import scalafx.scene.layout.HBox
-import com.radeusgd.archivum.gui.controls.dmbridges.StringBridge
+import com.radeusgd.archivum.datamodel.dmbridges.StringBridge
 import scalafx.scene.image.{Image, ImageView}
 import scalafx.stage.FileChooser
 import scalafx.stage.FileChooser.ExtensionFilter

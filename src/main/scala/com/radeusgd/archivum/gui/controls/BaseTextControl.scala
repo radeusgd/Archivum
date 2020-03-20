@@ -3,7 +3,7 @@ package com.radeusgd.archivum.gui.controls
 import com.radeusgd.archivum.datamodel._
 import com.radeusgd.archivum.gui.EditableView
 import com.radeusgd.archivum.gui.controls.commonproperties.{CommonProperties, DefaultValueOnCreation, HasCommonProperties, PreviosValueOnCreation}
-import com.radeusgd.archivum.gui.controls.dmbridges.StringDMBridge
+import com.radeusgd.archivum.datamodel.dmbridges.StringDMBridge
 import scalafx.geometry.{Insets, Pos}
 import scalafx.scene.control._
 import scalafx.scene.layout.HBox

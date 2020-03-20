@@ -2,7 +2,7 @@ package com.radeusgd.archivum.gui.controls
 
 import com.radeusgd.archivum.gui.EditableView
 import com.radeusgd.archivum.gui.controls.commonproperties.{CommonControlFactory, CommonProperties}
-import com.radeusgd.archivum.gui.controls.dmbridges.StringBridge
+import com.radeusgd.archivum.datamodel.dmbridges.StringBridge
 import com.radeusgd.archivum.languages.ViewLanguage
 
 class TextControl(properties: CommonProperties, path: List[String], editableView: EditableView)

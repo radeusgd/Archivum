@@ -3,7 +3,7 @@ package com.radeusgd.archivum.gui.controls
 import com.radeusgd.archivum.gui.EditableView
 import com.radeusgd.archivum.gui.controls.commonproperties.{CommonControlFactory, CommonProperties}
 import com.radeusgd.archivum.languages.ViewLanguage
-import com.radeusgd.archivum.gui.controls.dmbridges.ClassicYearDateBridge
+import com.radeusgd.archivum.datamodel.dmbridges.ClassicYearDateBridge
 
 class YearDateControl(properties: CommonProperties, path: List[String], editableView: EditableView)
    extends BaseTextControl(ClassicYearDateBridge, properties, path, editableView)
