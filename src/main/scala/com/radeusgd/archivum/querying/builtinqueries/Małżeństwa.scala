@@ -294,7 +294,7 @@ class Małżeństwa(years: Int, folderGroupings: Seq[String], charakter: Option[
    )
 
    override val manualQueries: Map[String, ResultSet => Seq[ResultRow]] = Map(
-      "daty" -> zakresDat,
+      // "daty" -> zakresDat,
       "Udział nowożeńców z miejscowości pozaparafialnych w małżeństwach zawartych w parafii" -> udziałPozaparafialnych
    )
 }

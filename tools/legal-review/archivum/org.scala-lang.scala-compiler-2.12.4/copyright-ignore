@@ -1,0 +1,5 @@
+val versionMsg = "Scaladoc %s -- %s".format(Properties.versionString, Properties.copyrightString)
+rem # Copyright 2002-2013 LAMP/EPFL
+import Properties.{ versionString, copyrightString } //versionFor
+def versionFor(command: String) = f"Scala $command $versionString -- $copyrightString"
+Properties.copyrightString

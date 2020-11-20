@@ -3,3 +3,7 @@ target/
 *.db
 images/
 *.json
+tools/legal-review-helper
+*.zip
+*.jar
+*.dbjson

@@ -36,6 +36,7 @@ class RepositoryMenu(val repository: Repository, private val parent: Scene) exte
             stage2.setScene(searchScene)
             ApplicationMain.setPrimaryStageVisibility(false)
             stage2.show()
+           stage2.setMaximized(true) // FIXME test if this works
          }
       },
       utils.makeGoToButton("Kwerendy", queries),
