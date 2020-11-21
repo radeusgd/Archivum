@@ -3,7 +3,12 @@ import org.enso.licensehelperplugin.{Distribution, GatherLicenses}
 
 version := "1.2.4"
 
-scalaVersion := "2.12.4"
+scalaVersion := "2.12.12"
+
+GatherLicenses.licenseConfigurations := Set("compile")
+GatherLicenses.configurationRoot := file("tools/legal-review")
+GatherLicenses.reportIssueExplanation := "Verify the reports."
+GatherLicenses.dependencyFilters := Seq()
 
 lazy val gatherLicenses =
   taskKey[Unit]("Gathers licensing information for relevant dependencies")
@@ -23,9 +28,6 @@ GatherLicenses.distributions := Seq(
     Distribution.sbtProjects(root)
   ),
 )
-
-GatherLicenses.licenseConfigurations := Set("compile")
-GatherLicenses.configurationRoot := file("tools/legal-review")
 
 lazy val openLegalReviewReport =
   taskKey[Unit](
@@ -55,14 +57,14 @@ lazy val root = (project in file("."))
       "org.scalafx" %% "scalafx" % "8.0.144-R12",
       "io.spray" %% "spray-json" % "1.3.3",
       // https://mvnrepository.com/artifact/org.scala-lang.modules/scala-xml
-      "org.scala-lang.modules" %% "scala-xml" % "1.0.6",
+      "org.scala-lang.modules" %% "scala-xml" % "1.3.0",
 
       "org.scalikejdbc" %% "scalikejdbc" % "3.2.1",
       "com.h2database" % "h2" % "1.4.196",
       "org.slf4j" % "slf4j-simple" % "1.7.30",
       "org.controlsfx" % "controlsfx" % "8.40.14",
       "org.parboiled" %% "parboiled" % "2.1.5",
-      "org.scala-lang" % "scala-compiler" % "2.12.4" // this will be needed for runtime compilation,
+      "org.scala-lang" % "scala-compiler" % scalaVersion.value // this will be needed for runtime compilation,
     )
   )
   .settings(

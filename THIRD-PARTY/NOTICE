@@ -1,0 +1,202 @@
+Archivum - database for historic demographic records
+Copyright 2020 Radosław Waśko, Wojciech Ziobro
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+------------------------------
+
+Source code for this application is available at https://github.com/radeusgd/Archivum
+
+Below is information regarding third-party software libraries that this software package uses:
+
+This software contains unmodified binary redistributions for
+H2 database engine (https://h2database.com/),
+which is dual licensed and available under the MPL 2.0
+(Mozilla Public License) or under the EPL 1.0 (Eclipse Public License).
+An original copy of the license agreement can be found at:
+https://h2database.com/html/license.html
+
+
+'scala-library', licensed under the Apache-2.0, is distributed with the archivum.
+The license file can be found at `licenses/APACHE-2.0.txt`.
+Copyright notices related to this dependency can be found in the directory `org.scala-lang.scala-library-2.12.12`.
+
+
+'parboiled_2.12', licensed under the Apache-2.0, is distributed with the archivum.
+The license information can be found along with the copyright notices.
+Copyright notices related to this dependency can be found in the directory `org.parboiled.parboiled_2.12-2.1.5`.
+
+
+'scalikejdbc-core_2.12', licensed under the Apache License, Version 2.0, is distributed with the archivum.
+The license file can be found at `licenses/APACHE-2.0.txt`.
+Copyright notices related to this dependency can be found in the directory `org.scalikejdbc.scalikejdbc-core_2.12-3.2.1`.
+
+
+'joda-convert', licensed under the Apache 2, is distributed with the archivum.
+The license information can be found along with the copyright notices.
+Copyright notices related to this dependency can be found in the directory `org.joda.joda-convert-2.0.1`.
+
+
+'spray-json_2.12', licensed under the Apache 2, is distributed with the archivum.
+The license file can be found at `licenses/APACHE-2.0.txt`.
+Copyright notices related to this dependency can be found in the directory `io.spray.spray-json_2.12-1.3.3`.
+
+
+'scalikejdbc-interpolation-macro_2.12', licensed under the Apache License, Version 2.0, is distributed with the archivum.
+The license file can be found at `licenses/APACHE-2.0.txt`.
+Copyright notices related to this dependency can be found in the directory `org.scalikejdbc.scalikejdbc-interpolation-macro_2.12-3.2.1`.
+
+
+'scalikejdbc-interpolation_2.12', licensed under the Apache License, Version 2.0, is distributed with the archivum.
+The license file can be found at `licenses/APACHE-2.0.txt`.
+Copyright notices related to this dependency can be found in the directory `org.scalikejdbc.scalikejdbc-interpolation_2.12-3.2.1`.
+
+
+'scala-compiler', licensed under the Apache-2.0, is distributed with the archivum.
+The license file can be found at `licenses/APACHE-2.0.txt`.
+Copyright notices related to this dependency can be found in the directory `org.scala-lang.scala-compiler-2.12.12`.
+
+
+'poi', licensed under the The Apache Software License, Version 2.0, is distributed with the archivum.
+The license information can be found along with the copyright notices.
+Copyright notices related to this dependency can be found in the directory `org.apache.poi.poi-4.0.0`.
+
+
+'commons-dbcp2', licensed under the Apache License, Version 2.0, is distributed with the archivum.
+The license information can be found along with the copyright notices.
+Copyright notices related to this dependency can be found in the directory `org.apache.commons.commons-dbcp2-2.2.0`.
+
+
+'scalafx_2.12', licensed under the BSD, is distributed with the archivum.
+The license information can be found along with the copyright notices.
+Copyright notices related to this dependency can be found in the directory `org.scalafx.scalafx_2.12-8.0.144-R12`.
+
+
+'shapeless_2.12', licensed under the Apache 2, is distributed with the archivum.
+The license file can be found at `licenses/APACHE-2.0.txt`.
+Copyright notices related to this dependency can be found in the directory `com.chuusai.shapeless_2.12-2.3.3`.
+
+
+'cats-kernel_2.12', licensed under the MIT, is distributed with the archivum.
+The license information can be found along with the copyright notices.
+Copyright notices related to this dependency can be found in the directory `org.typelevel.cats-kernel_2.12-1.0.1`.
+
+
+'commons-pool2', licensed under the Apache License, Version 2.0, is distributed with the archivum.
+The license information can be found along with the copyright notices.
+Copyright notices related to this dependency can be found in the directory `org.apache.commons.commons-pool2-2.5.0`.
+
+
+'commons-logging', licensed under the The Apache Software License, Version 2.0, is distributed with the archivum.
+The license file can be found at `licenses/APACHE-2.0.txt`.
+Copyright notices related to this dependency can be found in the directory `commons-logging.commons-logging-1.2`.
+
+
+'poi-ooxml-schemas', licensed under the The Apache Software License, Version 2.0, is distributed with the archivum.
+The license file can be found at `licenses/APACHE-2.0.txt`.
+Copyright notices related to this dependency can be found in the directory `org.apache.poi.poi-ooxml-schemas-4.0.0`.
+
+
+'xmlbeans', licensed under the The Apache Software License, Version 2.0, is distributed with the archivum.
+The license file can be found at `licenses/APACHE-2.0.txt`.
+Copyright notices related to this dependency can be found in the directory `org.apache.xmlbeans.xmlbeans-3.0.1`.
+
+
+'joda-time', licensed under the Apache 2, is distributed with the archivum.
+The license information can be found along with the copyright notices.
+Copyright notices related to this dependency can be found in the directory `joda-time.joda-time-2.9.9`.
+
+
+'cats-core_2.12', licensed under the MIT, is distributed with the archivum.
+The license information can be found along with the copyright notices.
+Copyright notices related to this dependency can be found in the directory `org.typelevel.cats-core_2.12-1.0.1`.
+
+
+'slf4j-api', licensed under the MIT License, is distributed with the archivum.
+The license information can be found along with the copyright notices.
+Copyright notices related to this dependency can be found in the directory `org.slf4j.slf4j-api-1.7.30`.
+
+
+'controlsfx', licensed under the The 3-Clause BSD License, is distributed with the archivum.
+The license information can be found along with the copyright notices.
+Copyright notices related to this dependency can be found in the directory `org.controlsfx.controlsfx-8.40.14`.
+
+
+'cats-macros_2.12', licensed under the MIT, is distributed with the archivum.
+The license information can be found along with the copyright notices.
+Copyright notices related to this dependency can be found in the directory `org.typelevel.cats-macros_2.12-1.0.1`.
+
+
+'scala-reflect', licensed under the Apache-2.0, is distributed with the archivum.
+The license file can be found at `licenses/APACHE-2.0.txt`.
+Copyright notices related to this dependency can be found in the directory `org.scala-lang.scala-reflect-2.12.12`.
+
+
+'macro-compat_2.12', licensed under the Apache 2, is distributed with the archivum.
+The license file can be found at `licenses/APACHE-2.0.txt`.
+Copyright notices related to this dependency can be found in the directory `org.typelevel.macro-compat_2.12-1.1.1`.
+
+
+'commons-compress', licensed under the Apache License, Version 2.0, is distributed with the archivum.
+The license file can be found at `licenses/APACHE-2.0.txt`.
+Copyright notices related to this dependency can be found in the directory `org.apache.commons.commons-compress-1.18`.
+
+
+'scala-parser-combinators_2.12', licensed under the BSD 3-clause, is distributed with the archivum.
+The license information can be found along with the copyright notices.
+Copyright notices related to this dependency can be found in the directory `org.scala-lang.modules.scala-parser-combinators_2.12-1.0.6`.
+
+
+'commons-codec', licensed under the Apache License, Version 2.0, is distributed with the archivum.
+The license information can be found along with the copyright notices.
+Copyright notices related to this dependency can be found in the directory `commons-codec.commons-codec-1.10`.
+
+
+'curvesapi', licensed under the BSD License, is distributed with the archivum.
+The license information can be found along with the copyright notices.
+Copyright notices related to this dependency can be found in the directory `com.github.virtuald.curvesapi-1.04`.
+
+
+'commons-collections4', licensed under the Apache License, Version 2.0, is distributed with the archivum.
+The license information can be found along with the copyright notices.
+Copyright notices related to this dependency can be found in the directory `org.apache.commons.commons-collections4-4.2`.
+
+
+'scalikejdbc_2.12', licensed under the Apache License, Version 2.0, is distributed with the archivum.
+The license file can be found at `licenses/APACHE-2.0.txt`.
+Copyright notices related to this dependency can be found in the directory `org.scalikejdbc.scalikejdbc_2.12-3.2.1`.
+
+
+'machinist_2.12', licensed under the MIT, is distributed with the archivum.
+The license information can be found along with the copyright notices.
+Copyright notices related to this dependency can be found in the directory `org.typelevel.machinist_2.12-0.6.2`.
+
+
+'spoiwo_2.12', licensed under the MIT-License, is distributed with the archivum.
+The license information can be found along with the copyright notices.
+Copyright notices related to this dependency can be found in the directory `com.norbitltd.spoiwo_2.12-1.4.1`.
+
+
+'poi-ooxml', licensed under the The Apache Software License, Version 2.0, is distributed with the archivum.
+The license information can be found along with the copyright notices.
+Copyright notices related to this dependency can be found in the directory `org.apache.poi.poi-ooxml-4.0.0`.
+
+
+'scala-xml_2.12', licensed under the Apache-2.0, is distributed with the archivum.
+The license file can be found at `licenses/APACHE-2.0.txt`.
+Copyright notices related to this dependency can be found in the directory `org.scala-lang.modules.scala-xml_2.12-1.3.0`.
+
+
+'slf4j-simple', licensed under the MIT License, is distributed with the archivum.
+The license information can be found along with the copyright notices.
+Copyright notices related to this dependency can be found in the directory `org.slf4j.slf4j-simple-1.7.30`.
+
+
+'h2', licensed under the MPL 2.0 or EPL 1.0, is distributed with the archivum.
+The license information can be found along with the copyright notices.
+Copyright notices related to this dependency can be found in the directory `com.h2database.h2-1.4.196`.
+

@@ -1,0 +1,7 @@
+"A footer on every Scaladoc page, by default the EPFL/Lightbend copyright notice. Can be overridden with a custom footer.",
+<div id="footer">Scala programming documentation. Copyright (c) 2002-2020 <a href="http://www.epfl.ch" target="_top">EPFL</a>, with contributions from <a href="http://www.lightbend.com" target="_top">Lightbend</a>.</div>
+Properties.copyrightString
+def versionFor(command: String) = f"Scala $command $versionString -- $copyrightString"
+import Properties.{ versionString, copyrightString } //versionFor
+rem # Copyright 2002-2013 LAMP/EPFL
+val versionMsg = "Scaladoc %s -- %s".format(Properties.versionString, Properties.copyrightString)
