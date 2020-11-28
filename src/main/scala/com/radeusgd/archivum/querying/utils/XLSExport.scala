@@ -176,9 +176,9 @@ object XLSExport {
       }
    }
 
-   def export(fileName: String, results: Seq[ResultRow]): Unit = {
-      Files.createDirectories(Paths.get(fileName).getParent)
-      makeSheet(results).saveAsXlsx(fileName)
+   def export(path: Path, results: Seq[ResultRow]): Unit = {
+      Files.createDirectories(path.getParent)
+      makeSheet(results).saveAsXlsx(path.toString)
    }
 
    def exportToSubFolders(path: Path, filename: String, columnsToFolders: Int, results: Seq[ResultRow]): Unit = {
@@ -194,7 +194,7 @@ object XLSExport {
       def exportHelper(path: Path, columns: Int, results: Seq[ResultRow]): Unit = {
          if (columns == 0) {
             Files.createDirectories(path)
-            export(path.resolve(filename).toString, results)
+            export(path.resolve(filename), results)
          }
          else {
             val cut = results.map(cutFirstCell)

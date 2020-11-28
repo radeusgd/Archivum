@@ -1,6 +1,7 @@
 package com.radeusgd.archivum.gui.scenes
 
 import java.io.File
+import java.nio.file.Paths
 
 import com.radeusgd.archivum.gui.{ApplicationMain, utils}
 import com.radeusgd.archivum.persistence.Repository
@@ -85,9 +86,9 @@ class RunQueries(val repository: Repository, parentScene: Scene) extends Scene {
 
          val query = builtinChooser.value.value.recipe(period, grouping, charakter)
 
-         val defaultPath = "Wyniki kwerend/" + repository.model.name + "/"
-         val path = utils.chooseSaveDirectory("Wyniki kwerend", new File(defaultPath))
-            .map(_.toPath.toString).getOrElse(defaultPath)
+         val defaultPath = java.nio.file.Path.of("Wyniki kwerend/" + repository.model.name + "/")
+         val path = utils.chooseSaveDirectory("Wyniki kwerend", defaultPath.toFile)
+            .map(_.toPath).getOrElse(defaultPath)
          val task = query.prepareTask(path, repository)
          this.delegate.disableProperty().bind(task.runningProperty())
          utils.runTaskWithProgress("Przetwarzanie kwerend", task)
