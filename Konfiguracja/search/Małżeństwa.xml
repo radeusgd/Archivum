@@ -1,0 +1,72 @@
+<searchdef>
+    <criteria>
+        <year path="Data ślubu" label="Rok" width="50"/>
+        <hbox>
+            <field path="PowiatCyrkuł" label="Powiat/Cyrkuł"/>
+            <field path="Miejscowość"/>
+            <field path="Numer domu" width="50"/>
+        </hbox>
+        <hbox>
+            <field path="Diecezja"/>
+            <field path="Dekanat"/>
+            <field path="Parafia"/>
+        </hbox>
+        <fulltext label="Szukaj"/>
+    </criteria>
+    <results>
+        <column name="Numer domu">`Numer domu`</column>
+        <column name="Miejscowość">`Miejscowość`</column>
+        <column name="Data ślubu">`Data ślubu`</column>
+        <column name="Pan młody">(join(`Pan młody.Imiona`) + " ") + `Pan młody.Nazwisko`</column>
+        <column name="Rodzice pana młodego">join(`Pan młody.Ojciec.Imię`, " ", `Pan młody.Ojciec.Nazwisko`, " i ", `Pan młody.Matka.Imię`, " ", `Pan młody.Matka.Nazwisko`)</column>
+        <column name="Panna młoda">(join(`Panna młoda.Imiona`) + " ") + `Panna młoda.Nazwisko`</column>
+        <column name="Rodzice panny młodej">join(`Panna młoda.Ojciec.Imię`, " ", `Panna młoda.Ojciec.Nazwisko`, " i ", `Panna młoda.Matka.Imię`, " ", `Panna młoda.Matka.Nazwisko`)</column>
+    </results>
+    <commonfeatures>
+        <group>
+            <feature>`Pan młody.Imiona.0`</feature>
+        </group>
+        <group>
+            <feature>`Pan młody.Nazwisko`</feature>
+        </group>
+        <group>
+            <feature>`Panna młoda.Imiona.0`</feature>
+        </group>
+        <group>
+            <feature>`Panna młoda.Nazwisko`</feature>
+        </group>
+        <group>
+            <feature>`Pan młody.Matka.Imię`</feature>
+        </group>
+        <group>
+            <feature>`Pan młody.Matka.Nazwisko`</feature>
+        </group>
+        <group>
+            <feature>`Pan młody.Ojciec.Imię`</feature>
+        </group>
+        <group>
+            <feature>`Pan młody.Ojciec.Nazwisko`</feature>
+        </group>
+        <group>
+            <feature>`Panna młoda.Matka.Imię`</feature>
+        </group>
+        <group>
+            <feature>`Panna młoda.Matka.Nazwisko`</feature>
+        </group>
+        <group>
+            <feature>`Panna młoda.Ojciec.Imię`</feature>
+        </group>
+        <group>
+            <feature>`Panna młoda.Ojciec.Nazwisko`</feature>
+        </group>
+        <group>
+            <feature>`Miejscowość` + `Numer domu`</feature>
+        </group>
+        <group>
+            <feature>`Miejscowość` + `Numer domu`</feature>
+        </group>
+        <group>
+            <feature>`Miejscowość`</feature>
+        </group>
+    </commonfeatures>
+</searchdef>

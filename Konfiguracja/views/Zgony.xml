@@ -1,0 +1,79 @@
+<!--
+$Nazwiska=Nazwisko;Rodzina.*.Nazwisko;Nazwisko panieńskie
+$Imiona=Imiona.*;Rodzina.*.Imię
+$Status=Rodzina.*.Status społeczny;Status społeczny
+$Zawod=Rodzina.*.Zawód;Zawód
+$Tytuly=Rodzina.*.Tytuł;Tytuł
+-->
+<vbox>
+  <label>Zgony</label>
+  <hbox>
+    <AutocompleteTextField path="Miejscowość" sticky="true"/>
+    <ChoiceField path="Charakter miejscowości" sticky="true"/>
+    <AutocompleteTextField path="PowiatCyrkuł" label="Powiat / Cyrkuł" sticky="true"/>
+  </hbox>
+  <hbox>
+    <AutocompleteTextField path="Diecezja" sticky="true"/>
+    <AutocompleteTextField path="Dekanat" sticky="true"/>
+    <AutocompleteTextField path="Parafia" sticky="true"/>
+  </hbox>
+  <hbox>
+    <vbox>
+      <label>Zmarły</label>
+      <AutocompleteTextField path="Tytuł" sources="{Tytuly}"/>
+      <table path="Imiona">
+        <AutocompleteTextColumn label="Imię" sources="{Imiona}"/>
+      </table>
+      <AutocompleteTextField path="Nazwisko" sources="{Nazwiska}"/>
+      <AutocompleteTextField path="Nazwisko panieńskie" sources="{Nazwiska}"/>
+      <ChoiceField path="Płeć"/>
+
+      <YearDateField path="Data śmierci"/>
+      <YearDateField path="Data pochówku"/>
+
+      <TextField path="Numer domu"/>
+
+      <hbox>
+        <IntegerField path="Wiek_liczba" label="Wiek" width="50"/>
+        <ChoiceField path="Wiek_jednostka" label=""/>
+      </hbox>
+      <YearDateField path="Data urodzenia"/>
+
+      <ChoiceField path="Stan cywilny"/>
+      <AutocompleteTextField path="Status społeczny" sources="{Status}"/>
+      <AutocompleteTextField path="Zawód" sources="{Zawod}"/>
+      <AutocompleteTextField path="Przyczyna zgonu"/>
+    </vbox>
+
+    <vbox>
+      <hbox>
+        <vbox>
+          <label>         Udzielający pogrzebu</label>
+          <AutocompleteTextField path="Udzielający pogrzebu.Imię"/>
+          <AutocompleteTextField path="Udzielający pogrzebu.Nazwisko"/>
+          <ChoiceField path="Czy zaopatrzony w sakramenty"/>
+          <AutocompleteTextField path="Miejsce pochówku"/>
+          <AutocompleteTextField path="Wyznanie"/>
+
+          <TextField path="Źródło" rows="3" width="300" sticky="true"/>
+          <TextField path="Notatki" rows="3" width="300"/>
+        </vbox>
+      </hbox>
+      <vbox>
+        <label>Rodzina</label>
+        <table path="Rodzina">
+          <ChoiceColumn path="Relacja"/>
+          <AutocompleteTextColumn path="Tytuł" sources="{Tytuly}" />
+          <AutocompleteTextColumn path="Imię" sources="{Imiona}"/>
+          <AutocompleteTextColumn path="Nazwisko" sources="{Nazwiska}"/>
+          <AutocompleteTextColumn path="Status społeczny" sources="{Status}"/>
+          <AutocompleteTextColumn path="Zawód" sources="{Zawod}"/>
+          <AutocompleteTextColumn path="Uwagi" sources="Rodzina.*.Uwagi" />
+        </table>
+      </vbox>
+    </vbox>
+  </hbox>
+  <table path="Zdjęcia">
+    <ImageColumn label="Zdjęcia"/>
+  </table>
+</vbox>

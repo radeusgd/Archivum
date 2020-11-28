@@ -1,0 +1,57 @@
+<searchdef>
+    <criteria>
+        <year path="Data urodzenia" label="Rok" width="50"/>
+        <hbox>
+            <field path="PowiatCyrkuł" label="Powiat/Cyrkuł"/>
+            <field path="Miejscowość"/>
+            <field path="Numer domu" width="50"/>
+        </hbox>
+        <hbox>
+            <field path="Diecezja"/>
+            <field path="Dekanat"/>
+            <field path="Parafia"/>
+        </hbox>
+        <fulltext label="Szukaj"/>
+    </criteria>
+    <results>
+        <column name="Imiona">join(Imiona)</column>
+        <column name="Numer domu">`Numer domu`</column>
+        <column name="Miejscowość">`Miejscowość`</column>
+        <column name="Data urodzenia">`Data urodzenia`</column>
+        <column name="Data chrztu">`Data chrztu`</column>
+        <column name="Ojciec">(join(`Ojciec.Imiona`) + " ") + `Ojciec.Nazwisko`</column>
+        <column name="Matka">(join(`Matka.Imiona`) + " ") + `Matka.Nazwisko`</column>
+    </results>
+    <commonfeatures>
+        <group>
+            <feature>`Ojciec.Imiona.0`</feature>
+        </group>
+        <group>
+            <feature>`Ojciec.Nazwisko`</feature>
+        </group>
+        <group>
+            <feature>`Matka.Imiona.0`</feature>
+        </group>
+        <group>
+            <feature>`Matka.Nazwisko`</feature>
+        </group>
+        <group>
+            <feature>`Ojciec.Ojciec.Nazwisko`</feature>
+            <feature>`Ojciec.Matka.Nazwisko`</feature>
+            <feature>`Matka.Ojciec.Nazwisko`</feature>
+            <feature>`Matka.Matka.Nazwisko`</feature>
+        </group>
+        <group>
+            <feature>`Ojciec.Ojciec.Imię`</feature>
+            <feature>`Ojciec.Matka.Imię`</feature>
+            <feature>`Matka.Ojciec.Imię`</feature>
+            <feature>`Matka.Matka.Imię`</feature>
+        </group>
+        <group>
+            <feature>`Miejscowość` + `Numer domu`</feature>
+        </group>
+        <group>
+            <feature>`Miejscowość`</feature>
+        </group>
+    </commonfeatures>
+</searchdef>

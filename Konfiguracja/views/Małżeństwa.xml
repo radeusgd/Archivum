@@ -1,0 +1,143 @@
+<!--
+$ImionaM=Pan młody.Imiona.*;Pan młody.Ojciec.Imię;Panna młoda.Ojciec.Imię
+$ImionaK=Panna młoda.Imiona.*;Pan młody.Matka.Imię;Panna młoda.Matka.Imię
+$ImionaR=Świadkowie.*.Imię;Poprzedni małżonkowie.*.Imię
+$NazwiskaM=Pan młody.Nazwisko;Pan młody.Ojciec.Nazwisko;Panna młoda.Ojciec.Nazwisko
+$NazwiskaK=Panna młoda.Nazwisko;Pan młody.Matka.Nazwisko;Panna młoda.Matka.Nazwisko
+$NazwiskaR=Świadkowie.*.Nazwisko;Poprzedni małżonkowie.*.Nazwisko
+$Miejsca=Pan młody.Miejsce zamieszkania;Pan młody.Miejsce urodzenia;Panna młoda.Miejsce zamieszkania;Panna młoda.Miejsce urodzenia
+$Statusy=Pan młody.Status społeczny;Panna młoda.Status społeczny;Świadkowie.*.Status społeczny;Pan młody.Ojciec.Status społeczny;Pan młody.Matka.Status społeczny;Panna młoda.Ojciec.Status społeczny;Panna młoda.Matka.Status społeczny
+$Zawody=Pan młody.Zawód;Panna młoda.Zawód;Świadkowie.*.Zawód;Pan młody.Ojciec.Zawód;Pan młody.Matka.Zawód;Panna młoda.Ojciec.Zawód;Panna młoda.Matka.Zawód
+$Tytuly=Pan młody.Tytuł;Panna młoda.Tytuł;Świadkowie.*.Tytuł;Poprzedni małżonkowie.*.Tytuł
+-->
+<vbox>`
+  <label>Małżeństwa</label>
+  <hbox>
+    <AutocompleteTextField path="Miejscowość" sticky="true"/>
+    <ChoiceField path="Charakter miejscowości" sticky="true"/>
+    <AutocompleteTextField path="PowiatCyrkuł" label="Powiat / Cyrkuł" sticky="true" paddingLeft="60"/>
+  </hbox>
+  <hbox>
+    <AutocompleteTextField path="Diecezja" sticky="true"/>
+    <AutocompleteTextField path="Dekanat" sticky="true"/>
+    <AutocompleteTextField path="Parafia" sticky="true"/>
+  </hbox>
+  <hbox>
+    <vbox>
+      <label>Ogólne</label>
+      <YearDateField path="Data ślubu"/>
+
+      <table path="Data zapowiedzi" paddingLeft="70">
+        <ClassicDateColumn label="Data zapowiedzi"/>
+      </table>
+      <ChoiceField path="Zgoda na zawarcie małżeństwa" default="Tak"/>
+      <ChoiceField path="Czy małżeństwo doszło do skutku" default="Tak"/>
+
+      <TextField path="Numer domu"/>
+    </vbox>
+    <vbox>
+      <label>     Pan młody</label>
+      <AutoCompleteTextField path="Pan młody.Tytuł" sources="{Tytuly}" />
+        <hbox>
+          <vbox>
+            <label size="12" width="50"> </label>
+            <label size="12" width="50">Imię</label>
+          </vbox>
+          <table path="Pan młody.Imiona">
+            <AutocompleteTextColumn sources="{ImionaM}"/>
+          </table>
+        </hbox>
+      <AutocompleteTextField path="Pan młody.Nazwisko" sources="{NazwiskaM}"/>
+      <IntegerField path="Pan młody.Wiek" width="50"/>
+      <YearDateField path="Pan młody.Data urodzenia"/>
+      <ChoiceField path="Pan młody.Stan cywilny"/>
+      <AutoCompleteTextField path="Pan młody.Wyznanie" sticky="true"/>
+      <ChoiceField path="Pan młody.Pochodzenie"/>
+      <AutoCompleteTextField path="Pan młody.Pochodzenie parafia" label="Pochodzenie (parafia)"/>
+      <AutoCompleteTextField path="Pan młody.Miejsce zamieszkania" sources="{Miejsca}"/>
+      <AutoCompleteTextField path="Pan młody.Miejsce urodzenia" sources="{Miejsca}"/>
+      <AutoCompleteTextField path="Pan młody.Status społeczny" sources="{Statusy}"/>
+      <AutoCompleteTextField path="Pan młody.Zawód" sources="{Zawody}"/>
+
+      <hbox>
+        <AutoCompleteTextField path="Pan młody.Ojciec.Imię" label="Imię i nazwisko ojca" sources="{ImionaM}" width="100" paddingLeft="7"/>
+        <AutoCompleteTextField path="Pan młody.Ojciec.Nazwisko" label="" sources="{NazwiskaM}" width="100"/>
+      </hbox>
+        <AutoCompleteTextField path="Pan młody.Ojciec.Status społeczny" label="Status społeczny ojca" sources="{Statusy}"/>
+        <AutoCompleteTextField path="Pan młody.Ojciec.Zawód" label="Zawód ojca" sources="{Zawody}"/>
+      <hbox>
+      <AutoCompleteTextField path="Pan młody.Matka.Imię" label="Imię i nazwisko matki" sources="{ImionaK}" width="100"/>
+      <AutoCompleteTextField path="Pan młody.Matka.Nazwisko" label="" sources="{NazwiskaK}" width="100"/>
+      </hbox>
+      <AutoCompleteTextField path="Pan młody.Matka.Status społeczny" label="Status społeczny matki" sources="{Statusy}"/>
+      <AutoCompleteTextField path="Pan młody.Matka.Zawód" label="Zawód matki" sources="{Zawody}"/>
+    </vbox>
+    <vbox>
+      <label>    Panna młoda</label>
+      <AutoCompleteTextField path="Panna młoda.Tytuł" sources="{Tytuly}" />
+      <table path="Panna młoda.Imiona" paddingLeft="100">
+        <AutocompleteTextColumn sources="{ImionaK}" label="Imię"/>
+      </table>
+      <AutocompleteTextField path="Panna młoda.Nazwisko" sources="{NazwiskaK}"/>
+      <IntegerField path="Panna młoda.Wiek" width="50"/>
+      <YearDateField path="Panna młoda.Data urodzenia"/>
+      <ChoiceField path="Panna młoda.Stan cywilny"/>
+      <AutoCompleteTextField path="Panna młoda.Wyznanie" sticky="true"/>
+      <ChoiceField path="Panna młoda.Pochodzenie"/>
+      <AutoCompleteTextField path="Panna młoda.Pochodzenie parafia" label="Pochodzenie (parafia)"/>
+      <AutoCompleteTextField path="Panna młoda.Miejsce zamieszkania" sources="{Miejsca}"/>
+      <AutoCompleteTextField path="Panna młoda.Miejsce urodzenia" sources="{Miejsca}"/>
+      <AutoCompleteTextField path="Panna młoda.Status społeczny" sources="{Statusy}"/>
+      <AutoCompleteTextField path="Panna młoda.Zawód" sources="{Zawody}"/>
+
+      <hbox>
+        <AutoCompleteTextField path="Panna młoda.Ojciec.Imię" label="Imię i nazwisko ojca" sources="{ImionaM}" width="100" paddingLeft="7"/>
+        <AutoCompleteTextField path="Panna młoda.Ojciec.Nazwisko" label="" sources="{NazwiskaM}" width="100"/>
+      </hbox>
+        <AutoCompleteTextField path="Panna młoda.Ojciec.Status społeczny" label="Status społeczny ojca" sources="{Statusy}"/>
+        <AutoCompleteTextField path="Panna młoda.Ojciec.Zawód" label="Zawód ojca" sources="{Zawody}"/>
+      <hbox>
+        <AutoCompleteTextField path="Panna młoda.Matka.Imię" label="Imię i nazwisko matki" sources="{ImionaK}" width="100"/>
+        <AutoCompleteTextField path="Panna młoda.Matka.Nazwisko" label="" sources="{NazwiskaK}" width="100"/>
+      </hbox>
+        <AutoCompleteTextField path="Panna młoda.Matka.Status społeczny" label="Status społeczny matki" sources="{Statusy}"/>
+        <AutoCompleteTextField path="Panna młoda.Matka.Zawód" label="Zawód matki" sources="{Zawody}"/>
+    </vbox>
+
+    <vbox>
+      <label>    Udzielający ślubu</label>
+      <AutocompleteTextField path="Udzielający ślubu.Imię" label="Imię"/>
+      <AutocompleteTextField path="Udzielający ślubu.Nazwisko" label="Nazwisko"/>
+
+      <TextField path="Źródło" rows="3" width="300" sticky="true"/>
+      <TextField path="Notatki" rows="3" width="300"/>
+    </vbox>
+  </hbox>
+  <vbox>
+    <label>Świadkowie</label>
+    <table path="Świadkowie">
+      <AutocompleteTextColumn path="Tytuł" sources="{Tytuly}" />
+      <AutocompleteTextColumn path="Imię" sources="{ImionaM};{ImionaK};{ImionaR}"/>
+      <AutocompleteTextColumn path="Nazwisko" sources="{NazwiskaM};{NazwiskaK};{NazwiskaR}"/>
+      <AutocompleteTextColumn path="Małżonek" sources="Świadkowie.*.Małżonek"/>
+      <ChoiceColumn path="Płeć" default="M"/>
+      <AutocompleteTextColumn path="Status społeczny" sources="{Statusy}"/>
+      <AutocompleteTextColumn path="Zawód" sources="{Zawody}"/>
+      <ChoiceColumn path="Czy małżeństwo" label="Małżeństwo" default="Nie"/>
+      <AutocompleteTextColumn path="Uwagi" sources="Świadkowie.*.Uwagi"/>
+    </table>
+    <label>Poprzedni małżonkowie</label>
+    <table path="Poprzedni małżonkowie">
+        <ChoiceColumn path="Relacja"/>
+        <AutocompleteTextColumn path="Tytuł" sources="{Tytuly}" />
+        <AutocompleteTextColumn path="Imię" sources="{ImionaM};{ImionaK};{ImionaR}"/>
+        <AutocompleteTextColumn path="Nazwisko" sources="{NazwiskaM};{NazwiskaK};{NazwiskaR}"/>
+        <AutocompleteTextColumn path="Status społeczny" sources="{Statusy}"/>
+        <AutocompleteTextColumn path="Zawód" sources="{Zawody}"/>
+        <TextColumn path="Uwagi" />
+    </table>
+  </vbox>
+  <table path="Zdjęcia">
+    <ImageColumn label="Zdjęcia"/>
+  </table>
+</vbox>

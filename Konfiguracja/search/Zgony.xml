@@ -1,0 +1,52 @@
+<searchdef>
+    <criteria>
+        <year path="Data śmierci" label="Rok" width="50"/>
+        <hbox>
+            <field path="PowiatCyrkuł" label="Powiat/Cyrkuł"/>
+            <field path="Miejscowość"/>
+            <field path="Numer domu" width="50"/>
+        </hbox>
+        <hbox>
+            <field path="Diecezja"/>
+            <field path="Dekanat"/>
+            <field path="Parafia"/>
+        </hbox>
+        <fulltext label="Szukaj"/>
+    </criteria>
+    <results>
+        <column name="Imię i nazwisko">join(Imiona) + (" " + Nazwisko)</column>
+        <column name="Numer domu">`Numer domu`</column>
+        <column name="Miejscowość">`Miejscowość`</column>
+        <column name="Data zgonu">`Data śmierci`</column>
+        <column name="Data pochówku">`Data pochówku`</column>
+        <column name="Ojciec">get(find(Rodzina, "Relacja", "Ojciec"), "Imię") + (" " + get(find(Rodzina, "Relacja", "Ojciec"), "Nazwisko"))</column>
+        <column name="Matka">get(find(Rodzina, "Relacja", "Matka"), "Imię") + (" " + get(find(Rodzina, "Relacja", "Matka"), "Nazwisko"))</column>
+        <column name="Małżonek">get(find(Rodzina, "Relacja", "Małżonek"), "Imię") + (" " + get(find(Rodzina, "Relacja", "Małżonek"), "Nazwisko"))</column>
+    </results>
+    <commonfeatures>
+        <group>
+            <feature>get(find(Rodzina, "Relacja", "Ojciec"), "Imię")</feature>
+        </group>
+        <group>
+            <feature>get(find(Rodzina, "Relacja", "Ojciec"), "Nazwisko")</feature>
+        </group>
+        <group>
+            <feature>get(find(Rodzina, "Relacja", "Matka"), "Imię")</feature>
+        </group>
+        <group>
+            <feature>get(find(Rodzina, "Relacja", "Matka"), "Nazwisko")</feature>
+        </group>
+        <group>
+            <feature>get(find(Rodzina, "Relacja", "Małżonek"), "Imię")</feature>
+        </group>
+        <group>
+            <feature>get(find(Rodzina, "Relacja", "Małżonek"), "Nazwisko")</feature>
+        </group>
+        <group>
+            <feature>`Miejscowość` + `Numer domu`</feature>
+        </group>
+        <group>
+            <feature>`Miejscowość`</feature>
+        </group>
+    </commonfeatures>
+</searchdef>
