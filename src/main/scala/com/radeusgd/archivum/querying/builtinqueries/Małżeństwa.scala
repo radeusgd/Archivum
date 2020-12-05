@@ -59,7 +59,8 @@ class Małżeństwa(
           stanCywilnyPana(d).toString + " i " + stanCywilnyPanny(d)
         },
         orderMapping = _.toString
-      )
+      ),
+      appendHeader = Some("Rodzaj ślubu")
     )
   }
 
@@ -67,20 +68,20 @@ class Małżeństwa(
     val pochodzeniePana = path"Pan młody.Pochodzenie"
     val pochodzeniePanny = path"Panna młoda.Pochodzenie"
 
-    val counts = rs.countHorizontal(
+    rs.countHorizontal(
       OldComputedGroupBy(
         getter = (d: DMValue) => {
           pochodzeniePana(d).toString + " / " + pochodzeniePanny(d)
         },
         orderMapping = _.toString
-      )
+      ),
+      appendHeader = Some("Pochodzenie Pana młodego / Panny młodej")
     )
-
-    counts.addHeader("Pochodzenie Pana młodego / Panny młodej")
   }
 
   private def płećŚwiadków(rs: ResultSet): Seq[ResultRow] = {
-    rs.unpackAggregate("Świadkowie").countHorizontal(GroupBy("Płeć"))
+    rs.unpackAggregate("Świadkowie")
+      .countHorizontal(GroupBy("Płeć"), appendHeader = Some("Płeć świadków"))
   }
 
   private def zawódŚwiadków(rs: ResultSet): Seq[ResultRow] = {
@@ -89,7 +90,10 @@ class Małżeństwa(
 
   private def statusSpołecznyŚwiadków(rs: ResultSet): Seq[ResultRow] =
     rs.unpackAggregate("Świadkowie")
-      .countHorizontal(GroupBy("Status społeczny"))
+      .countHorizontal(
+        GroupBy("Status społeczny"),
+        appendHeader = Some("Status społeczny")
+      )
 
   private def najczęstsiŚwiadkowie(rs: ResultSet): Seq[ResultRow] = {
     rs.unpackAggregate("Świadkowie")
@@ -180,13 +184,13 @@ class Małżeństwa(
 
   private def liczbaŚwiadków(rs: ResultSet): Seq[ResultRow] = {
     rs.countHorizontal(
-        CustomGroupBy(
-          "Świadkowie.length",
-          identity,
-          _.asInt.get
-        )
-      )
-      .addHeader("Liczba świadków")
+      CustomGroupBy(
+        "Świadkowie.length",
+        identity,
+        _.asInt.get
+      ),
+      appendHeader = Some("Liczba świadków")
+    )
   }
 
   private def podzielNowożeńców(rs: ResultSet): ResultSet = {
@@ -200,11 +204,10 @@ class Małżeństwa(
     })
   }
 
-  private def wyznaniePłeć(rs: ResultSet): Seq[ResultRow] = {
+  private def wyznaniePłeć(rs: ResultSet): Seq[ResultRow] =
     podzielNowożeńców(rs)
       .groupBy(GroupBy("Wyznanie"))
-      .countHorizontal(GroupBy("Płeć"))
-  }
+      .countHorizontal(GroupBy("Płeć"), appendHeader = Some("Płeć"))
 
   private def wiekStan(rs: ResultSet): Seq[ResultRow] = {
 
@@ -242,8 +245,7 @@ class Małżeństwa(
     podzielNowożeńców(rs)
       .groupBy(podziałPłci)
       .groupBy(podziałStanu)
-      .countHorizontal(podziałWieku)
-      .addHeader("Przedział wiekowy")
+      .countHorizontal(podziałWieku, appendHeader = Some("Przedział wiekowy"))
   }
 
   private def zgodaOjca(rs: ResultSet): Seq[ResultRow] =
@@ -265,9 +267,9 @@ class Małżeństwa(
         crossGrouping(
           "Pan młody.Miejsce urodzenia",
           "Panna młoda.Miejsce urodzenia"
-        )
+        ),
+        appendHeader = Some("Miejscowości")
       )
-      .addHeader("Miejscowości")
 
   private def pochodzenieWedługPłci(rs: ResultSet): Seq[ResultRow] =
     podzielNowożeńców(rs)
@@ -311,20 +313,31 @@ class Małżeństwa(
   }
 
   private def udziałPozaparafialnych(rs: ResultSet): Seq[ResultRow] = {
+    // TODO coś tu mi się nie zgadza - brakuje jakiegoś filtra
     rs.groupBy(GroupBy("Miejscowość"))
       .groupBy(GroupBy("Parafia"))
-      .countHorizontal(GroupByYears("Data ślubu", years))
-      .addHeader("Liczba przybyłych")
+      .countHorizontal(
+        GroupByYears("Data ślubu", years),
+        appendHeader = Some("Liczba przybyłych")
+      )
   }
 
   override val groupedQueries: Map[String, Query] = Map(
     "Sezonowość tygodniowa zawieranych małżeństw" -> Query(
       DataŚlubu,
-      (rs: ResultSet) => rs.countHorizontal(groupByWeekday("Data ślubu"))
+      (rs: ResultSet) =>
+        rs.countHorizontal(
+          groupByWeekday("Data ślubu"),
+          appendHeader = Some("Dzień tygodnia")
+        )
     ),
     "Sezonowość miesięczna zawieranych małżeństw" -> Query(
       DataŚlubu,
-      (rs: ResultSet) => rs.countHorizontal(groupByMonth("Data ślubu"))
+      (rs: ResultSet) =>
+        rs.countHorizontal(
+          groupByMonth("Data ślubu"),
+          appendHeader = Some("Miesiąc")
+        )
     ),
     "Sezonowość roczna zawieranych małżeństw" -> Query(
       DataŚlubu,
