@@ -85,7 +85,8 @@ class Małżeństwa(
   }
 
   private def zawódŚwiadków(rs: ResultSet): Seq[ResultRow] = {
-    rs.unpackAggregate("Świadkowie").countHorizontal(GroupBy("Zawód"))
+    rs.unpackAggregate("Świadkowie")
+      .countHorizontal(GroupBy("Zawód"), appendHeader = Some("Zawód"))
   }
 
   private def statusSpołecznyŚwiadków(rs: ResultSet): Seq[ResultRow] =
@@ -118,7 +119,7 @@ class Małżeństwa(
         )
       )
       .filterGroups(_.asSingleton.value.length >= 2)
-      .countAfterGrouping()
+      .countAfterGrouping(columnName = "Liczba małżeństw")
   }
 
   private def najczęstsiŚwiadkowieTop20(rs: ResultSet): Seq[ResultRow] = {
@@ -144,42 +145,42 @@ class Małżeństwa(
         )
       )
       .filterTop(20)
-      .countAfterGrouping()
+      .countAfterGrouping(columnName = "Liczba małżeństw")
   }
 
   private def wiekNowożeńców(rs: ResultSet): Seq[ResultRow] = {
-    rs.groupByHorizontal(
-        OldComputedGroupBy(
-          (v: DMValue) => {
-            val pan = path"Pan młody.Wiek" (v).asInt
-            val pani = path"Panna młoda.Wiek" (v).asInt
-            val normalnie = for {
-              wpan <- pan
-              wpani <- pani
-            } yield
-              if (wpan == wpani) "oboje nupturientów w tym samym wieku"
-              else if (wpan > wpani) "mężczyzna starszy od kobiety"
-              else "kobieta starsza od mężczyzny"
+    rs.countHorizontal(
+      OldComputedGroupBy(
+        (v: DMValue) => {
+          val pan = path"Pan młody.Wiek" (v).asInt
+          val pani = path"Panna młoda.Wiek" (v).asInt
+          val normalnie = for {
+            wpan <- pan
+            wpani <- pani
+          } yield
+            if (wpan == wpani) "oboje nupturientów w tym samym wieku"
+            else if (wpan > wpani) "mężczyzna starszy od kobiety"
+            else "kobieta starsza od mężczyzny"
 
-            val res = normalnie.getOrElse(
-              if (pan.isEmpty && pani.isEmpty)
-                "nieokreślony wiek obojga nupturientów"
-              else "nieokreślony wiek jednego z nupturientów"
-            )
+          val res = normalnie.getOrElse(
+            if (pan.isEmpty && pani.isEmpty)
+              "nieokreślony wiek obojga nupturientów"
+            else "nieokreślony wiek jednego z nupturientów"
+          )
 
-            DMString(res)
-          },
-          _.asString.get
-        )
-      )
-      .countAfterGrouping()
+          DMString(res)
+        },
+        _.asString.get
+      ),
+      appendHeader = Some("Wiek nowożeńców")
+    )
   }
 
   private def strukturaWyznaniowa(rs: ResultSet): Seq[ResultRow] = {
-    rs.groupByHorizontal(
-        crossGrouping("Pan młody.Wyznanie", "Panna młoda.Wyznanie")
-      )
-      .countAfterGrouping()
+    rs.countHorizontal(
+      crossGrouping("Pan młody.Wyznanie", "Panna młoda.Wyznanie"),
+      appendHeader = Some("Wyznanie")
+    )
   }
 
   private def liczbaŚwiadków(rs: ResultSet): Seq[ResultRow] = {
